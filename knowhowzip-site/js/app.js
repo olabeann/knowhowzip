@@ -1,0 +1,399 @@
+"use strict";
+
+/* ---------- logos ---------- */
+function houseSVG(s,o){o=o||{};const ink=o.ink||'#1A2B36',roof=o.roof||'#D9332A';
+  return `<svg width="${s}" height="${s*1.05}" viewBox="0 0 100 105"><polygon points="50,4 92,40 8,40" fill="${roof}"/><rect x="16" y="40" width="68" height="58" fill="none" stroke="${ink}" stroke-width="6"/>${o.text===false?'':`<text x="50" y="64" text-anchor="middle" font-family="'Black Han Sans'" font-size="22" fill="${ink}">MM</text><text x="50" y="88" text-anchor="middle" font-family="'Black Han Sans'" font-size="22" fill="${ink}">OH</text>`}</svg>`;}
+function platMark(s){var g='lg'+Math.random().toString(36).slice(2,8);return `<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="${g}" x1="12" y1="92" x2="88" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#33B5FF"/><stop offset="1" stop-color="#4D54EA"/></linearGradient></defs><path d="M36 87 L20 87 Q14 87 14 81 L14 40 Q14 37 16.5 35 L47 11 Q50 8.5 53 11 L83.5 35 Q86 37 86 40 L86 81 Q86 87 80 87 L64 87" stroke="url(#${g})" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 33 Q53 53 70 56 Q53 59 50 79 Q47 59 30 56 Q47 53 50 33 Z" fill="url(#${g})"/></svg>`;}
+function creatorLogo(c,size){
+  if(c.logoType==='house')return houseSVG(size*0.82,{ink:c.themeDeep});
+  return `<div style="width:${size}px;height:${size}px;background:${c.theme};display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans';font-size:${size*0.4}px;color:${c.themeDeep}">${c.monogram}</div>`;
+}
+document.getElementById('pmark-foot').innerHTML=platMark(30);
+var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{ink:'#1c3a4a'});
+
+const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
+const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
+
+let state={user:null,purchased:new Set(),cart:new Set(),authMode:'login',pending:null,cat:'전체',creatorCat:'전체',creatorSearch:'',creatorVerified:false,myFilter:'active',payMethod:'card'};
+
+/* ---------- product card (with creator) ---------- */
+function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
+function prodCard(p,c){
+  const d=discRate(p);
+  return `<article class="pcard" onclick="openDetail('${p.id}')">
+    <div class="thumb"><span class="lbl">${p.tag||'클래스'}</span><span class="own" data-own="${p.id}">수강 중</span>
+      <div style="position:absolute;inset:0;background:${p.grad}"></div><div style="position:relative">${c.logoType==='house'?houseSVG(72,{ink:p.deep,text:false}):''}</div></div>
+    <div class="c-body">
+      <div class="c-creator"><span class="mini">${creatorLogo(c,18)}</span>${c.name}</div>
+      <span class="c-cohort">${p.cohort.no}기 · ${p.cohort.status}</span>
+      <h3 class="c-title">${p.title}</h3>
+      <div class="c-rate"><span class="stars">${stars(p.rate)}</span><b>${p.rate}</b><span>(${p.reviews})</span></div>
+      <div class="c-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">${won(p.orig)}</span>`:''}</div>
+    </div></article>`;
+}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  document.getElementById('catChips').innerHTML=cats.map(ct=>`<button class="chip ${state.cat===ct?'active':''}" onclick="setCat('${ct}')">${ct}</button>`).join('');
+  const cs=creators.filter(c=>state.cat==='전체'||c.cat===state.cat);
+  document.getElementById('creatorGrid').innerHTML=cs.map(c=>`
+    <div class="ccard" onclick="openCreator('${c.id}')">
+      <div class="cc-cover" style="background:${c.cover}"><div class="cc-logo">${creatorLogo(c,54)}</div></div>
+      <div class="cc-body">
+        <div class="cc-name">${c.name}${c.verified?'<span class="vf">✔</span>':''}</div>
+        <div class="cc-cat">${c.cat}</div>
+        <div class="cc-desc">${c.tagline}</div>
+        <div class="cc-meta"><span>클래스 <b>${c.products.length}</b></span><span>누적 수강생 <b>${c.followers}</b></span></div>
+      </div>
+    </div>`).join('');
+  const pop=allProducts().filter(x=>state.cat==='전체'||x.c.cat===state.cat).sort((a,b)=>b.p.reviews-a.p.reviews).slice(0,8);
+  document.getElementById('popularGrid').innerHTML=pop.map(x=>prodCard(x.p,x.c)).join('');
+  refreshOwned();
+}
+function setCat(ct){state.cat=ct;renderHome();}
+
+/* ---------- CREATOR directory ---------- */
+const categoryIcons={'전체':'▦','부동산·경매':'⌂','재테크·주식':'↗','디자인':'✦','개발':'⌘'};
+function renderCreatorsPage(){
+  const catBox=document.getElementById('creatorPageCats');
+  catBox.innerHTML=cats.map(ct=>`<button class="creator-category ${state.creatorCat===ct?'active':''}" onclick="setCreatorDirectoryCat('${ct}')"><span>${categoryIcons[ct]||'●'}</span>${ct}</button>`).join('');
+  const query=state.creatorSearch.trim().toLowerCase();
+  const list=creators.filter(c=>(state.creatorCat==='전체'||c.cat===state.creatorCat)&&(!state.creatorVerified||c.verified)&&(!query||`${c.name} ${c.handle} ${c.cat} ${c.tagline}`.toLowerCase().includes(query)));
+  document.getElementById('creatorResultCount').textContent=list.length;
+  document.querySelectorAll('.creator-filter-pills button').forEach(b=>b.classList.toggle('active',state.creatorVerified?b.dataset.verified==='verified':b.dataset.verified==='all'));
+  document.getElementById('creatorPageGrid').innerHTML=list.map(c=>`
+    <article class="creator-directory-card" onclick="openCreator('${c.id}')" tabindex="0" onkeydown="if(event.key==='Enter')openCreator('${c.id}')">
+      <div class="creator-card-cover" style="background:${c.cover}">
+        <span class="creator-card-category">${c.cat}</span>
+        <div class="creator-card-logo">${creatorLogo(c,72)}</div>
+      </div>
+      <div class="creator-card-body">
+        <div class="creator-card-title"><h3>${c.name}</h3>${c.verified?'<span title="인증 크리에이터">✓</span>':''}</div>
+        <div class="creator-card-handle">${c.handle}</div>
+        <p>${c.tagline}</p>
+        <div class="creator-card-stats"><span>클래스 <b>${c.products.length}</b></span><span>팔로워 <b>${c.followers}</b></span><i>→</i></div>
+      </div>
+    </article>`).join('');
+  document.getElementById('creatorEmpty').hidden=list.length!==0;
+}
+function setCreatorDirectoryCat(cat){state.creatorCat=cat;renderCreatorsPage();}
+function setCreatorSearch(value){state.creatorSearch=value;renderCreatorsPage();}
+function setCreatorVerified(value){state.creatorVerified=value;renderCreatorsPage();}
+
+/* ---------- CREATOR storefront ---------- */
+let activeCreator=null;
+function openCreator(id){
+  const c=creators.find(x=>x.id===id);activeCreator=id;
+  document.getElementById('view-creator').innerHTML=`
+    <div class="cbanner"><div style="position:absolute;inset:0;background:${c.cover};opacity:.55"></div>
+      <div class="wrap"><button class="back-link" onclick="show('creators')">← 크리에이터</button>
+      <div class="cbanner-in">
+        <div class="clogo">${creatorLogo(c,64)}</div>
+        <div class="cinfo">
+          <h1 class="cname">${c.name}${c.verified?'<span class="vf">✔</span>':''}</h1>
+          <div class="chandle">${c.handle} · ${c.cat}</div>
+          <p class="ctag">${c.tagline}</p>
+        </div>
+        <button class="cshare" onclick="shareCreator('${id}')">🔗 페이지 공유</button>
+      </div></div>
+    </div>
+    <div class="wrap">
+      <div class="ctabs">
+        <button class="active" onclick="ctab(this,'cs-class')">클래스 ${c.products.length}</button>
+        <button onclick="ctab(this,'cs-about')">소개</button>
+        <button onclick="ctab(this,'cs-faq')">FAQ</button>
+      </div>
+      <div class="csec show" id="cs-class"><div class="grid">${c.products.map(p=>prodCard(p,c)).join('')}</div></div>
+      <div class="csec" id="cs-about"><div class="about-box">${c.about}</div></div>
+      <div class="csec" id="cs-faq"><div class="faq-list">${faqAcc(c.faq,'cf'+id)}</div></div>
+    </div>`;
+  show('creator');window.scrollTo({top:0});setHash('#/c/'+id);
+  refreshOwned();
+}
+function ctab(btn,id){btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.csec').forEach(s=>s.classList.remove('show'));document.getElementById(id).classList.add('show');}
+
+/* ---------- DETAIL ---------- */
+let activeDetail=null;
+function faqAcc(list,prefix){return list.map((f,i)=>`<div class="faq-item"><button class="faq-q" onclick="toggleFaq('${prefix}-${i}')"><span><span class="qmark">Q.</span>${f.q}</span><span class="pm">+</span></button><div class="faq-a" id="fa-${prefix}-${i}"><p>${f.a}</p></div></div>`).join('');}
+function openDetail(pid){
+  const p=productMap[pid],c=creatorOf[pid];activeDetail=pid;
+  const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,seat=Math.round(ch.enrolled/ch.seats*100);
+  document.getElementById('view-detail').innerHTML=`
+    <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
+    <div class="detail-hero"><div class="wrap detail-hero-in">
+      <div>
+        <div class="d-creatorchip" onclick="openCreator('${c.id}')"><span class="mini">${creatorLogo(c,26)}</span>${c.name}${c.verified?' ✔':''}</div>
+        <div class="d-tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+        <h1>${p.title}</h1>
+        <p class="d-lead">${p.lead}</p>
+        <div class="d-meta"><span><span class="stars">${stars(p.rate)}</span> <b>${p.rate}</b> (${p.reviews})</span><span>·</span><span><b>${ch.no}기</b> 모집중</span></div>
+        <div class="d-visual" style="background:${p.grad}">${c.logoType==='house'?houseSVG(110,{ink:p.deep,text:false}):''}</div>
+      </div>
+      <aside><div class="buycard">
+        <div class="bc-vis" style="background:${p.grad}">${c.logoType==='house'?houseSVG(66,{ink:p.deep,text:false}):''}</div>
+        <div class="bc-body">
+          <div class="cohort-box">
+            <div class="ch-top"><span class="ch-no">${ch.no}기 모집</span><span class="ch-st">${ch.status}</span></div>
+            <div class="ch-row"><span>수강 기간</span><b>${ch.period}</b></div>
+            <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
+            <div class="ch-row"><span>신청 현황</span><b>${ch.enrolled} / ${ch.seats}명</b></div>
+            <div class="seat-bar"><i style="width:${seat}%"></i></div>
+          </div>
+          <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
+          <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
+            <button class="btn-red" onclick="startPurchase('${pid}')">${ch.no}기 수강신청</button>
+            <button class="bc-cart" onclick="addCart('${pid}')">장바구니 담기</button>
+          </div>
+          <div class="bc-owned" data-owned="${pid}" style="display:${owned?'block':'none'}">✓ 수강 중 · 내 학습에서 확인</div>
+          <ul class="bc-incl"><li>온라인 라이브 + 다시보기</li><li>콘텐츠 자료 제공</li><li>수강생 단톡방 · 줌 초대</li><li>라이브 1:1 질의응답</li></ul>
+        </div>
+      </div></aside>
+    </div></div>
+
+    <div class="detail-body"><div class="wrap">
+      <div class="d-tabs">
+        <button class="active" onclick="goTab(this,'sec-intro')">클래스 소개</button>
+        <button onclick="goTab(this,'sec-content')">콘텐츠</button>
+        <button onclick="goTab(this,'sec-op')">운영 안내</button>
+        <button onclick="goTab(this,'sec-faq')">클래스 FAQ</button>
+      </div>
+      <div class="d-section" id="sec-intro"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p></div>
+      <div class="d-section" id="sec-content"><h3><span class="dot"></span>콘텐츠 <span class="sub">영상 · 자료</span></h3>
+        <div class="sub-h">📹 영상 커리큘럼</div>
+        <ul class="curr">${p.content.videos.map((s,i)=>`<li><span class="wk">${i+1}주차</span><span>${s}</span><span class="pl">▶</span></li>`).join('')}</ul>
+        <div class="sub-h">📄 제공 자료</div>
+        <ul class="mat-list">${p.content.files.map(m=>`<li><span class="mi">📄</span><span>${m}</span><span class="lock">${owned?'다운로드 가능':'🔒 수강 후 제공'}</span></li>`).join('')}</ul>
+      </div>
+      <div class="d-section" id="sec-op"><h3><span class="dot"></span>운영 안내 <span class="sub">단톡방 · 줌</span></h3>
+        <p style="margin-bottom:14px">${p.operation.guide}</p>
+        <div class="op-card"><span class="oi oi-kakao">💬</span><span><span class="ot">수강생 단톡방</span><br><span class="od">공지·질문·다시보기 공유</span></span>${owned?'<span class="obtn">입장하기 →</span>':'<span class="olock">🔒 수강 후 제공</span>'}</div>
+        <div class="op-card"><span class="oi oi-zoom">🎥</span><span><span class="ot">줌(Zoom) 라이브</span><br><span class="od">매주 라이브 입장 링크</span></span>${owned?'<span class="obtn">링크 보기 →</span>':'<span class="olock">🔒 수강 후 제공</span>'}</div>
+      </div>
+      <div class="d-section" id="sec-faq"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div>
+    </div></div>
+    <div class="buybar" id="buybar"></div>`;
+  const bar=document.getElementById('buybar');
+  bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">${ch.no}기 수강신청</button>`;
+  show('detail');window.scrollTo({top:0});setHash('#/p/'+pid);
+}
+function goTab(btn,id){document.querySelectorAll('.d-tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+
+/* ---------- MYPAGE (grouped by creator) ---------- */
+const learningProgress={'mmoh-basic':50,'mmoh-right':25,'ml-stock':75};
+const endedCourses=new Set(['ml-stock']);
+const lessonDurations=['88분','92분','76분','81분','68분','74분'];
+function productProgress(id){return learningProgress[id]??20;}
+function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
+function toggleLearningAcc(id){document.getElementById(id)?.classList.toggle('open');}
+function playLesson(productId,index,title){
+  const accordion=document.getElementById(`learn-${productId}-video`),player=document.getElementById(`player-${productId}`);
+  if(!accordion||!player)return;
+  accordion.classList.add('open');
+  player.classList.add('show');
+  player.querySelector('.learning-player-title').textContent=title;
+  player.querySelector('.learning-player-meta').textContent=`${index+1}강 재생 중 · 데모 플레이어`;
+  document.querySelectorAll(`[data-product="${productId}"]`).forEach(row=>{const playing=Number(row.dataset.lesson)===index;row.classList.toggle('playing',playing);row.querySelector('strong').textContent=playing?'재생 중':(row.querySelector('.lesson-state').classList.contains('done')?'완료':'미완료');});
+  player.scrollIntoView({behavior:'smooth',block:'center'});
+  toast(`${title} 재생을 시작합니다 (예시)`);
+}
+function continueLearning(productId,index){
+  const videos=productMap[productId].content.videos,next=Math.min(index,videos.length-1);
+  playLesson(productId,next,videos[next]);
+}
+function renderLearningTabs(owned){
+  const ended=owned.filter(x=>endedCourses.has(x.p.id)).length,active=owned.length-ended;
+  document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`]].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
+}
+function renderMy(){
+  const box=document.getElementById('myContent');
+  const allOwned=state.user?allProducts().filter(x=>state.purchased.has(x.p.id)):[];
+  renderLearningTabs(allOwned);
+  if(!state.user){box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  if(!allOwned.length){box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>아직 수강 중인 클래스가 없습니다</h3><p>크리에이터의 클래스를 둘러보세요.</p><button class="btn-red" onclick="show('creators')">둘러보기</button></div>`;return;}
+  const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
+  if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
+  const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
+  box.innerHTML=Object.values(byCreator).map(g=>`
+    <section class="learning-group">
+      <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}${g.c.verified?'<i>✓</i>':''}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
+      ${g.items.map(p=>{const progress=productProgress(p.id),videos=p.content.videos,doneCount=Math.floor(videos.length*progress/100);if(endedCourses.has(p.id))return `
+        <article class="learning-card ended">
+          <div class="learning-summary">
+            <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
+            <div class="learning-title"><em>${p.cohort.no}기</em><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>${p.cohort.period}</small></div>
+            <span class="ended-course-badge">수강 종료</span>
+          </div>
+        </article>`;return `
+        <article class="learning-card">
+          <div class="learning-summary">
+            <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
+            <div class="learning-title"><em>${p.cohort.no}기</em><h3>${p.title}</h3><div class="learning-status-count"><span class="done">✓ 시청 완료 ${doneCount}강</span><span>미완료 ${videos.length-doneCount}강</span></div><small>전체 ${videos.length}강</small></div>
+            <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',${doneCount})">이어서 학습</button>
+          </div>
+          <div class="learning-details">
+            <div class="learning-acc open" id="learn-${p.id}-video">
+              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-video')"><span><i class="video">▶</i>콘텐츠 · 영상 <small>${videos.length}강</small></span><b>＋</b></button>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><div class="learning-player" id="player-${p.id}"><div class="learning-player-screen"><span>▶</span></div><div><b class="learning-player-title">강의를 선택해 주세요</b><small class="learning-player-meta">카드 안에서 바로 재생됩니다</small></div></div>${videos.map((video,idx)=>{const done=idx<doneCount;return `<button class="lesson-row" data-product="${p.id}" data-lesson="${idx}" onclick="playLesson('${p.id}',${idx},'${video}')"><span class="lesson-state ${done?'done':''}">${done?'✓':'▶'}</span><span class="lesson-title">${video}<small>${done?'시청 완료':'미완료 · 재생하기'}</small></span><span class="lesson-duration">${lessonDurations[idx%lessonDurations.length]}</span><strong>${done?'완료':'미완료'}</strong></button>`;}).join('')}</div></div>
+            </div>
+            <div class="learning-acc" id="learn-${p.id}-files">
+              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-files')"><span><i class="file">▤</i>콘텐츠 · 자료 <small>${p.content.files.length}개</small></span><b>＋</b></button>
+              <div class="learning-acc-body"><div class="learning-acc-inner">${p.content.files.map(file=>`<button class="learning-resource" onclick="toast('&quot;${file}&quot; 다운로드 (예시)')"><i>📄</i><span>${file}<small>강의 자료</small></span><b>다운로드</b></button>`).join('')}</div></div>
+            </div>
+            <div class="learning-acc" id="learn-${p.id}-operation">
+              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p><button class="learning-resource" onclick="toast('수강생 단톡방으로 이동 (예시)')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>열기 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크 열기 (예시)')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>링크 →</b></button></div></div>
+            </div>
+          </div>
+        </article>`;}).join('')}
+    </section>`).join('');
+}
+
+/* ---------- platform FAQ ---------- */
+const commonFaqs=[
+  {q:'결제 후 바로 수강할 수 있나요?',a:'네. 결제가 완료되면 수강 권한이 자동 부여되고, 내 학습에서 즉시 콘텐츠와 운영 안내를 확인할 수 있습니다.'},
+  {q:'여러 크리에이터의 클래스를 한 계정으로 들을 수 있나요?',a:'네. 하나의 노하우집 계정으로 모든 크리에이터의 클래스를 구매·수강할 수 있고, 내 학습에서 크리에이터별로 모아 볼 수 있습니다.'},
+  {q:'자료·단톡방은 어떻게 이용하나요?',a:'구매한 클래스의 내 학습에서 자료 다운로드와 단톡방·줌 링크가 활성화됩니다. 미구매 클래스는 제한됩니다.'},
+  {q:'환불 규정은 어떻게 되나요?',a:'첫 강의 시작 전까지 전액 환불, 이후에는 진행 회차를 제외한 잔여분에 대해 규정에 따라 처리됩니다.'},
+  {q:'크리에이터로 입점하려면요?',a:'고객센터의 크리에이터 입점 안내를 통해 신청할 수 있습니다. (예시)'},
+];
+// 실제 노하우집 카카오 채널을 개설한 뒤 이 주소만 채널 URL로 교체하면 됩니다.
+const KAKAO_CHANNEL_URL='https://pf.kakao.com/';
+function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,noreferrer');}
+function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
+function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';}
+
+/* ---------- view switch ---------- */
+function show(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
+  document.getElementById('view-'+view).classList.add('show');
+  document.querySelectorAll('.gnb-menu button').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));
+  if(view==='home')renderHome();
+  if(view==='creators')renderCreatorsPage();
+  if(view==='mypage')renderMy();
+  if(view==='faq')renderFaq();
+  if(view==='home')setHash('');
+  if(view==='creators')setHash('#/creators');
+  if(view==='mypage')setHash('#/mypage');
+  if(view==='faq')setHash('#/faq');
+  if(view!=='detail'&&view!=='creator')window.scrollTo({top:0});
+}
+function toggleMnav(){document.getElementById('mnav').classList.toggle('show');}
+
+/* ---------- auth ---------- */
+function openAuth(m){switchAuth(m);document.getElementById('authModal').classList.add('show');}
+function closeAuth(){document.getElementById('authModal').classList.remove('show');}
+function switchAuth(m){state.authMode=m;
+  document.getElementById('tab-login').classList.toggle('active',m==='login');
+  document.getElementById('tab-signup').classList.toggle('active',m==='signup');
+  document.querySelectorAll('.signup-only').forEach(e=>e.style.display=m==='signup'?'block':'none');
+  document.querySelectorAll('.login-only').forEach(e=>e.style.display=m==='login'?'block':'none');
+  document.getElementById('authTitle').textContent=m==='signup'?'회원가입':'로그인';
+  document.getElementById('authDesc').textContent=m==='signup'?'정보를 입력하고 클래스를 시작하세요.':'노하우집 계정으로 클래스를 수강하세요.';
+  document.getElementById('authSubmit').textContent=m==='signup'?'가입하고 시작하기':'로그인';}
+const DEMO_PURCHASES=['mmoh-basic','mmoh-right','ml-stock'];
+function demoLogin(){
+  switchAuth('login');
+  document.getElementById('f-name').value='김노하우';
+  document.getElementById('f-email').value='demo@knowhowzip.kr';
+  document.getElementById('f-pw').value='demo1234';
+  submitAuth();
+}
+function submitAuth(){
+  const email=document.getElementById('f-email').value.trim(),name=document.getElementById('f-name').value.trim();
+  if(!email){toast('이메일을 입력해 주세요');return;}
+  if(state.authMode==='signup'&&!name){toast('이름을 입력해 주세요');return;}
+  state.user={name:name||email.split('@')[0],email};
+  if(state.authMode==='login')DEMO_PURCHASES.forEach(id=>state.purchased.add(id));
+  document.getElementById('signupBtn').style.display='none';
+  document.getElementById('userChip').style.display='flex';document.getElementById('userName').textContent=state.user.name;
+  document.getElementById('mAuth').style.display='none';document.getElementById('mUser').style.display='flex';document.getElementById('mUserName').textContent=state.user.name;
+  closeAuth();toast((state.authMode==='signup'?'회원가입':'로그인')+' 완료');
+  if(state.pending){const id=state.pending;state.pending=null;openPay(id);}
+  else if(state.authMode==='login')show('mypage');}
+function logout(){state.user=null;state.purchased.clear();state.cart.clear();updateCart();
+  document.getElementById('signupBtn').style.display='';
+  document.getElementById('userChip').style.display='none';
+  document.getElementById('mAuth').style.display='flex';document.getElementById('mUser').style.display='none';
+  refreshOwned();renderMy();toast('로그아웃되었습니다');show('home');}
+
+/* ---------- cart / purchase ---------- */
+function addCart(id){if(state.cart.has(id)){toast('이미 장바구니에 있습니다');return;}state.cart.add(id);updateCart();toast('장바구니에 담았습니다');}
+function updateCart(){const n=state.cart.size,el=document.getElementById('cartCount');el.textContent=n;el.style.display=n?'flex':'none';}
+function startPurchase(id){if(!state.user){state.pending=id;openAuth('login');toast('결제를 위해 먼저 로그인해 주세요');return;}openPay(id);}
+function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.payMethod='card';
+  document.getElementById('payTitle').textContent='결제하기';
+  document.getElementById('payBody').innerHTML=`
+    <div class="pay-sum">
+      <div class="row"><span>크리에이터</span><b>${c.name}</b></div>
+      <div class="row"><span>클래스</span><b>${p.title}</b></div>
+      <div class="row"><span>기수</span><b>${p.cohort.no}기 (${p.cohort.period})</b></div>
+      ${d?`<div class="row"><span>정가</span><span style="text-decoration:line-through;color:var(--ink-mute)">${won(p.orig)}</span></div><div class="row"><span>할인</span><span style="color:var(--red)">-${won(p.orig-p.price)} (${d}%)</span></div>`:''}
+      <div class="row tot"><span>결제 금액</span><span class="p">${won(p.price)}</span></div>
+    </div>
+    <div style="font-weight:800;font-size:13px;margin-bottom:8px">결제 수단</div>
+    <div class="pay-methods" id="payMethods"><button class="active" data-m="card" onclick="pickMethod('card')">신용카드</button><button data-m="bank" onclick="pickMethod('bank')">계좌이체</button><button data-m="kakao" onclick="pickMethod('kakao')">카카오페이</button></div>
+    <button class="btn-red" onclick="confirmPay('${id}')">${won(p.price)} 결제하기</button>`;
+  document.getElementById('payModal').classList.add('show');}
+function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
+function confirmPay(id){const p=productMap[id],c=creatorOf[id];state.purchased.add(id);state.cart.delete(id);updateCart();
+  document.getElementById('payTitle').textContent='결제 완료';
+  document.getElementById('payBody').innerHTML=`<div class="pay-done"><div class="check">✓</div><h3>결제가 완료되었습니다</h3><p>${c.name}의 "${p.title}" ${p.cohort.no}기 수강 권한이 자동 부여되었습니다.</p><button class="btn-red" style="width:100%" onclick="goMy()">내 학습으로 가기</button></div>`;
+  refreshOwned();}
+function goMy(){closePay();show('mypage');}
+function closePay(){document.getElementById('payModal').classList.remove('show');}
+
+function refreshOwned(){
+  Object.keys(productMap).forEach(id=>{
+    const owned=state.purchased.has(id);
+    document.querySelectorAll(`[data-own="${id}"]`).forEach(e=>e.style.display=owned?'block':'none');
+    const act=document.querySelector(`[data-actions="${id}"]`),note=document.querySelector(`[data-owned="${id}"]`);
+    if(act)act.style.display=owned?'none':'flex';if(note)note.style.display=owned?'block':'none';
+  });
+  if(activeDetail&&document.getElementById('view-detail').classList.contains('show'))openDetail(activeDetail);
+}
+
+/* ---------- share ---------- */
+const SHARE_DOMAIN='https://knowhow.kr';
+function creatorUrl(c){return SHARE_DOMAIN+'/'+c.handle.replace('@','');}
+function productUrl(c,p){return SHARE_DOMAIN+'/'+c.handle.replace('@','')+'/class/'+p.id;}
+function openShare(title,desc,url,logoHTML,sub){
+  document.getElementById('shareTitle').textContent=title;
+  document.getElementById('shareDesc').textContent=desc;
+  document.getElementById('sharePreview').innerHTML=`<div class="sc-logo">${logoHTML}</div><div style="min-width:0"><div class="sc-name">${title}</div><div class="sc-sub">${sub}</div></div>`;
+  document.getElementById('shareUrl').value=url;
+  // 모바일 네이티브 공유 시트가 있으면 우선 사용
+  if(navigator.share){navigator.share({title,text:sub,url}).catch(()=>document.getElementById('shareModal').classList.add('show'));}
+  else document.getElementById('shareModal').classList.add('show');
+}
+function shareCreator(id){const c=creators.find(x=>x.id===id);openShare(c.name,'이 페이지를 공유하면 누구나 들어와 수강신청할 수 있어요.',creatorUrl(c),creatorLogo(c,42),c.tagline);}
+function shareProduct(pid){const p=productMap[pid],c=creatorOf[pid];openShare(p.title.split(' · ')[0],'이 클래스를 공유하면 바로 수강신청 페이지로 연결돼요.',productUrl(c,p),(c.logoType==='house'?houseSVG(34,{ink:p.deep,text:false}):creatorLogo(c,42)),c.name+' · '+won(p.price));}
+function closeShare(){document.getElementById('shareModal').classList.remove('show');}
+function copyShare(){const v=document.getElementById('shareUrl').value;
+  if(navigator.clipboard){navigator.clipboard.writeText(v).then(()=>toast('링크를 복사했어요')).catch(()=>fallbackCopy(v));}else fallbackCopy(v);}
+function fallbackCopy(v){const i=document.getElementById('shareUrl');i.select();try{document.execCommand('copy');toast('링크를 복사했어요');}catch(e){toast('링크를 길게 눌러 복사하세요');}}
+function quickShare(type){
+  if(type==='qr'){toast('QR 코드를 생성합니다 (예시)');return;}
+  if(type==='kakao'){toast('카카오톡 공유를 엽니다 (예시)');return;}
+  if(type==='sms'){toast('문자 공유를 엽니다 (예시)');return;}
+}
+
+/* ---------- hash routing (deep link for sharing) ---------- */
+let suppressHash=false;
+function setHash(h){suppressHash=true;location.hash=h;setTimeout(()=>{suppressHash=false;},0);}
+function route(){
+  const h=location.hash;
+  if(h.startsWith('#/c/')){const id=h.slice(4);if(creators.find(x=>x.id===id))return openCreator(id);}
+  if(h.startsWith('#/p/')){const id=h.slice(4);if(productMap[id])return openDetail(id);}
+  if(h==='#/creators')return show('creators');
+  if(h==='#/mypage')return show('mypage');
+  if(h==='#/faq')return show('faq');
+  show('home');
+}
+window.addEventListener('hashchange',()=>{if(!suppressHash)route();});
+
+let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200);}
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('show');}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-bg.show').forEach(m=>m.classList.remove('show'));document.getElementById('mnav').classList.remove('show');}});
+
+renderHome();
+route();

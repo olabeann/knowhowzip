@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>노하우집 · 크리에이터 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="./css/admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="./index.html" aria-label="노하우집 공개 페이지로 이동">
+        <img src="./assets/images/knowhowzip-logo.png" alt="노하우집">
+        <span>Creator</span>
+      </a>
+
+      <div class="creator-account">
+        <div class="creator-avatar" id="creatorAvatar"></div>
+        <div><b>애매모홈</b><small>@mmoh · 부동산·경매</small></div>
+        <span class="verified">✓</span>
+      </div>
+
+      <nav class="admin-nav" aria-label="관리자 메뉴">
+        <button class="active" data-view="dashboard" onclick="showAdminView('dashboard')"><i>▦</i><span>대시보드</span></button>
+        <button data-view="classes" onclick="showAdminView('classes')"><i>▶</i><span>클래스 관리</span></button>
+        <button data-view="students" onclick="showAdminView('students')"><i>♙</i><span>수강생 관리</span></button>
+        <button data-view="sales" onclick="showAdminView('sales')"><i>₩</i><span>매출·정산</span></button>
+        <button data-view="messages" onclick="showAdminView('messages')"><i>✉</i><span>문의 관리</span><em>4</em></button>
+        <button data-view="settings" onclick="showAdminView('settings')"><i>⚙</i><span>채널 설정</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="./index.html#/c/mmoh">공개 페이지 보기 <span>↗</span></a>
+        <button onclick="adminToast('로그아웃되었습니다 (예시)')">로그아웃</button>
+      </div>
+    </aside>
+
+    <div class="admin-workspace">
+      <header class="admin-topbar">
+        <div><span class="mobile-admin-title">크리에이터 관리자</span></div>
+        <div class="topbar-actions">
+          <button class="notice" aria-label="알림" onclick="adminToast('새 알림 3건이 있습니다')">♢<span>3</span></button>
+          <div class="admin-profile"><b>이원일</b><small>관리자</small></div>
+          <div class="profile-dot">이</div>
+        </div>
+      </header>
+
+      <main class="admin-main" id="adminContent"></main>
+    </div>
+  </div>
+
+  <div class="admin-toast" id="adminToast"></div>
+  <script src="./js/admin.js"></script>
+</body>
+</html>
