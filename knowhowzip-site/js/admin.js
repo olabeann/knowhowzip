@@ -155,7 +155,7 @@ function studentTable(rows,compact=false){
 }
 
 function renderStudents(){
-  return `${pageHeader('Student management','수강생 관리','결제·수강 상태와 클래스 참여 정보를 확인합니다.','<button class="btn ghost" onclick="adminToast(\'CSV 다운로드 (예시)\')">↓ 명단 다운로드</button><button class="btn primary" onclick="adminToast(\'수강생 초대 (예시)\')">+ 수강생 초대</button>')}
+  return `${pageHeader('Student management','수강생 관리','결제·수강 상태와 클래스 참여 정보를 확인합니다.','')}
   <div class="filter-bar"><div class="admin-search">⌕ <input placeholder="이름 또는 이메일 검색" oninput="filterStudents(this.value)"></div><select><option>전체 클래스</option><option>경매 낙찰 기초반</option><option>권리분석 실전반</option></select><select><option>전체 상태</option><option>수강 중</option><option>결제 완료</option></select></div>
   <article class="panel full-table" id="studentTable">${studentTable(students)}</article>`;
 }
