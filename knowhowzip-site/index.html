@@ -49,9 +49,9 @@
       <div class="hero-bg"></div>
       <div class="wrap hero-in">
         <div class="hero-copy">
-          <span class="badge-pill">✨ 크리에이터가 직접 운영하는 클래스 마켓</span>
-          <h1>한 분야의 진짜 전문가에게<br><span class="grad-txt">직접</span> 배우세요</h1>
-          <p class="hero-sub">경매·재테크·디자인·개발까지, 믿을 수 있는 크리에이터의 라이브 클래스를 한곳에서 만나보세요.</p>
+          <span class="badge-pill">✨ 여러 크리에이터의 클래스를 한곳에서</span>
+          <h1>좋아하는 크리에이터에게 배우고<br><span class="grad-txt">한곳에서</span> 관리하세요</h1>
+          <p class="hero-sub">인스타그램에서 발견한 클래스도 익숙한 흐름으로 신청·결제하고, 일정과 자료는 노하우집에서 한 번에 관리하세요.</p>
           <div class="hero-cta">
             <button class="btn-primary lg" onclick="show('creators')">크리에이터 둘러보기</button>
             <button class="btn-soft lg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">이용 방법 보기</button>
@@ -65,32 +65,16 @@
           <div class="mock-card">
             <div class="mock-head">
               <span class="mock-logo" id="mockLogo"></span>
-              <div><div class="mock-name">애매모홈 <span class="v">✔</span></div><div class="mock-sub">부동산·경매</div></div>
-              <span class="mock-badge">3기 모집중</span>
+              <div><div class="mock-name">애매모홈</div><div class="mock-sub">부동산·경매</div></div>
+              <span class="mock-badge">모집중</span>
             </div>
             <div class="mock-row"><span class="mock-thumb" style="background:linear-gradient(135deg,#AFD6E7,#7DB8D4)"></span><span class="mock-rt"><b>경매 낙찰 기초반</b><small>★ 4.9 · 수강생 312</small></span><span class="mock-price">₩290,000</span></div>
             <div class="mock-row"><span class="mock-thumb" style="background:linear-gradient(135deg,#F3C7C2,#D9332A)"></span><span class="mock-rt"><b>권리분석 실전반</b><small>★ 4.8 · 수강생 178</small></span><span class="mock-price">₩390,000</span></div>
-            <button class="mock-cta">수강신청하기</button>
+            <button class="mock-cta" onclick="openCreator('mmoh')">수강신청하기</button>
           </div>
           <div class="float-chip chip-a">⭐ 평점 4.9</div>
-          <div class="float-chip chip-b">🎥 라이브 + 다시보기</div>
         </div>
       </div>
-    </div>
-
-    <!-- LOGO CLOUD -->
-    <div class="logocloud">
-      <div class="wrap">
-        <p>이런 분야의 크리에이터가 함께합니다</p>
-        <div class="lc-row"><span>부동산·경매</span><span>재테크·주식</span><span>디자인</span><span>개발</span><span>마케팅</span><span>사진·영상</span></div>
-      </div>
-    </div>
-
-    <!-- STATS -->
-    <div class="wrap stats-row">
-      <div class="stat-c"><div class="num">12<span style="font-size:24px">팀+</span></div><div class="lab">입점 크리에이터</div></div>
-      <div class="stat-c"><div class="num">38<span style="font-size:24px">개+</span></div><div class="lab">운영 중인 클래스</div></div>
-      <div class="stat-c"><div class="num">1.4<span style="font-size:24px">만+</span></div><div class="lab">누적 수강생</div></div>
     </div>
 
     <!-- CREATORS -->
@@ -119,13 +103,13 @@
     <div class="wrap section" id="how">
       <div class="sec-head center">
         <span class="eyebrow">How it works</span>
-        <h2>3단계면 충분합니다</h2>
-        <p>복잡한 절차 없이, 좋아하는 크리에이터의 클래스를 바로 시작하세요.</p>
+        <h2>배우는 곳이 달라도, 관리는 하나로</h2>
+        <p>복잡한 채널 이동 없이 익숙한 흐름으로 클래스를 시작하세요.</p>
       </div>
       <div class="steps">
-        <div class="step-c"><div class="sn">1</div><h3>둘러보기</h3><p>크리에이터 페이지와 클래스 상세에서 커리큘럼·기수·후기를 확인합니다.</p></div>
-        <div class="step-c"><div class="sn">2</div><h3>로그인 후 결제</h3><p>한 번의 회원가입으로 모든 크리에이터의 클래스를 결제할 수 있습니다.</p></div>
-        <div class="step-c"><div class="sn">3</div><h3>바로 수강</h3><p>결제 즉시 수강 권한이 부여되고, 내 학습에서 영상·자료·운영 안내를 이용합니다.</p></div>
+        <div class="step-c"><div class="sn">1</div><h3>클래스 확인</h3><p>크리에이터가 공유한 링크에서 커리큘럼과 일정, 수강 방식을 확인합니다.</p></div>
+        <div class="step-c"><div class="sn">2</div><h3>간편하게 신청·결제</h3><p>복잡한 문의나 송금 과정 없이 익숙한 방식으로 신청하고 결제합니다.</p></div>
+        <div class="step-c"><div class="sn">3</div><h3>한곳에서 관리</h3><p>신청한 클래스의 일정, 자료, 수강 안내를 내 학습에서 한 번에 확인합니다.</p></div>
       </div>
     </div>
 
@@ -134,13 +118,14 @@
       <div class="wrap">
         <div class="sec-head center">
           <span class="eyebrow">Why 노하우집</span>
-          <h2>노하우집이 다른 이유</h2>
+          <h2>여러 크리에이터에게 배우고,<br>관리는 따로 하고 계신가요?</h2>
+          <p>흩어진 결제, 일정, 강의 자료를 노하우집 한곳에 모았습니다.</p>
         </div>
         <div class="feat-grid">
-          <div class="feat-c"><div class="fi">👤</div><div><h3>한 계정으로 모든 크리에이터</h3><p>여러 크리에이터의 클래스를 하나의 계정으로 결제하고, 내 학습에서 모아 봅니다.</p></div></div>
-          <div class="feat-c"><div class="fi">🎥</div><div><h3>라이브 + 다시보기</h3><p>실시간 라이브로 배우고, 놓친 부분은 다시보기로 복습할 수 있습니다.</p></div></div>
-          <div class="feat-c"><div class="fi">💬</div><div><h3>단톡방·줌 밀착 운영</h3><p>수강생 단톡방과 줌으로 질문하고 소통하며 끝까지 함께합니다.</p></div></div>
-          <div class="feat-c"><div class="fi">🛡️</div><div><h3>안전한 결제와 환불</h3><p>검증된 결제 수단과 명확한 환불 규정으로 믿고 수강할 수 있습니다.</p></div></div>
+          <div class="feat-c"><div class="fi">💳</div><div><h3>익숙한 신청과 결제</h3><p>크리에이터마다 다른 신청 방식 대신, 익숙한 흐름으로 간편하게 시작하세요.</p></div></div>
+          <div class="feat-c"><div class="fi">🗓️</div><div><h3>흩어지지 않는 수강 안내</h3><p>일정, 준비물, 강의 자료를 여러 채널에서 다시 찾을 필요가 없습니다.</p></div></div>
+          <div class="feat-c"><div class="fi">💬</div><div><h3>빠르게 이어지는 도움</h3><p>결제와 수강 중 궁금한 점이 생기면 노하우집에서 안내받을 수 있습니다.</p></div></div>
+          <div class="feat-c"><div class="fi">📚</div><div><h3>한눈에 보는 내 클래스</h3><p>서로 다른 크리에이터의 클래스도 내 학습에서 한 번에 관리하세요.</p></div></div>
         </div>
       </div>
     </div>
@@ -161,10 +146,10 @@
     <!-- CTA BAND -->
     <div class="wrap" style="padding-bottom:80px">
       <div class="cta-band">
-        <h2>지금, 좋아하는 크리에이터에게 배워보세요</h2>
-        <p>회원가입은 무료입니다. 한 계정으로 모든 클래스를 만나보세요.</p>
+        <h2>좋아하는 크리에이터의 강의,<br>이제 한곳에서 관리하세요</h2>
+        <p>익숙한 방식으로 시작하고, 신청한 클래스는 내 학습에서 모아보세요.</p>
         <div class="btns">
-          <button class="b-w" onclick="openAuth('signup')">무료로 시작하기</button>
+          <button class="b-w" onclick="openAuth('signup')">한곳에서 시작하기</button>
           <button class="b-o" onclick="toast('크리에이터 입점 문의 (예시)')">크리에이터 입점 문의</button>
         </div>
       </div>
@@ -197,10 +182,6 @@
           <h2>전체 크리에이터</h2>
           <p><b id="creatorResultCount">0</b>명의 크리에이터를 찾았어요.</p>
         </div>
-        <div class="creator-filter-pills">
-          <button class="active" data-verified="all" onclick="setCreatorVerified(false)">전체</button>
-          <button data-verified="verified" onclick="setCreatorVerified(true)">✓ 인증 크리에이터</button>
-        </div>
       </div>
       <div class="creator-directory-grid" id="creatorPageGrid"></div>
       <div class="creator-empty" id="creatorEmpty" hidden>조건에 맞는 크리에이터가 없습니다.</div>
@@ -216,13 +197,13 @@
   </section>
 
   <section id="view-faq" class="view">
-    <div class="page-hero"><div class="wrap"><h1>고객센터</h1><p>결제·수강·환불 등 플랫폼 공통 안내입니다. 클래스별 FAQ는 각 클래스 상세에서 확인하세요.</p></div></div>
+    <div class="page-hero"><div class="wrap"><h1>고객센터</h1><p>결제·수강·환불은 노하우집 운영팀이 안내합니다. 수강 중인 클래스 FAQ는 내 학습에서 확인하세요.</p></div></div>
     <div class="page-body"><div class="wrap">
       <div class="faq-section-title"><h2>자주 묻는 질문</h2><p>궁금한 내용을 먼저 확인해 보세요.</p></div>
       <div class="faq-list" id="faqList"></div>
       <div class="kakao-support-card">
         <div class="kakao-support-icon">💬</div>
-        <div class="kakao-support-copy"><span>빠른 상담</span><h2>카카오톡 채널로 문의하세요</h2><p>결제·수강·환불 문의를 남겨주시면 운영시간 내 순서대로 답변드립니다.</p></div>
+        <div class="kakao-support-copy"><span>빠른 상담</span><h2>카카오톡 채널로 문의하세요</h2><p>결제·수강·환불 문의를 남겨주시면 노하우집 운영팀이 운영시간 내 순서대로 답변드립니다.</p></div>
         <button onclick="openKakaoChannel()">채널 상담 시작하기 <b>→</b></button>
       </div>
     </div></div>
@@ -234,7 +215,7 @@
     <div class="foot-in">
       <div class="foot-brand"><span class="pmark" id="pmark-foot" style="width:30px;height:30px"></span><span>노하우집<small>크리에이터 클래스 마켓</small></span></div>
       <div class="foot-cols">
-        <div class="foot-col"><h5>탐색</h5><a href="#" onclick="show('creators');return false;">크리에이터</a><a href="#" onclick="show('home');return false;">인기 클래스</a></div>
+        <div class="foot-col"><h5>탐색</h5><a href="#" onclick="show('creators');return false;">크리에이터</a></div>
         <div class="foot-col"><h5>내 정보</h5><a href="#" onclick="show('mypage');return false;">내 학습</a><a href="#" onclick="openAuth('login');return false;">로그인</a></div>
         <div class="foot-col"><h5>지원</h5><a href="#" onclick="show('faq');return false;">고객센터</a><a href="#" onclick="toast('크리에이터 입점 안내 (예시)');return false;">크리에이터 입점</a></div>
       </div>
@@ -253,7 +234,7 @@
     <div class="field"><label>비밀번호</label><input id="f-pw" type="password" placeholder="••••••••"></div>
     <div class="field signup-only"><label>휴대폰 번호</label><input id="f-phone" type="tel" placeholder="010-0000-0000"></div>
     <button class="btn-red" id="authSubmit" onclick="submitAuth()">로그인</button>
-    <div class="demo-login login-only">
+    <div class="demo-login">
       <span>또는</span>
       <button type="button" onclick="demoLogin()"><b>⚡ 체험 계정으로 로그인</b><small>예시 수강 클래스가 바로 표시됩니다</small></button>
     </div>

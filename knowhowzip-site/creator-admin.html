@@ -21,7 +21,6 @@
       <div class="creator-account">
         <div class="creator-avatar" id="creatorAvatar"></div>
         <div><b>애매모홈</b><small>@mmoh · 부동산·경매</small></div>
-        <span class="verified">✓</span>
       </div>
 
       <nav class="admin-nav" aria-label="관리자 메뉴">
@@ -29,12 +28,12 @@
         <button data-view="classes" onclick="showAdminView('classes')"><i>▶</i><span>클래스 관리</span></button>
         <button data-view="students" onclick="showAdminView('students')"><i>♙</i><span>수강생 관리</span></button>
         <button data-view="sales" onclick="showAdminView('sales')"><i>₩</i><span>매출·정산</span></button>
-        <button data-view="messages" onclick="showAdminView('messages')"><i>✉</i><span>문의 관리</span><em>4</em></button>
+        <button data-view="alimtalk" onclick="showAdminView('alimtalk')"><i>♢</i><span>알림톡 관리</span></button>
         <button data-view="settings" onclick="showAdminView('settings')"><i>⚙</i><span>채널 설정</span></button>
       </nav>
 
       <div class="sidebar-bottom">
-        <a href="./index.html#/c/mmoh">공개 페이지 보기 <span>↗</span></a>
+        <a href="./index.html#/c/mmoh">내 페이지 보기 <span>↗</span></a>
         <button onclick="adminToast('로그아웃되었습니다 (예시)')">로그아웃</button>
       </div>
     </aside>
@@ -50,6 +49,14 @@
       </header>
 
       <main class="admin-main" id="adminContent"></main>
+    </div>
+  </div>
+
+
+  <div class="class-preview-modal" id="classPreviewModal" onclick="if(event.target===this)closeClassPreview()">
+    <div class="class-preview-dialog" role="dialog" aria-modal="true" aria-label="클래스 상세 미리보기">
+      <div class="class-preview-head"><div><b>클래스 상세 미리보기</b><span>수강생에게 보이는 화면입니다.</span></div><button type="button" onclick="closeClassPreview()" aria-label="미리보기 닫기">×</button></div>
+      <iframe id="classPreviewFrame" title="클래스 상세 미리보기"></iframe>
     </div>
   </div>
 

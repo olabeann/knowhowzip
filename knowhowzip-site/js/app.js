@@ -14,18 +14,18 @@ var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{in
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
-let state={user:null,purchased:new Set(),cart:new Set(),authMode:'login',pending:null,cat:'전체',creatorCat:'전체',creatorSearch:'',creatorVerified:false,myFilter:'active',payMethod:'card'};
+let state={user:null,purchased:new Set(),cart:new Set(),authMode:'login',pending:null,cat:'전체',creatorCat:'전체',creatorSearch:'',myFilter:'active',payMethod:'card'};
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
 function prodCard(p,c){
   const d=discRate(p);
   return `<article class="pcard" onclick="openDetail('${p.id}')">
-    <div class="thumb"><span class="lbl">${p.tag||'클래스'}</span><span class="own" data-own="${p.id}">수강 중</span>
+    <div class="thumb"><span class="own" data-own="${p.id}">수강 중</span>
       <div style="position:absolute;inset:0;background:${p.grad}"></div><div style="position:relative">${c.logoType==='house'?houseSVG(72,{ink:p.deep,text:false}):''}</div></div>
     <div class="c-body">
       <div class="c-creator"><span class="mini">${creatorLogo(c,18)}</span>${c.name}</div>
-      <span class="c-cohort">${p.cohort.no}기 · ${p.cohort.status}</span>
+      <span class="c-cohort">${p.cohort.status}</span>
       <h3 class="c-title">${p.title}</h3>
       <div class="c-rate"><span class="stars">${stars(p.rate)}</span><b>${p.rate}</b><span>(${p.reviews})</span></div>
       <div class="c-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">${won(p.orig)}</span>`:''}</div>
@@ -40,10 +40,9 @@ function renderHome(){
     <div class="ccard" onclick="openCreator('${c.id}')">
       <div class="cc-cover" style="background:${c.cover}"><div class="cc-logo">${creatorLogo(c,54)}</div></div>
       <div class="cc-body">
-        <div class="cc-name">${c.name}${c.verified?'<span class="vf">✔</span>':''}</div>
+        <div class="cc-name">${c.name}</div>
         <div class="cc-cat">${c.cat}</div>
         <div class="cc-desc">${c.tagline}</div>
-        <div class="cc-meta"><span>클래스 <b>${c.products.length}</b></span><span>누적 수강생 <b>${c.followers}</b></span></div>
       </div>
     </div>`).join('');
   const pop=allProducts().filter(x=>state.cat==='전체'||x.c.cat===state.cat).sort((a,b)=>b.p.reviews-a.p.reviews).slice(0,8);
@@ -58,9 +57,8 @@ function renderCreatorsPage(){
   const catBox=document.getElementById('creatorPageCats');
   catBox.innerHTML=cats.map(ct=>`<button class="creator-category ${state.creatorCat===ct?'active':''}" onclick="setCreatorDirectoryCat('${ct}')"><span>${categoryIcons[ct]||'●'}</span>${ct}</button>`).join('');
   const query=state.creatorSearch.trim().toLowerCase();
-  const list=creators.filter(c=>(state.creatorCat==='전체'||c.cat===state.creatorCat)&&(!state.creatorVerified||c.verified)&&(!query||`${c.name} ${c.handle} ${c.cat} ${c.tagline}`.toLowerCase().includes(query)));
+  const list=creators.filter(c=>(state.creatorCat==='전체'||c.cat===state.creatorCat)&&(!query||`${c.name} ${c.handle} ${c.cat} ${c.tagline}`.toLowerCase().includes(query)));
   document.getElementById('creatorResultCount').textContent=list.length;
-  document.querySelectorAll('.creator-filter-pills button').forEach(b=>b.classList.toggle('active',state.creatorVerified?b.dataset.verified==='verified':b.dataset.verified==='all'));
   document.getElementById('creatorPageGrid').innerHTML=list.map(c=>`
     <article class="creator-directory-card" onclick="openCreator('${c.id}')" tabindex="0" onkeydown="if(event.key==='Enter')openCreator('${c.id}')">
       <div class="creator-card-cover" style="background:${c.cover}">
@@ -68,29 +66,27 @@ function renderCreatorsPage(){
         <div class="creator-card-logo">${creatorLogo(c,72)}</div>
       </div>
       <div class="creator-card-body">
-        <div class="creator-card-title"><h3>${c.name}</h3>${c.verified?'<span title="인증 크리에이터">✓</span>':''}</div>
+        <div class="creator-card-title"><h3>${c.name}</h3></div>
         <div class="creator-card-handle">${c.handle}</div>
         <p>${c.tagline}</p>
-        <div class="creator-card-stats"><span>클래스 <b>${c.products.length}</b></span><span>팔로워 <b>${c.followers}</b></span><i>→</i></div>
       </div>
     </article>`).join('');
   document.getElementById('creatorEmpty').hidden=list.length!==0;
 }
 function setCreatorDirectoryCat(cat){state.creatorCat=cat;renderCreatorsPage();}
 function setCreatorSearch(value){state.creatorSearch=value;renderCreatorsPage();}
-function setCreatorVerified(value){state.creatorVerified=value;renderCreatorsPage();}
-
 /* ---------- CREATOR storefront ---------- */
 let activeCreator=null;
 function openCreator(id){
   const c=creators.find(x=>x.id===id);activeCreator=id;
+  let savedCover='';try{savedCover=id==='mmoh'?localStorage.getItem('nhz-mmoh-cover')||'':'';}catch(error){}
   document.getElementById('view-creator').innerHTML=`
-    <div class="cbanner"><div style="position:absolute;inset:0;background:${c.cover};opacity:.55"></div>
-      <div class="wrap"><button class="back-link" onclick="show('creators')">← 크리에이터</button>
+    <div class="cbanner"><div style="position:absolute;inset:0;background:${savedCover||c.cover};opacity:${savedCover?1:.55}"></div>
+      <div class="wrap">
       <div class="cbanner-in">
         <div class="clogo">${creatorLogo(c,64)}</div>
         <div class="cinfo">
-          <h1 class="cname">${c.name}${c.verified?'<span class="vf">✔</span>':''}</h1>
+          <h1 class="cname">${c.name}</h1>
           <div class="chandle">${c.handle} · ${c.cat}</div>
           <p class="ctag">${c.tagline}</p>
         </div>
@@ -99,18 +95,18 @@ function openCreator(id){
     </div>
     <div class="wrap">
       <div class="ctabs">
-        <button class="active" onclick="ctab(this,'cs-class')">클래스 ${c.products.length}</button>
+        <button class="active" onclick="ctab(this,'cs-class')">클래스</button>
         <button onclick="ctab(this,'cs-about')">소개</button>
-        <button onclick="ctab(this,'cs-faq')">FAQ</button>
+        
       </div>
       <div class="csec show" id="cs-class"><div class="grid">${c.products.map(p=>prodCard(p,c)).join('')}</div></div>
       <div class="csec" id="cs-about"><div class="about-box">${c.about}</div></div>
-      <div class="csec" id="cs-faq"><div class="faq-list">${faqAcc(c.faq,'cf'+id)}</div></div>
     </div>`;
   show('creator');window.scrollTo({top:0});setHash('#/c/'+id);
   refreshOwned();
 }
 function ctab(btn,id){btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.csec').forEach(s=>s.classList.remove('show'));document.getElementById(id).classList.add('show');}
+
 
 /* ---------- DETAIL ---------- */
 let activeDetail=null;
@@ -122,18 +118,18 @@ function openDetail(pid){
     <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
     <div class="detail-hero"><div class="wrap detail-hero-in">
       <div>
-        <div class="d-creatorchip" onclick="openCreator('${c.id}')"><span class="mini">${creatorLogo(c,26)}</span>${c.name}${c.verified?' ✔':''}</div>
+        <div class="d-creatorchip" onclick="openCreator('${c.id}')"><span class="mini">${creatorLogo(c,26)}</span>${c.name}</div>
         <div class="d-tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
         <h1>${p.title}</h1>
         <p class="d-lead">${p.lead}</p>
-        <div class="d-meta"><span><span class="stars">${stars(p.rate)}</span> <b>${p.rate}</b> (${p.reviews})</span><span>·</span><span><b>${ch.no}기</b> 모집중</span></div>
+        <div class="d-meta"><span><span class="stars">${stars(p.rate)}</span> <b>${p.rate}</b> (${p.reviews})</span><span>·</span><span>${ch.status}</span></div>
         <div class="d-visual" style="background:${p.grad}">${c.logoType==='house'?houseSVG(110,{ink:p.deep,text:false}):''}</div>
       </div>
       <aside><div class="buycard">
         <div class="bc-vis" style="background:${p.grad}">${c.logoType==='house'?houseSVG(66,{ink:p.deep,text:false}):''}</div>
         <div class="bc-body">
           <div class="cohort-box">
-            <div class="ch-top"><span class="ch-no">${ch.no}기 모집</span><span class="ch-st">${ch.status}</span></div>
+            <div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">${ch.status}</span></div>
             <div class="ch-row"><span>수강 기간</span><b>${ch.period}</b></div>
             <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
             <div class="ch-row"><span>신청 현황</span><b>${ch.enrolled} / ${ch.seats}명</b></div>
@@ -141,7 +137,7 @@ function openDetail(pid){
           </div>
           <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
           <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
-            <button class="btn-red" onclick="startPurchase('${pid}')">${ch.no}기 수강신청</button>
+            <button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>
             <button class="bc-cart" onclick="addCart('${pid}')">장바구니 담기</button>
           </div>
           <div class="bc-owned" data-owned="${pid}" style="display:${owned?'block':'none'}">✓ 수강 중 · 내 학습에서 확인</div>
@@ -173,7 +169,7 @@ function openDetail(pid){
     </div></div>
     <div class="buybar" id="buybar"></div>`;
   const bar=document.getElementById('buybar');
-  bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">${ch.no}기 수강신청</button>`;
+  bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>`;
   show('detail');window.scrollTo({top:0});setHash('#/p/'+pid);
 }
 function goTab(btn,id){document.querySelectorAll('.d-tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth'});}
@@ -182,6 +178,15 @@ function goTab(btn,id){document.querySelectorAll('.d-tabs button').forEach(b=>b.
 const learningProgress={'mmoh-basic':50,'mmoh-right':25,'ml-stock':75};
 const endedCourses=new Set(['ml-stock']);
 const lessonDurations=['88분','92분','76분','81분','68분','74분'];
+const zoomSchedules={
+  'mmoh-basic':[{date:'07.05',day:'일',time:'20:00',title:'오리엔테이션 · 경매 절차 이해'},{date:'07.12',day:'일',time:'20:00',title:'물건 검색과 시세 분석'},{date:'07.19',day:'일',time:'20:00',title:'입찰표 작성 실습'}],
+  'mmoh-right':[{date:'07.12',day:'일',time:'20:00',title:'권리분석 핵심 개념'},{date:'07.19',day:'일',time:'20:00',title:'위험 물건 사례 분석'}],
+  'ml-stock':[{date:'07.08',day:'수',time:'20:00',title:'투자 원칙과 종목 분석'}]
+};
+function renderZoomSchedules(productId){
+  const schedules=zoomSchedules[productId]||[{date:'일정',day:'',time:'추후 안내',title:'라이브 일정은 공지로 안내됩니다'}];
+  return `<div class="zoom-schedule"><div class="zoom-schedule-head"><b>줌 라이브 일정</b><span>일정 변경 시 공지로 안내됩니다.</span></div>${schedules.map((schedule,index)=>`<div class="zoom-schedule-row"><span class="zoom-order">${index+1}</span><div><b>${schedule.title}</b><small>${schedule.date}${schedule.day?'('+schedule.day+')':''} · ${schedule.time}</small></div><em>예정</em></div>`).join('')}</div>`;
+}
 function productProgress(id){return learningProgress[id]??20;}
 function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
 function toggleLearningAcc(id){document.getElementById(id)?.classList.toggle('open');}
@@ -202,32 +207,42 @@ function continueLearning(productId,index){
 }
 function renderLearningTabs(owned){
   const ended=owned.filter(x=>endedCourses.has(x.p.id)).length,active=owned.length-ended;
-  document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`]].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
+  document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`],['payments','결제 내역']].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
 }
+const demoPayments=[
+  {id:'P20260629001',date:'2026.06.29',productId:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',amount:290000,payment:'결제 완료',refund:'환불 가능'},
+  {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료',refund:'환불 요청 없음'},
+  {id:'P20260517008',date:'2026.05.17',productId:'ml-stock',title:'직장인 주식 투자 4주 클래스',amount:240000,payment:'결제 취소',refund:'환불 완료'}
+];
+function renderPaymentHistory(){
+  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>클래스 결제와 환불 처리 상태를 확인하세요.</p></div><select><option>전체 내역</option><option>결제 완료</option><option>환불 완료</option></select></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state ${payment.payment==='결제 취소'?'cancel':''}">${payment.payment}</span><span class="refund-state">${payment.refund}</span></div><button onclick="toast('결제 상세 내역을 확인합니다 (예시)')">상세 보기</button></article>`).join('')}</div></section>`;
+}
+
 function renderMy(){
   const box=document.getElementById('myContent');
   const allOwned=state.user?allProducts().filter(x=>state.purchased.has(x.p.id)):[];
   renderLearningTabs(allOwned);
   if(!state.user){box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  if(state.myFilter==='payments'){box.innerHTML=renderPaymentHistory();return;}
   if(!allOwned.length){box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>아직 수강 중인 클래스가 없습니다</h3><p>크리에이터의 클래스를 둘러보세요.</p><button class="btn-red" onclick="show('creators')">둘러보기</button></div>`;return;}
   const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
-  box.innerHTML=Object.values(byCreator).map(g=>`
+  box.innerHTML=renderGlobalLearningFaq(allOwned)+Object.values(byCreator).map(g=>`
     <section class="learning-group">
-      <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}${g.c.verified?'<i>✓</i>':''}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
+      <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${g.items.map(p=>{const progress=productProgress(p.id),videos=p.content.videos,doneCount=Math.floor(videos.length*progress/100);if(endedCourses.has(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><em>${p.cohort.no}기</em><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>${p.cohort.period}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>${p.cohort.period}</small></div>
             <span class="ended-course-badge">수강 종료</span>
           </div>
         </article>`;return `
         <article class="learning-card">
           <div class="learning-summary">
             <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><em>${p.cohort.no}기</em><h3>${p.title}</h3><div class="learning-status-count"><span class="done">✓ 시청 완료 ${doneCount}강</span><span>미완료 ${videos.length-doneCount}강</span></div><small>전체 ${videos.length}강</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><div class="learning-status-count"><span class="done">✓ 시청 완료 ${doneCount}강</span><span>미완료 ${videos.length-doneCount}강</span></div><small>전체 ${videos.length}강</small></div>
             <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',${doneCount})">이어서 학습</button>
           </div>
           <div class="learning-details">
@@ -241,11 +256,32 @@ function renderMy(){
             </div>
             <div class="learning-acc" id="learn-${p.id}-operation">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p><button class="learning-resource" onclick="toast('수강생 단톡방으로 이동 (예시)')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>열기 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크 열기 (예시)')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>링크 →</b></button></div></div>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동 (예시)')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>열기 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크 열기 (예시)')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>링크 →</b></button></div></div>
+            </div>
+            <div class="learning-acc" id="learn-${p.id}-faq">
+              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-faq')"><span><i class="faq">?</i>수강 FAQ <small>${p.faq.length}개</small></span><b>＋</b></button>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><div class="faq-list">${faqAcc(p.faq,'lf'+p.id)}</div></div></div>
             </div>
           </div>
         </article>`;}).join('')}
     </section>`).join('');
+}
+
+function renderGlobalLearningFaq(allOwned){
+  const entries=allOwned.flatMap(item=>(item.p.faq||[]).map(faq=>({...faq,creator:item.c.name,course:item.p.title})));
+  return '<section class="global-learning-faq"><button type="button" class="global-learning-faq-copy" onclick="toggleGlobalLearningFaq(this)" aria-expanded="false"><span>?</span><div><b>강의에 대해 궁금한 게 있나요?</b><small>수강 중인 모든 클래스의 FAQ에서 먼저 검색해 보세요.</small></div><i>⌄</i></button><div class="global-learning-faq-body"><label class="learning-faq-search"><span>⌕</span><input type="search" placeholder="궁금한 내용을 자유롭게 검색해 보세요" oninput="filterGlobalLearningFaq(this.value)"></label><div class="learning-faq-result" id="globalLearningFaqResult"></div><div class="global-learning-faq-results" id="globalLearningFaqResults" hidden>'+entries.map(faq=>'<article class="global-learning-faq-item"><span>'+faq.creator+' · '+faq.course+'</span><b>Q. '+faq.q+'</b><p>'+faq.a+'</p></article>').join('')+'</div><div class="learning-faq-empty" id="globalLearningFaqEmpty" hidden>검색 결과가 없습니다.</div></div></section>';
+}
+function toggleGlobalLearningFaq(button){
+  const panel=button.closest('.global-learning-faq'),open=panel.classList.toggle('open');
+  button.setAttribute('aria-expanded',String(open));
+  if(open)setTimeout(()=>panel.querySelector('input')?.focus(),0);
+}
+function filterGlobalLearningFaq(value){
+  const results=document.getElementById('globalLearningFaqResults'),empty=document.getElementById('globalLearningFaqEmpty'),result=document.getElementById('globalLearningFaqResult');
+  if(!results)return;
+  const query=value.trim().toLowerCase();let visible=0;
+  results.querySelectorAll('.global-learning-faq-item').forEach(item=>{const matched=!query||item.textContent.toLowerCase().includes(query);item.hidden=!matched;if(matched)visible++;});
+  results.hidden=!query||visible===0;empty.hidden=!query||visible!==0;result.textContent=query?'검색 결과 '+visible+'개':'';
 }
 
 /* ---------- platform FAQ ---------- */
@@ -254,13 +290,13 @@ const commonFaqs=[
   {q:'여러 크리에이터의 클래스를 한 계정으로 들을 수 있나요?',a:'네. 하나의 노하우집 계정으로 모든 크리에이터의 클래스를 구매·수강할 수 있고, 내 학습에서 크리에이터별로 모아 볼 수 있습니다.'},
   {q:'자료·단톡방은 어떻게 이용하나요?',a:'구매한 클래스의 내 학습에서 자료 다운로드와 단톡방·줌 링크가 활성화됩니다. 미구매 클래스는 제한됩니다.'},
   {q:'환불 규정은 어떻게 되나요?',a:'첫 강의 시작 전까지 전액 환불, 이후에는 진행 회차를 제외한 잔여분에 대해 규정에 따라 처리됩니다.'},
-  {q:'크리에이터로 입점하려면요?',a:'고객센터의 크리에이터 입점 안내를 통해 신청할 수 있습니다. (예시)'},
+  {q:'크리에이터로 입점하려면요?',a:'고객센터의 크리에이터 입점 안내를 통해 신청할 수 있습니다. (예시)'}
 ];
+function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
+function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';}
 // 실제 노하우집 카카오 채널을 개설한 뒤 이 주소만 채널 URL로 교체하면 됩니다.
 const KAKAO_CHANNEL_URL='https://pf.kakao.com/';
 function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,noreferrer');}
-function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
-function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';}
 
 /* ---------- view switch ---------- */
 function show(view){
@@ -286,7 +322,6 @@ function switchAuth(m){state.authMode=m;
   document.getElementById('tab-login').classList.toggle('active',m==='login');
   document.getElementById('tab-signup').classList.toggle('active',m==='signup');
   document.querySelectorAll('.signup-only').forEach(e=>e.style.display=m==='signup'?'block':'none');
-  document.querySelectorAll('.login-only').forEach(e=>e.style.display=m==='login'?'block':'none');
   document.getElementById('authTitle').textContent=m==='signup'?'회원가입':'로그인';
   document.getElementById('authDesc').textContent=m==='signup'?'정보를 입력하고 클래스를 시작하세요.':'노하우집 계정으로 클래스를 수강하세요.';
   document.getElementById('authSubmit').textContent=m==='signup'?'가입하고 시작하기':'로그인';}
@@ -326,7 +361,7 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
     <div class="pay-sum">
       <div class="row"><span>크리에이터</span><b>${c.name}</b></div>
       <div class="row"><span>클래스</span><b>${p.title}</b></div>
-      <div class="row"><span>기수</span><b>${p.cohort.no}기 (${p.cohort.period})</b></div>
+      <div class="row"><span>수강 기간</span><b>${p.cohort.period}</b></div>
       ${d?`<div class="row"><span>정가</span><span style="text-decoration:line-through;color:var(--ink-mute)">${won(p.orig)}</span></div><div class="row"><span>할인</span><span style="color:var(--red)">-${won(p.orig-p.price)} (${d}%)</span></div>`:''}
       <div class="row tot"><span>결제 금액</span><span class="p">${won(p.price)}</span></div>
     </div>
@@ -337,7 +372,7 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
 function confirmPay(id){const p=productMap[id],c=creatorOf[id];state.purchased.add(id);state.cart.delete(id);updateCart();
   document.getElementById('payTitle').textContent='결제 완료';
-  document.getElementById('payBody').innerHTML=`<div class="pay-done"><div class="check">✓</div><h3>결제가 완료되었습니다</h3><p>${c.name}의 "${p.title}" ${p.cohort.no}기 수강 권한이 자동 부여되었습니다.</p><button class="btn-red" style="width:100%" onclick="goMy()">내 학습으로 가기</button></div>`;
+  document.getElementById('payBody').innerHTML=`<div class="pay-done"><div class="check">✓</div><h3>결제가 완료되었습니다</h3><p>${c.name}의 “${p.title}” 수강 권한이 자동 부여되었습니다.</p><button class="btn-red" style="width:100%" onclick="goMy()">내 학습으로 가기</button></div>`;
   refreshOwned();}
 function goMy(){closePay();show('mypage');}
 function closePay(){document.getElementById('payModal').classList.remove('show');}
