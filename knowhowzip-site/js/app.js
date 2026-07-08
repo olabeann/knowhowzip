@@ -228,9 +228,10 @@ function renderMy(){
   const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
-  box.innerHTML=renderGlobalLearningFaq(allOwned)+Object.values(byCreator).map(g=>`
+  box.innerHTML=Object.values(byCreator).map(g=>`
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
+      ${renderCreatorLearningFaq(g.c,g.items)}
       ${g.items.map(p=>{const progress=productProgress(p.id),videos=p.content.videos,doneCount=Math.floor(videos.length*progress/100);if(endedCourses.has(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
@@ -267,19 +268,19 @@ function renderMy(){
     </section>`).join('');
 }
 
-function renderGlobalLearningFaq(allOwned){
-  const entries=allOwned.flatMap(item=>(item.p.faq||[]).map(faq=>({...faq,creator:item.c.name,course:item.p.title})));
-  return '<section class="global-learning-faq"><button type="button" class="global-learning-faq-copy" onclick="toggleGlobalLearningFaq(this)" aria-expanded="false"><span>?</span><div><b>강의에 대해 궁금한 게 있나요?</b><small>수강 중인 모든 클래스의 FAQ에서 먼저 검색해 보세요.</small></div><i>⌄</i></button><div class="global-learning-faq-body"><label class="learning-faq-search"><span>⌕</span><input type="search" placeholder="궁금한 내용을 자유롭게 검색해 보세요" oninput="filterGlobalLearningFaq(this.value)"></label><div class="learning-faq-result" id="globalLearningFaqResult"></div><div class="global-learning-faq-results" id="globalLearningFaqResults" hidden>'+entries.map(faq=>'<article class="global-learning-faq-item"><span>'+faq.creator+' · '+faq.course+'</span><b>Q. '+faq.q+'</b><p>'+faq.a+'</p></article>').join('')+'</div><div class="learning-faq-empty" id="globalLearningFaqEmpty" hidden>검색 결과가 없습니다.</div></div></section>';
+function renderCreatorLearningFaq(creator,products){
+  const entries=products.flatMap(product=>(product.faq||[]).map(faq=>({...faq,course:product.title})));
+  return '<section class="global-learning-faq"><button type="button" class="global-learning-faq-copy" onclick="toggleGlobalLearningFaq(this)" aria-expanded="false"><span>?</span><div><b>강의에 대해 궁금한 게 있나요?</b><small>'+creator.name+' 수강 클래스의 FAQ에서 먼저 검색해 보세요.</small></div><i>⌄</i></button><div class="global-learning-faq-body"><label class="learning-faq-search"><span>⌕</span><input type="search" placeholder="궁금한 내용을 자유롭게 검색해 보세요" oninput="filterCreatorLearningFaq(this)"></label><div class="learning-faq-result"></div><div class="global-learning-faq-results" hidden>'+entries.map(faq=>'<article class="global-learning-faq-item"><span>'+creator.name+' · '+faq.course+'</span><b>Q. '+faq.q+'</b><p>'+faq.a+'</p></article>').join('')+'</div><div class="learning-faq-empty" hidden>검색 결과가 없습니다.</div></div></section>';
 }
 function toggleGlobalLearningFaq(button){
   const panel=button.closest('.global-learning-faq'),open=panel.classList.toggle('open');
   button.setAttribute('aria-expanded',String(open));
   if(open)setTimeout(()=>panel.querySelector('input')?.focus(),0);
 }
-function filterGlobalLearningFaq(value){
-  const results=document.getElementById('globalLearningFaqResults'),empty=document.getElementById('globalLearningFaqEmpty'),result=document.getElementById('globalLearningFaqResult');
+function filterCreatorLearningFaq(input){
+  const panel=input.closest('.global-learning-faq'),results=panel.querySelector('.global-learning-faq-results'),empty=panel.querySelector('.learning-faq-empty'),result=panel.querySelector('.learning-faq-result');
   if(!results)return;
-  const query=value.trim().toLowerCase();let visible=0;
+  const query=input.value.trim().toLowerCase();let visible=0;
   results.querySelectorAll('.global-learning-faq-item').forEach(item=>{const matched=!query||item.textContent.toLowerCase().includes(query);item.hidden=!matched;if(matched)visible++;});
   results.hidden=!query||visible===0;empty.hidden=!query||visible!==0;result.textContent=query?'검색 결과 '+visible+'개':'';
 }
