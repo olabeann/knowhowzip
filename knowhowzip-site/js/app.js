@@ -76,10 +76,23 @@ function renderCreatorsPage(){
 function setCreatorDirectoryCat(cat){state.creatorCat=cat;renderCreatorsPage();}
 function setCreatorSearch(value){state.creatorSearch=value;renderCreatorsPage();}
 /* ---------- CREATOR storefront ---------- */
+
+function creatorCommerce(c){
+  if(c.id!=='mmoh')return {memberships:[],products:c.products};
+  return {products:c.products,memberships:[
+    {name:'입문 멤버십',price:190000,desc:'경매 낙찰 기초반부터 시작하는 입문 과정',period:'90일 이용',courses:['경매 낙찰 기초반'],featured:false},
+    {name:'중급 멤버십',price:390000,desc:'기초를 끝내고 권리분석까지 이어 듣는 추천 과정',period:'120일 이용',courses:['경매 낙찰 기초반','권리분석 실전반'],featured:true},
+    {name:'고급 멤버십',price:690000,desc:'기초·권리분석·현장 임장까지 모두 포함',period:'150일 이용',courses:['경매 낙찰 기초반','권리분석 실전반','현장 임장 마스터'],featured:false}
+  ]};
+}
+function membershipCard(plan,c){
+  return `<article class="membership-card ${plan.featured?'featured':''}"><span>${plan.featured?'추천 멤버십':'멤버십'}</span><h3>${plan.name}</h3><p>${plan.desc}</p><strong>${won(plan.price)}</strong><small>${plan.period}</small><div class="membership-includes"><b>포함 강의</b>${plan.courses.map(course=>`<em>${course}</em>`).join('')}</div><button onclick="toast('${plan.name} 결제 화면으로 이동합니다 (예시)')">멤버십 신청하기</button></article>`;
+}
 let activeCreator=null;
 function openCreator(id){
   const c=creators.find(x=>x.id===id);activeCreator=id;
   let savedCover='';try{savedCover=id==='mmoh'?localStorage.getItem('nhz-mmoh-cover')||'':'';}catch(error){}
+  const commerce=creatorCommerce(c);
   document.getElementById('view-creator').innerHTML=`
     <div class="cbanner"><div style="position:absolute;inset:0;background:${savedCover||c.cover};opacity:${savedCover?1:.55}"></div>
       <div class="wrap">
@@ -95,11 +108,12 @@ function openCreator(id){
     </div>
     <div class="wrap">
       <div class="ctabs">
-        <button class="active" onclick="ctab(this,'cs-class')">클래스</button>
+        ${commerce.memberships.length?`<button class="active" onclick="ctab(this,'cs-membership')">멤버십</button>`:''}
+        <button class="${commerce.memberships.length?'':'active'}" onclick="ctab(this,'cs-class')">개별 강의</button>
         <button onclick="ctab(this,'cs-about')">소개</button>
-        
       </div>
-      <div class="csec show" id="cs-class"><div class="grid">${c.products.map(p=>prodCard(p,c)).join('')}</div></div>
+      ${commerce.memberships.length?`<div class="csec show" id="cs-membership"><div class="membership-grid">${commerce.memberships.map(plan=>membershipCard(plan,c)).join('')}</div></div>`:''}
+      <div class="csec ${commerce.memberships.length?'':'show'}" id="cs-class"><div class="creator-section-copy"><h2>개별 강의</h2><p>필요한 강의만 단독으로 신청할 수 있습니다. 선수강 조건이 있는 강의는 신청 전 안내됩니다.</p></div><div class="grid">${c.products.map(p=>prodCard(p,c)).join('')}</div></div>
       <div class="csec" id="cs-about"><div class="about-box">${c.about}</div></div>
     </div>`;
   show('creator');window.scrollTo({top:0});setHash('#/c/'+id);
@@ -228,7 +242,7 @@ function renderMy(){
   const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
-  box.innerHTML=Object.values(byCreator).map(g=>`
+  box.innerHTML=renderLearningEntitlementSummary(allOwned)+Object.values(byCreator).map(g=>`
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}

@@ -25,7 +25,8 @@
 
       <nav class="admin-nav" aria-label="관리자 메뉴">
         <button class="active" data-view="dashboard" onclick="showAdminView('dashboard')"><i>▦</i><span>대시보드</span></button>
-        <button data-view="classes" onclick="showAdminView('classes')"><i>▶</i><span>클래스 관리</span></button>
+        <button data-view="classes" onclick="showAdminView('classes')"><i>&#9654;</i><span>강의 관리</span></button>
+        <button data-view="products" onclick="showAdminView('products')"><i>&#9635;</i><span>상품·멤버십 관리</span></button>
         <button data-view="students" onclick="showAdminView('students')"><i>♙</i><span>수강생 관리</span></button>
         <button data-view="sales" onclick="showAdminView('sales')"><i>₩</i><span>매출·정산</span></button>
         <button data-view="alimtalk" onclick="showAdminView('alimtalk')"><i>♢</i><span>알림톡 관리</span></button>
@@ -54,9 +55,9 @@
 
 
   <div class="class-preview-modal" id="classPreviewModal" onclick="if(event.target===this)closeClassPreview()">
-    <div class="class-preview-dialog" role="dialog" aria-modal="true" aria-label="클래스 상세 미리보기">
-      <div class="class-preview-head"><div><b>클래스 상세 미리보기</b><span>수강생에게 보이는 화면입니다.</span></div><button type="button" onclick="closeClassPreview()" aria-label="미리보기 닫기">×</button></div>
-      <iframe id="classPreviewFrame" title="클래스 상세 미리보기"></iframe>
+    <div class="class-preview-dialog" role="dialog" aria-modal="true" aria-label="강의 상세 미리보기">
+      <div class="class-preview-head"><div><b>강의 상세 미리보기</b><span>수강생에게 보이는 화면입니다.</span></div><button type="button" onclick="closeClassPreview()" aria-label="미리보기 닫기">×</button></div>
+      <iframe id="classPreviewFrame" title="강의 상세 미리보기"></iframe>
     </div>
   </div>
 

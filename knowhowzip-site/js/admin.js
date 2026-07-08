@@ -25,17 +25,17 @@ function pageHeader(kicker,title,desc,actions=''){
 }
 
 function renderDashboard(){
-  return `${pageHeader('2026년 6월 30일 화요일','안녕하세요, 애매모홈님 👋','오늘의 클래스 운영 현황을 한눈에 확인하세요.','<button class="btn ghost" onclick="adminToast(\'미리보기 페이지를 엽니다 (예시)\')">내 페이지 보기 ↗</button>')}
+  return `${pageHeader('2026년 6월 30일 화요일','안녕하세요, 애매모홈님 👋','강의와 상품 운영 현황을 한눈에 확인하세요.','<button class="btn ghost" onclick="adminToast(\'미리보기 페이지를 엽니다 (예시)\')">내 페이지 보기 ↗</button>')}
     <section class="metric-grid three">
       <article class="metric-card"><div class="metric-icon blue">₩</div><span>이번 달 매출</span><strong>₩18,420,000</strong><small class="up">↑ 18.6% <i>지난달 대비</i></small></article>
       <article class="metric-card"><div class="metric-icon violet">♙</div><span>전체 수강생</span><strong>48명</strong><small class="up">↑ 7명 <i>이번 주 신규</i></small></article>
-      <article class="metric-card"><div class="metric-icon green">▶</div><span>운영 중인 클래스</span><strong>3개</strong><small><i>모집중 2 · 예정 1</i></small></article>
+      <article class="metric-card"><div class="metric-icon green">▶</div><span>공개 강의</span><strong>3개</strong><small><i>콘텐츠 관리 중</i></small></article>
     </section>
 
     <section class="dashboard-grid single">
 
       <article class="panel cohort-panel">
-        <div class="panel-head"><div><h2>클래스 운영 현황</h2><p>모집 및 수강 진행 상태</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
+        <div class="panel-head"><div><h2>강의 운영 현황</h2><p>콘텐츠 공개 및 선수강 진행 상태</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
         <div class="cohort-list">${classes.map((c,i)=>`<button onclick="showAdminView('classes')"><span class="cohort-color" style="background:${c.color}">${i+1}</span><span class="cohort-info"><b>${c.title.split(' · ')[0]}</b><small>${c.period}</small></span><span class="cohort-state ${c.status==='모집중'?'open':'soon'}">${c.status}</span><strong>${c.students}/${c.seats}</strong></button>`).join('')}</div>
       </article>
     </section>
@@ -49,8 +49,8 @@ function renderDashboard(){
 }
 
 function renderClasses(){
-  return `${pageHeader('Class management','클래스 관리','클래스별 모집·운영 상태를 관리합니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 클래스 만들기</button>')}
-  <div class="class-admin-grid">${classes.map((c,i)=>`<article class="admin-class-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${c.title} 관리"><div class="class-cover" style="background:${c.color}">${houseMark(70)}<span>${c.status}</span></div><div class="class-card-body"><div class="class-card-top"><div class="class-card-menu"><button type="button" onclick="toggleClassMenu(event,'${c.id}')">•••</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" onclick="openClassPreview('${c.id}')">미리보기</button><button type="button" onclick="openClassEditor('clone','${c.id}')">클래스 복제</button><button type="button" onclick="adminToast('비공개로 전환했습니다 (예시)')">비공개 전환</button><button type="button" class="danger" onclick="adminToast('삭제는 운영팀 확인 후 진행됩니다')">삭제</button></div></div></div><h2>${c.title}</h2><p>${c.period} · ${c.students}명 결제</p><div class="class-card-foot"><strong>${won(c.price)}</strong></div></div></article>`).join('')}</div>`;
+  return `${pageHeader('Lecture management','강의 관리','영상·자료·FAQ·선수강 조건을 관리합니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 강의 만들기</button>')}
+  <div class="class-admin-grid">${classes.map((c,i)=>`<article class="admin-class-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${c.title} 관리"><div class="class-cover" style="background:${c.color}">${houseMark(70)}<span>공개</span></div><div class="class-card-body"><div class="class-card-top"><div class="class-card-menu"><button type="button" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" onclick="openClassPreview('${c.id}')">미리보기</button><button type="button" onclick="openClassEditor('clone','${c.id}')">강의 복제</button><button type="button" onclick="adminToast('\ube44\uacf5\uac1c\ub85c \uc804\ud658\ud588\uc2b5\ub2c8\ub2e4 (\uc608\uc2dc)')">비공개 전환</button><button type="button" class="danger" onclick="adminToast('\uc0ad\uc81c\ub294 \uc6b4\uc601\ud300 \ud655\uc778 \ud6c4 \uc9c4\ud589\ub429\ub2c8\ub2e4')">삭제</button></div></div></div><h2>${c.title}</h2><p>영상 4강 · 자료 3개 · FAQ 2개</p><div class="class-card-foot lecture-meta"><strong>선수강 없음</strong><span>공개</span></div></div></article>`).join('')}</div>`;
 }
 
 function openClassPreview(classId=''){
@@ -80,9 +80,9 @@ function renderClassEditor(mode='create',classId=''){
   const curriculum=(editing||cloning)?['경매 절차와 권리의 이해','물건 검색과 시세 분석','입찰표 작성 실습','모의 입찰 & 라이브 Q&A']:[''];
   const materials=(editing||cloning)?['주차별 강의 노트(PDF)','입찰표 작성 템플릿','물건 분석 체크리스트']:[''];
   return `<form class="class-editor" onsubmit="saveClassForm(event,'${mode}')">
-    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 클래스 관리</button><div><span>${editing?'Class editing':cloning?'Class duplicate':'New class'}</span><h1>${editing?'클래스 수정':cloning?'클래스 복제':'새 클래스 만들기'}</h1><p>${editing?'공개 중인 클래스 정보와 운영 내용을 수정합니다.':cloning?'기존 내용을 복사했습니다. 일정과 공개 설정을 확인해 주세요.':'클래스 소개부터 콘텐츠와 운영 방식까지 순서대로 입력하세요.'}</p></div><div class="editor-actions"><button type="button" class="btn ghost" onclick="openClassPreview('${classId}')">미리보기 ↗</button><button type="button" class="btn ghost" onclick="adminToast(&quot;임시 저장했습니다&quot;)">임시 저장</button><button type="submit" class="btn primary">${editing?'변경사항 저장':cloning?'복제본 저장':'검토 후 등록'}</button></div></div>
+    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 강의 관리</button><div><span>${editing?'Class editing':cloning?'Class duplicate':'New class'}</span><h1>${editing?'강의 수정':cloning?'강의 복제':'새 강의 만들기'}</h1><p>${editing?'공개 중인 클래스 정보와 운영 내용을 수정합니다.':cloning?'기존 내용을 복사했습니다. 일정과 공개 설정을 확인해 주세요.':'클래스 소개부터 콘텐츠와 운영 방식까지 순서대로 입력하세요.'}</p></div><div class="editor-actions"><button type="button" class="btn ghost" onclick="openClassPreview('${classId}')">미리보기 ↗</button><button type="button" class="btn ghost" onclick="adminToast(&quot;임시 저장했습니다&quot;)">임시 저장</button><button type="submit" class="btn primary">${editing?'변경사항 저장':cloning?'복제본 저장':'검토 후 등록'}</button></div></div>
     <div class="editor-layout">
-      <nav class="editor-steps"><button type="button" class="active" onclick="scrollEditorSection('editor-basic',this)"><i>1</i><span>판매 페이지<small>소개·커버·태그</small></span></button><button type="button" onclick="scrollEditorSection('editor-cohort',this)"><i>2</i><span>일정·가격<small>기간·인원·금액</small></span></button><button type="button" onclick="scrollEditorSection('editor-content',this)"><i>3</i><span>콘텐츠·혜택<small>강의·자료·제공 항목</small></span></button><button type="button" onclick="scrollEditorSection('editor-operation',this)"><i>4</i><span>수강 운영<small>진행 방식·안내</small></span></button><button type="button" onclick="scrollEditorSection('editor-publish',this)"><i>5</i><span>FAQ·공개<small>문의·정책·노출</small></span></button></nav>
+      <nav class="editor-steps"><button type="button" class="active" onclick="scrollEditorSection('editor-basic',this)"><i>1</i><span>강의 정보<small>소개·난이도·태그</small></span></button><button type="button" onclick="scrollEditorSection('editor-cohort',this)"><i>2</i><span>수강 조건<small>선수강·수료 기준</small></span></button><button type="button" onclick="scrollEditorSection('editor-content',this)"><i>3</i><span>콘텐츠·혜택<small>강의·자료·제공 항목</small></span></button><button type="button" onclick="scrollEditorSection('editor-operation',this)"><i>4</i><span>수강 운영<small>진행 방식·안내</small></span></button><button type="button" onclick="scrollEditorSection('editor-publish',this)"><i>5</i><span>FAQ·공개<small>문의·정책·노출</small></span></button></nav>
       <div class="editor-sections">
         <section class="panel editor-section" id="editor-basic"><div class="editor-section-head"><i>1</i><div><h2>판매 페이지</h2><p>수강생이 신청 전에 확인하는 핵심 정보를 구성합니다.</p></div><span>필수</span></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:${course.color||'linear-gradient(135deg,#DCE3FF,#AFC0FF)'}">${houseMark(72)}<button type="button" onclick="adminToast('커버 이미지 업로드 (예시)')">커버 변경</button></div><div class="editor-cover-guide"><b>커버 이미지</b><p>권장 크기 1280×800px · JPG, PNG · 최대 5MB</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택 (예시)')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스 제목 <em>*</em><input required maxlength="60" value="${name}" placeholder="예: 경매 낙찰 기초반"><small>핵심 주제와 수강 결과가 드러나는 제목을 권장합니다. 기수가 있다면 제목에 함께 적어주세요.</small></label><label class="wide">부제목<input maxlength="80" value="${subtitle}" placeholder="예: 직장인을 위한 4주 완성"></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option><option>디자인</option><option>개발</option></select></label><label>난이도 <em>*</em><select required><option>입문</option><option>중급</option><option>심화</option></select></label><label class="wide">한 줄 소개 <em>*</em><input required value="${editing||cloning?'경매가 처음인 직장인을 위한 실전 입문 과정':''}" placeholder="수강생에게 약속하는 핵심 변화를 한 문장으로 적어주세요"></label><label class="wide">상세 소개 <em>*</em><textarea required placeholder="클래스에서 무엇을, 어떻게 배우는지 자세히 소개해 주세요.">${editing||cloning?'복잡한 경매 절차를 직장인 눈높이로 풀었습니다. 실제 물건을 분석하고 입찰표까지 직접 작성합니다.':''}</textarea></label><label class="wide">검색 태그<input maxlength="80" placeholder="예: 경매 입문, 직장인, 실전"><small>쉼표로 구분해 최대 5개까지 입력하세요.</small></label></div></section>
 
@@ -213,13 +213,54 @@ function switchSettingsPanel(panel,button){
   button.classList.add('active');
   document.getElementById('settingsPanel').innerHTML=settingsPanelMarkup(panel);
 }
+const saleProducts=[
+  {type:'멤버십',name:'입문 멤버십',desc:'경매 기초 강의 이용권',price:190000,period:'결제일로부터 90일',courses:['경매 낙찰 기초반'],status:'판매중'},
+  {type:'멤버십',name:'중급 멤버십',desc:'기초 + 권리분석까지 단계별 수강',price:390000,period:'결제일로부터 120일',courses:['경매 낙찰 기초반','권리분석 실전반'],status:'판매중'},
+  {type:'패키지',name:'경매 실전 패키지',desc:'기초·권리분석·임장을 한 번에 구성',price:790000,period:'지정 수강기간',courses:['경매 낙찰 기초반','권리분석 실전반','현장 임장 마스터'],status:'준비중'},
+  {type:'개별 강의',name:'경매 낙찰 기초반 단품',desc:'하나의 강의만 단독 판매',price:290000,period:'2026.07.05 ~ 08.02',courses:['경매 낙찰 기초반'],status:'판매중'}
+];
+function renderProducts(){
+  return `${pageHeader('Product & membership','상품·멤버십 관리','사용자가 결제하는 상품과 포함 강의, 이용 기간을 관리합니다.','<button class="btn primary" onclick="openProductEditor(\'create\')">+ 새 상품 만들기</button>')}
+  <section class="product-policy-panel panel"><div><span>구조 변경</span><h2>강의와 판매 상품을 분리합니다</h2><p>강의는 영상·자료·FAQ 같은 학습 콘텐츠이고, 상품은 사용자가 결제하는 대상입니다. 하나의 강의는 개별 상품, 패키지, 멤버십에 동시에 포함될 수 있습니다.</p></div><ul><li>상품 결제 완료 → 포함 강의 권한 부여</li><li>선수강 조건은 강의에 설정</li><li>유효한 권한이 하나라도 있으면 강의 이용 가능</li></ul></section>
+  <div class="product-admin-grid">${saleProducts.map((product,index)=>`<article class="sale-product-card"><div class="sale-product-top"><span>${product.type}</span><em class="${product.status==='판매중'?'open':'soon'}">${product.status}</em></div><h2>${product.name}</h2><p>${product.desc}</p><strong>${won(product.price)}</strong><small>이용 기간 · ${product.period}</small><div class="included-courses"><b>포함 강의</b>${product.courses.map(course=>`<span>${course}</span>`).join('')}</div><button type="button" onclick="adminToast('${product.name} \uc218\uc815 \ud654\uba74\uc785\ub2c8\ub2e4 (\uc608\uc2dc)')">상품 수정</button></article>`).join('')}</div>
+  <article class="panel product-matrix"><div class="panel-head"><div><h2>상품별 수강 권한 매트릭스</h2><p>상품 구매 시 어떤 강의 권한이 부여되는지 확인합니다.</p></div></div><table><thead><tr><th>상품</th><th>유형</th><th>포함 강의</th><th>이용 기간</th><th>정책</th></tr></thead><tbody>${saleProducts.map(product=>`<tr><td><b>${product.name}</b></td><td>${product.type}</td><td>${product.courses.join(' · ')}</td><td>${product.period}</td><td>${product.type==='멤버십'?'등급별 권한 부여':'상품별 권한 부여'}</td></tr>`).join('')}</tbody></table></article>`;
+}
+
+function renderProductEditor(mode='create'){
+  return `<form class="product-editor" onsubmit="saveProductForm(event,'${mode}')">
+    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('products')">← 상품·멤버십 관리</button><div><span>Product setup</span><h1>새 상품 만들기</h1><p>사용자가 결제할 상품을 만들고, 상품에 포함될 강의와 이용 기간을 설정합니다.</p></div><div class="editor-actions"><button type="button" class="btn ghost" onclick="adminToast('\uc0c1\ud488 \ubbf8\ub9ac\ubcf4\uae30 \ud654\uba74\uc785\ub2c8\ub2e4 (\uc608\uc2dc)')">미리보기</button><button type="button" class="btn ghost" onclick="adminToast('\uc784\uc2dc \uc800\uc7a5\ud588\uc2b5\ub2c8\ub2e4')">임시 저장</button><button type="submit" class="btn primary">상품 등록</button></div></div>
+    <section class="product-setup-hero panel"><div><span>상품은 결제 대상입니다</span><h2>강의 콘텐츠와 판매 상품을 분리해서 관리하세요</h2><p>하나의 강의는 단품, 패키지, 멤버십에 동시에 포함될 수 있습니다. 결제가 완료되면 포함 강의의 수강 권한이 자동으로 부여됩니다.</p></div><ul><li>강의 = 영상·자료·FAQ</li><li>상품 = 가격·판매기간·포함 강의</li><li>권한 = 상품 구매 결과</li></ul></section>
+    <div class="product-editor-grid"><div class="product-editor-main">
+      <section class="panel product-section"><div class="product-section-head"><i>1</i><div><h2>상품 유형</h2><p>크리에이터의 판매 방식에 맞는 상품 유형을 선택하세요.</p></div></div><div class="product-type-grid"><button type="button" class="active" data-type="single" onclick="selectProductType(this,'single')"><b>개별 강의 상품</b><small>하나의 강의를 단독 판매</small></button><button type="button" data-type="bundle" onclick="selectProductType(this,'bundle')"><b>강의 묶음 상품</b><small>여러 강의를 패키지로 판매</small></button><button type="button" data-type="membership" onclick="selectProductType(this,'membership')"><b>멤버십 상품</b><small>등급별로 여러 강의 권한 제공</small></button></div><p class="product-type-note" id="productTypeNote">개별 강의 상품은 하나의 강의를 단독으로 판매할 때 사용합니다.</p></section>
+      <section class="panel product-section"><div class="product-section-head"><i>2</i><div><h2>상품 정보</h2><p>공개 페이지와 결제 화면에 보이는 정보를 입력합니다.</p></div></div><div class="editor-fields"><label class="wide">상품명 <em>*</em><input required value="경매 낙찰 기초반 단품" placeholder="예: 중급 멤버십, 경매 실전 패키지"></label><label class="wide">상품 소개 <em>*</em><textarea required placeholder="상품에 포함된 강의와 수강 흐름을 설명해 주세요.">경매 입문자가 기초 강의를 먼저 듣고 실전 감각을 만들 수 있는 상품입니다.</textarea></label><label>상품 상태<select><option>판매중</option><option>판매예정</option><option>비공개</option></select></label><label>추천 표시<select><option>표시 안 함</option><option>추천 상품</option><option>대표 상품</option></select></label></div></section>
+      <section class="panel product-section"><div class="product-section-head"><i>3</i><div><h2>포함 강의</h2><p>이 상품을 결제하면 권한이 부여될 강의를 선택합니다.</p></div></div><div class="included-lecture-list"><label><input type="checkbox" checked><span><b>경매 낙찰 기초반</b><small>선수강 없음 · 즉시 수강 가능</small></span></label><label><input type="checkbox"><span><b>권리분석 실전반</b><small>경매 낙찰 기초반 완료 후 학습 가능</small></span></label><label><input type="checkbox"><span><b>현장 임장 마스터</b><small>권리분석 실전반 완료 후 학습 가능</small></span></label></div><div class="product-warning"><b>선수강 조건은 강의에 설정됩니다.</b><p>상품에 포함되어 권한을 보유하더라도, 선수강 조건을 충족하기 전까지 해당 강의는 내 학습에서 잠금 상태로 표시됩니다.</p></div></section>
+      <section class="panel product-section"><div class="product-section-head"><i>4</i><div><h2>가격·이용 기간</h2><p>MVP에서는 1회 결제와 상품별 이용 기간을 우선 적용합니다.</p></div></div><div class="editor-fields"><label>결제 방식<select><option>1회 결제</option><option disabled>월 정기결제 · 후속 단계</option><option disabled>연 정기결제 · 후속 단계</option></select></label><label>판매 가격 <em>*</em><div class="input-suffix"><input required type="number" min="0" step="1000" value="290000"><span>원</span></div></label><label>판매 시작일<input type="date" value="2026-07-01"></label><label>판매 종료일<input type="date" value="2026-07-31"></label><label>이용 기간 기준<select><option>결제일 기준</option><option>지정 수강 기간 기준</option><option>기간 제한 없음</option></select></label><label>이용 기간<div class="input-suffix"><input type="number" min="1" value="90"><span>일</span></div></label></div></section>
+      <section class="panel product-section"><div class="product-section-head"><i>5</i><div><h2>환불·공개 정책</h2><p>상품 결제 전 확인할 정책과 공개 상태를 설정합니다.</p></div></div><div class="editor-fields"><label class="wide">환불 안내 <em>*</em><textarea required>결제 후 수강 시작 전까지 취소할 수 있으며, 수강 시작 후에는 노하우집 운영 정책에 따라 환불됩니다.</textarea></label><label class="wide">결제 완료 안내<textarea>결제 완료 후 내 학습에서 포함 강의와 수강 안내를 확인할 수 있습니다.</textarea></label></div><div class="publish-options"><label><input type="radio" name="product-publish" checked><span><b>판매중으로 공개</b><small>저장 후 공개 페이지에 상품이 노출됩니다.</small></span></label><label><input type="radio" name="product-publish"><span><b>비공개로 저장</b><small>관리자에서만 확인하고 나중에 공개합니다.</small></span></label></div></section>
+    </div><aside class="product-editor-side"><div class="panel product-summary"><span>상품 요약</span><h3>경매 낙찰 기초반 단품</h3><p>개별 강의 상품 · 1회 결제</p><strong>₩290,000</strong><div><b>포함 강의</b><em>경매 낙찰 기초반</em></div><small>결제 완료 시 포함 강의 권한이 부여됩니다.</small></div><div class="panel product-side-guide"><b>생성 후 흐름</b><ol><li>상품 공개</li><li>사용자 결제</li><li>포함 강의 권한 부여</li><li>선수강 조건 확인</li><li>내 학습에서 수강</li></ol></div></aside></div>
+    <div class="editor-bottom-bar"><span><b>새 상품</b><small>필수 항목을 확인한 뒤 등록하세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('products')">취소</button><button type="button" class="btn ghost" onclick="adminToast('\uc784\uc2dc \uc800\uc7a5\ud588\uc2b5\ub2c8\ub2e4')">임시 저장</button><button type="submit" class="btn primary">상품 등록</button></div></div>
+  </form>`;
+}
+function selectProductType(button,type){
+  document.querySelectorAll('.product-type-grid button').forEach(item=>item.classList.remove('active'));
+  button.classList.add('active');
+  const notes={single:'개별 강의 상품은 하나의 강의를 단독으로 판매할 때 사용합니다.',bundle:'강의 묶음 상품은 여러 강의를 한 번에 구매하도록 구성합니다.',membership:'멤버십 상품은 등급별로 여러 강의 권한을 제공할 때 사용합니다.'};
+  const note=document.getElementById('productTypeNote');if(note)note.textContent=notes[type];
+}
+function openProductEditor(mode='create'){
+  document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='products'));
+  document.getElementById('adminContent').innerHTML=renderProductEditor(mode);
+  window.scrollTo({top:0});
+  location.hash='#product-new';
+}
+function saveProductForm(event,mode){event.preventDefault();adminToast('\uc0c1\ud488\uc744 \ub4f1\ub85d\ud588\uc2b5\ub2c8\ub2e4');setTimeout(()=>showAdminView('products'),700);}
+
 function renderSettings(){
   return `${pageHeader('Channel settings','채널 설정','공개 채널 정보와 운영에 필요한 설정을 관리합니다.')}
   <nav class="settings-tabs"><button class="active" onclick="switchSettingsPanel('profile',this)">공개 채널</button><button onclick="switchSettingsPanel('notifications',this)">운영 알림</button><button onclick="switchSettingsPanel('payout',this)">정산 정보</button><button onclick="switchSettingsPanel('admins',this)">관리자 권한</button></nav>
   <section id="settingsPanel">${settingsPanelMarkup('profile')}</section>`;
 }
 
-const viewRenderers={dashboard:renderDashboard,classes:renderClasses,students:renderStudents,sales:renderSales,alimtalk:renderAlimtalk,settings:renderSettings};
+const viewRenderers={dashboard:renderDashboard,classes:renderClasses,products:renderProducts,students:renderStudents,sales:renderSales,alimtalk:renderAlimtalk,settings:renderSettings};
 function showAdminView(view){
   document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
   document.getElementById('adminContent').innerHTML=viewRenderers[view]();
@@ -235,6 +276,7 @@ const initialView=location.hash.slice(1);
 if(initialView==='class-new')openClassEditor('create');
 else if(initialView.startsWith('class-edit-'))openClassEditor('edit',initialView.replace('class-edit-',''));
 else if(initialView.startsWith('class-clone-'))openClassEditor('clone',initialView.replace('class-clone-',''));
+else if(initialView==='product-new')openProductEditor('create');
 else showAdminView(viewRenderers[initialView]?initialView:'dashboard');
 
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeClassPreview();});
