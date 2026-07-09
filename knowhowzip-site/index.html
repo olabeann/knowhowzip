@@ -20,6 +20,7 @@
       <button data-nav="home" class="active" onclick="show('home')">홈</button>
       <button data-nav="creators" onclick="show('creators')">크리에이터</button>
       <button data-nav="mypage" onclick="show('mypage')">내 학습</button>
+      <button data-nav="account" onclick="show('account')">마이</button>
       <button data-nav="faq" onclick="show('faq')">고객센터</button>
     </nav>
     <div class="nav-right">
@@ -31,10 +32,18 @@
   </div>
 </header>
 
+<div class="creator-inquiry-strip">
+  <div class="wrap creator-inquiry-in">
+    <span>크리에이터 입점을 원하시나요?</span>
+    <button type="button" onclick="openKakaoChannel()">문의하기</button>
+  </div>
+</div>
+
 <div class="mnav" id="mnav">
   <button class="mlink" onclick="show('home');toggleMnav()">홈</button>
   <button class="mlink" onclick="show('creators');toggleMnav()">크리에이터</button>
   <button class="mlink" onclick="show('mypage');toggleMnav()">내 학습</button>
+  <button class="mlink" onclick="show('account');toggleMnav()">마이</button>
   <button class="mlink" onclick="show('faq');toggleMnav()">고객센터</button>
   <div class="mauth" id="mAuth"><button class="s" onclick="toggleMnav();openAuth('login')">바로 시작하기</button></div>
   <div class="muser" id="mUser" style="display:none"><span id="mUserName"></span> 님<button class="out" onclick="logout();toggleMnav()">로그아웃</button></div>
@@ -57,8 +66,8 @@
             <button class="btn-soft lg" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">이용 방법 보기</button>
           </div>
           <div class="hero-search">
-            <input type="text" placeholder="배우고 싶은 주제나 크리에이터 검색" onkeydown="if(event.key==='Enter')toast('검색 결과 페이지로 이동합니다 (예시)')">
-            <button onclick="toast('검색 (예시)')">🔍</button>
+            <input type="text" placeholder="배우고 싶은 주제나 크리에이터 검색" onkeydown="if(event.key==='Enter')toast('검색 기능은 준비 중입니다')">
+            <button onclick="toast('검색 기능은 준비 중입니다')">🔍</button>
           </div>
         </div>
         <div class="hero-art">
@@ -137,9 +146,9 @@
         <h2>수강생들의 후기</h2>
       </div>
       <div class="testi-grid">
-        <div class="testi-c"><div class="stars">★★★★★</div><p>“경매가 막연했는데 4주 만에 혼자 입찰표를 쓸 수 있게 됐어요. 단톡방 피드백이 특히 좋았습니다.”</p><div class="who"><span class="av">김</span><div><b>김지훈</b><small>경매 낙찰 기초반 수강</small></div></div></div>
-        <div class="testi-c"><div class="stars">★★★★★</div><p>“퇴근 후에도 부담 없이 들을 수 있는 구성이라 끝까지 완강했어요. 자료가 실무에 바로 쓰입니다.”</p><div class="who"><span class="av">이</span><div><b>이서연</b><small>직장인 주식 투자 수강</small></div></div></div>
-        <div class="testi-c"><div class="stars">★★★★★</div><p>“비전공자인데도 첫 포트폴리오를 완성했어요. 크리에이터가 직접 봐주는 점이 가장 좋았습니다.”</p><div class="who"><span class="av">정</span><div><b>정유진</b><small>UX/UI 디자인 수강</small></div></div></div>
+        <div class="testi-c"><div class="stars">★★★★★</div><p>“경매가 막연했는데 4주 만에 혼자 입찰표를 쓸 수 있게 됐어요. 단톡방 피드백이 특히 좋았습니다.”</p><div class="who"><span class="av">김</span><div><b>김*훈</b><small>애매모홈 · 경매 낙찰 기초반</small></div></div></div>
+        <div class="testi-c"><div class="stars">★★★★★</div><p>“권리분석이 어렵게만 느껴졌는데 실제 사례로 보니까 위험한 물건을 거르는 기준이 생겼어요.”</p><div class="who"><span class="av">이</span><div><b>이*연</b><small>애매모홈 · 권리분석 실전반</small></div></div></div>
+        <div class="testi-c"><div class="stars">★★★★★</div><p>“임장을 어떻게 가야 하는지 막막했는데 체크리스트대로 보니 현장에서 놓치는 게 확 줄었습니다.”</p><div class="who"><span class="av">정</span><div><b>정*진</b><small>애매모홈 · 현장 임장 마스터</small></div></div></div>
       </div>
     </div>
 
@@ -149,8 +158,7 @@
         <h2>좋아하는 크리에이터의 강의,<br>이제 한곳에서 관리하세요</h2>
         <p>익숙한 방식으로 시작하고, 신청한 클래스는 내 학습에서 모아보세요.</p>
         <div class="btns">
-          <button class="b-w" onclick="openAuth('signup')">한곳에서 시작하기</button>
-          <button class="b-o" onclick="toast('크리에이터 입점 문의 (예시)')">크리에이터 입점 문의</button>
+          <button class="b-w" onclick="openAuth('signup')">바로 시작하기</button>
         </div>
       </div>
     </div>
@@ -196,6 +204,11 @@
     <div class="page-body"><div class="wrap" id="myContent"></div></div>
   </section>
 
+  <section id="view-account" class="view">
+    <div class="page-hero my-learning-hero"><div class="wrap"><h1>마이</h1><p>결제 내역과 내 정보를 확인합니다.</p><div class="my-learning-tabs" id="accountTabs"></div></div></div>
+    <div class="page-body"><div class="wrap" id="accountContent"></div></div>
+  </section>
+
   <section id="view-faq" class="view">
     <div class="page-hero"><div class="wrap"><h1>고객센터</h1><p>결제·수강·환불은 노하우집 운영팀이 안내합니다. 수강 중인 클래스 FAQ는 내 학습에서 확인하세요.</p></div></div>
     <div class="page-body"><div class="wrap">
@@ -216,8 +229,8 @@
       <div class="foot-brand"><span class="pmark" id="pmark-foot" style="width:30px;height:30px"></span><span>노하우집<small>크리에이터 클래스 마켓</small></span></div>
       <div class="foot-cols">
         <div class="foot-col"><h5>탐색</h5><a href="#" onclick="show('creators');return false;">크리에이터</a></div>
-        <div class="foot-col"><h5>내 정보</h5><a href="#" onclick="show('mypage');return false;">내 학습</a><a href="#" onclick="openAuth('login');return false;">로그인</a></div>
-        <div class="foot-col"><h5>지원</h5><a href="#" onclick="show('faq');return false;">고객센터</a><a href="#" onclick="toast('크리에이터 입점 안내 (예시)');return false;">크리에이터 입점</a></div>
+        <div class="foot-col"><h5>내 정보</h5><a href="#" onclick="show('mypage');return false;">내 학습</a><a href="#" onclick="show('account');return false;">마이</a><a href="#" onclick="openAuth('login');return false;">카카오 로그인</a></div>
+        <div class="foot-col"><h5>지원</h5><a href="#" onclick="show('faq');return false;">고객센터</a><a href="#" onclick="openKakaoChannel();return false;">크리에이터 입점</a></div>
       </div>
     </div>
     <div class="foot-bottom">노하우집 · 크리에이터 클래스 마켓 · 본 페이지는 외주/검수용 시안입니다.</div>
@@ -226,17 +239,10 @@
 
 <!-- AUTH MODAL -->
 <div class="modal-bg" id="authModal"><div class="modal" role="dialog" aria-modal="true">
-  <div class="modal-head"><div><h3 id="authTitle">로그인</h3><p id="authDesc">노하우집 계정으로 클래스를 수강하세요.</p></div><button class="modal-x" onclick="closeAuth()">&times;</button></div>
+  <div class="modal-head"><div><h3 id="authTitle">카카오 간편 로그인</h3><p id="authDesc">노하우집을 함께 시작해보세요!</p></div><button class="modal-x" onclick="closeAuth()">&times;</button></div>
   <div class="modal-body">
-    <div class="tabs"><button id="tab-login" class="active" onclick="switchAuth('login')">로그인</button><button id="tab-signup" onclick="switchAuth('signup')">회원가입</button></div>
-    <div class="field signup-only"><label>이름</label><input id="f-name" type="text" placeholder="홍길동"></div>
-    <div class="field"><label>이메일</label><input id="f-email" type="email" placeholder="you@email.com"></div>
-    <div class="field"><label>비밀번호</label><input id="f-pw" type="password" placeholder="••••••••"></div>
-    <div class="field signup-only"><label>휴대폰 번호</label><input id="f-phone" type="tel" placeholder="010-0000-0000"></div>
-    <button class="btn-red" id="authSubmit" onclick="submitAuth()">로그인</button>
-    <div class="demo-login">
-      <span>또는</span>
-      <button type="button" onclick="demoLogin()"><b>⚡ 체험 계정으로 로그인</b><small>예시 수강 클래스가 바로 표시됩니다</small></button>
+    <div class="kakao-auth">
+      <button type="button" class="kakao-login-btn" id="authSubmit" onclick="submitAuth()">카카오로 3초 만에 시작하기</button>
     </div>
   </div>
 </div></div>
@@ -258,7 +264,7 @@
       <button onclick="quickShare('sms')"><span class="qi" style="background:#E8F0FE">✉️</span>문자</button>
       <button onclick="quickShare('qr')"><span class="qi" style="background:#EEF1FF">▦</span>QR 코드</button>
     </div>
-    <p class="share-note">* 예시 도메인입니다. 실제 배포 시 발급되는 주소로 공유됩니다.</p>
+    <p class="share-note">공유 주소는 실제 배포 도메인 기준으로 제공됩니다.</p>
   </div>
 </div></div>
 

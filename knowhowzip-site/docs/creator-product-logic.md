@@ -439,9 +439,9 @@ function getMyLearning({ userId, now }) {
 }
 ```
 
-## 8. 결제 내역 노출 로직
+## 8. 마이 > 결제 내역 노출 로직
 
-결제 내역은 주문 기준으로 보여준다. 어떤 멤버십과 클래스 권한이 생겼는지는 상품의 부여 멤버십과 포함 클래스 목록으로 표시한다.
+결제 내역은 `마이` 화면에서 주문 기준으로 보여준다. 어떤 수강생 등급과 클래스 권한이 생겼는지는 상품의 부여 등급과 포함 클래스 목록으로 표시한다.
 
 ```js
 function getPaymentHistory({ userId }) {
@@ -456,7 +456,7 @@ function getPaymentHistory({ userId }) {
         orderId: order.id,
         paidAt: order.paidAt,
         productName: product.name,
-        grantedMembershipGrade: product.grantedMembershipGrade,
+        grantedGrade: product.grantedMembershipGrade,
         amount: order.amount,
         paymentStatus: order.paymentStatus,
         refundStatus: order.refundStatus,
@@ -504,10 +504,10 @@ function applyRefund({ orderId, refundStatus, revokeAccess }) {
 
 상품 수정 시에는 결제 이력 여부를 먼저 확인한다.
 
-- 결제 이력이 없는 상품: 상품 정보, 포함 클래스, 부여 멤버십, 가격·이용 기간, 환불·공개 정책을 수정할 수 있다.
+- 결제 이력이 없는 상품: 상품 정보, 포함 클래스, 부여 등급, 가격·이용 기간, 환불·공개 정책을 수정할 수 있다.
 - 결제 이력이 있는 상품: `1. 상품 정보`만 수정할 수 있다.
-- 결제 이력이 있는 상품에서 수정 가능한 항목은 상품명, 상품 소개, 상품 상태, 추천 표시다.
-- 결제 이력이 있는 상품의 포함 클래스, 부여 멤버십, 가격, 이용 기간, 환불 정책을 바꾸려면 기존 상품을 수정하지 않고 새 상품을 생성한다.
+- 결제 이력이 있는 상품에서 수정 가능한 항목은 상품명, 상품 소개, 노출 상태다.
+- 결제 이력이 있는 상품의 포함 클래스, 부여 등급, 가격, 이용 기간, 환불 정책을 바꾸려면 기존 상품을 수정하지 않고 새 상품을 생성한다.
 
 ```js
 function validateProductForm(product) {
@@ -534,14 +534,14 @@ function validateProductForm(product) {
 ### 크리에이터 공개 페이지
 
 - 상품 유형 탭은 두지 않는다.
-- 상품 카드는 상품명, 가격, 포함 클래스, 부여 멤버십, 이용 기간, 판매 상태를 표시한다.
+- 상품 카드는 상품명, 가격, 포함 클래스, 부여 등급, 이용 기간, 판매 상태를 표시한다.
 - 포함 클래스가 1개인 상품과 여러 개인 상품은 같은 카드 규칙으로 노출한다.
 
 ### 결제 팝업
 
 - 결제 대상은 상품이다.
-- 결제 완료 문구는 “멤버십 등급과 포함 클래스 권한이 부여되었습니다”로 표시한다.
-- 부여 멤버십과 포함 클래스 목록을 결제 요약에 보여준다.
+- 결제 완료 문구는 “수강생 등급과 포함 클래스 권한이 부여되었습니다”로 표시한다.
+- 부여 등급과 포함 클래스 목록을 결제 요약에 보여준다.
 
 ### 내 학습
 
@@ -550,9 +550,9 @@ function validateProductForm(product) {
 - 만료된 권한만 있으면 `수강 종료`로 분류한다.
 - 유효 권한은 있지만 선수강 조건 미충족이면 잠금 상태로 보여준다.
 
-## 12. 현재 데모 코드에서 바꿀 지점
+## 12. 현재 화면 코드에서 바꿀 지점
 
-현재 데모는 `state.purchased`에 강의 id를 직접 넣는다. 변경 후에는 아래처럼 바꾸는 것이 맞다.
+현재 정적 화면 코드는 `state.purchased`에 강의 id를 직접 넣는다. 실제 개발에서는 아래처럼 바꾸는 것이 맞다.
 
 ```js
 state.orders = [];

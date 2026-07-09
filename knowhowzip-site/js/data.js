@@ -37,51 +37,6 @@ const creators=[
         cohort:{no:1,status:'모집중',period:'2026.07.19 ~ 08.16',deadline:'2026.07.14',seats:20,enrolled:9},
         content:{videos:['임장 준비와 동선 설계','현장 체크포인트','명도 시나리오 작성','협상 롤플레잉 + 현장 동행'],files:['임장 체크리스트(PDF)','명도 합의서 양식']}}),
    ]},
-
-  {id:'moneylog',name:'머니로그',handle:'@moneylog',cat:'재테크·주식',verified:true,logoType:'mono',monogram:'ML',
-   theme:'#FFD9A8',themeDeep:'#7a4d12',cover:'linear-gradient(120deg,#FFE3BE,#F6C580)',
-   tagline:'30대 직장인의 현실 자산 불리기',
-   about:'월급만으로 막막한 직장인을 위한 재테크·주식 클래스. 박재무 강사와 함께 현실적인 자산 설계를 배웁니다.',
-   followers:'28.1K',faq:[{q:'주식 초보도 되나요?',a:'네, 계좌 개설부터 차근차근 다룹니다.'}],
-   products:[
-     P({id:'ml-stock',title:'직장인 주식 투자 4주 클래스',tag:'BEST',rate:4.8,reviews:241,price:240000,orig:300000,
-        grad:'linear-gradient(135deg,#FFE3BE,#F0B65C)',deep:'#7a4d12',tags:['주식','입문','직장인'],
-        lead:'바쁜 직장인을 위한 현실 주식 투자. 종목 분석부터 매매 원칙까지.',
-        intro:'시간 없는 직장인도 따라올 수 있는 투자 원칙과 종목 분석법을 다룹니다.',
-        cohort:{no:5,status:'모집중',period:'2026.07.08 ~ 08.05',deadline:'2026.07.03',seats:40,enrolled:33}}),
-     P({id:'ml-asset',title:'자산 포트폴리오 설계반',tag:'심화',rate:4.7,reviews:88,price:320000,orig:320000,
-        grad:'linear-gradient(135deg,#FFEBD2,#E8A84A)',deep:'#7a4d12',tags:['자산배분','심화'],
-        lead:'예적금·주식·연금까지, 내 자산을 한 장으로 설계합니다.',
-        intro:'생애주기에 맞춘 자산 배분과 리밸런싱 전략을 배웁니다.',
-        cohort:{no:2,status:'모집중',period:'2026.07.20 ~ 08.17',deadline:'2026.07.15',seats:30,enrolled:11}}),
-   ]},
-
-  {id:'designdive',name:'디자인다이브',handle:'@designdive',cat:'디자인',verified:false,logoType:'mono',monogram:'DD',
-   theme:'#CDE8E1',themeDeep:'#1c4a40',cover:'linear-gradient(120deg,#D7F0E9,#9FD4C7)',
-   tagline:'비전공자도 포트폴리오까지 완성하는 UX/UI',
-   about:'현직 디자이너 김라라와 함께 피그마 기초부터 포트폴리오 완성까지. 실무 중심 디자인 클래스.',
-   followers:'9.7K',faq:[{q:'피그마 라이선스가 필요한가요?',a:'무료 플랜으로 충분히 수강할 수 있습니다.'}],
-   products:[
-     P({id:'dd-figma',title:'피그마로 시작하는 UX/UI 디자인',tag:'NEW',rate:4.9,reviews:64,price:260000,orig:320000,
-        grad:'linear-gradient(135deg,#D7F0E9,#7FBEB0)',deep:'#1c4a40',tags:['UX/UI','피그마','입문'],
-        lead:'피그마 기초부터 실제 앱 화면 설계까지, 4주 완성.',
-        intro:'디자인 비전공자도 4주면 첫 포트폴리오 화면을 완성합니다.',
-        cohort:{no:1,status:'모집중',period:'2026.08.02 ~ 08.30',deadline:'2026.07.28',seats:25,enrolled:7}}),
-   ]},
-
-  {id:'codeground',name:'코드그라운드',handle:'@codeground',cat:'개발',verified:true,logoType:'mono',monogram:'CG',
-   theme:'#D9D5F7',themeDeep:'#332a7a',cover:'linear-gradient(120deg,#E2DEFA,#A99FE8)',
-   tagline:'노베이스에서 첫 웹 서비스 배포까지',
-   about:'현직 개발자 이도현과 함께 HTML부터 배포까지. 비전공자를 위한 실전 웹 개발 클래스.',
-   followers:'15.3K',faq:[{q:'컴퓨터 사양이 중요한가요?',a:'일반 노트북이면 충분합니다.'}],
-   products:[
-     P({id:'cg-web',title:'비전공자 웹 개발 입문 6주',tag:'BEST',rate:4.8,reviews:152,price:330000,orig:420000,
-        grad:'linear-gradient(135deg,#E2DEFA,#9A8DE0)',deep:'#332a7a',tags:['웹개발','입문','6주'],
-        lead:'HTML·CSS·JS 기초부터 나만의 웹사이트 배포까지.',
-        intro:'코딩이 처음이어도 6주 차에는 직접 만든 웹사이트를 인터넷에 올립니다.',
-        cohort:{no:4,status:'모집중',period:'2026.07.06 ~ 08.17',deadline:'2026.07.01',seats:35,enrolled:29},
-        content:{videos:['웹의 동작 원리','HTML/CSS 기초','자바스크립트 입문','반응형 레이아웃','간단한 기능 구현','배포 실습'],files:['실습 코드(ZIP)','학습 로드맵(PDF)']}}),
-   ]},
 ];
 
 /* indexes */

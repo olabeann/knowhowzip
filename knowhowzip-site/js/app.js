@@ -14,7 +14,7 @@ var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{in
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
-let state={user:null,purchased:new Set(),cart:new Set(),authMode:'login',pending:null,cat:'전체',creatorCat:'전체',creatorSearch:'',myFilter:'active',payMethod:'card'};
+let state={user:null,purchased:new Set(),cart:new Set(),authMode:'kakao',pending:null,cat:'전체',creatorCat:'전체',creatorSearch:'',myFilter:'active',accountFilter:'payments',payMethod:'card'};
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
@@ -34,7 +34,10 @@ function prodCard(p,c){
 
 /* ---------- HOME ---------- */
 function renderHome(){
-  document.getElementById('catChips').innerHTML=cats.map(ct=>`<button class="chip ${state.cat===ct?'active':''}" onclick="setCat('${ct}')">${ct}</button>`).join('');
+  const homeCats=document.getElementById('catChips');
+  const showCategoryFilters=cats.length>2;
+  homeCats.hidden=!showCategoryFilters;
+  homeCats.innerHTML=showCategoryFilters?cats.map(ct=>`<button class="chip ${state.cat===ct?'active':''}" onclick="setCat('${ct}')">${ct}</button>`).join(''):'';
   const cs=creators.filter(c=>state.cat==='전체'||c.cat===state.cat);
   document.getElementById('creatorGrid').innerHTML=cs.map(c=>`
     <div class="ccard" onclick="openCreator('${c.id}')">
@@ -55,7 +58,9 @@ function setCat(ct){state.cat=ct;renderHome();}
 const categoryIcons={'전체':'▦','부동산·경매':'⌂','재테크·주식':'↗','디자인':'✦','개발':'⌘'};
 function renderCreatorsPage(){
   const catBox=document.getElementById('creatorPageCats');
-  catBox.innerHTML=cats.map(ct=>`<button class="creator-category ${state.creatorCat===ct?'active':''}" onclick="setCreatorDirectoryCat('${ct}')"><span>${categoryIcons[ct]||'●'}</span>${ct}</button>`).join('');
+  const showCategoryFilters=cats.length>2;
+  catBox.closest('.creator-category-nav').hidden=!showCategoryFilters;
+  catBox.innerHTML=showCategoryFilters?cats.map(ct=>`<button class="creator-category ${state.creatorCat===ct?'active':''}" onclick="setCreatorDirectoryCat('${ct}')"><span>${categoryIcons[ct]||'●'}</span>${ct}</button>`).join(''):'';
   const query=state.creatorSearch.trim().toLowerCase();
   const list=creators.filter(c=>(state.creatorCat==='전체'||c.cat===state.creatorCat)&&(!query||`${c.name} ${c.handle} ${c.cat} ${c.tagline}`.toLowerCase().includes(query)));
   document.getElementById('creatorResultCount').textContent=list.length;
@@ -78,15 +83,7 @@ function setCreatorSearch(value){state.creatorSearch=value;renderCreatorsPage();
 /* ---------- CREATOR storefront ---------- */
 
 function creatorCommerce(c){
-  if(c.id!=='mmoh')return {memberships:[],products:c.products};
-  return {products:c.products,memberships:[
-    {name:'입문 멤버십',price:190000,desc:'경매 낙찰 기초반부터 시작하는 입문 과정',period:'90일 이용',courses:['경매 낙찰 기초반'],featured:false},
-    {name:'중급 멤버십',price:390000,desc:'기초를 끝내고 권리분석까지 이어 듣는 추천 과정',period:'120일 이용',courses:['경매 낙찰 기초반','권리분석 실전반'],featured:true},
-    {name:'고급 멤버십',price:690000,desc:'기초·권리분석·현장 임장까지 모두 포함',period:'150일 이용',courses:['경매 낙찰 기초반','권리분석 실전반','현장 임장 마스터'],featured:false}
-  ]};
-}
-function membershipCard(plan,c){
-  return `<article class="membership-card ${plan.featured?'featured':''}"><span>${plan.featured?'추천 멤버십':'멤버십'}</span><h3>${plan.name}</h3><p>${plan.desc}</p><strong>${won(plan.price)}</strong><small>${plan.period}</small><div class="membership-includes"><b>포함 강의</b>${plan.courses.map(course=>`<em>${course}</em>`).join('')}</div><button onclick="toast('${plan.name} 결제 화면으로 이동합니다 (예시)')">멤버십 신청하기</button></article>`;
+  return {products:c.products};
 }
 let activeCreator=null;
 function openCreator(id){
@@ -108,12 +105,10 @@ function openCreator(id){
     </div>
     <div class="wrap">
       <div class="ctabs">
-        ${commerce.memberships.length?`<button class="active" onclick="ctab(this,'cs-membership')">멤버십</button>`:''}
-        <button class="${commerce.memberships.length?'':'active'}" onclick="ctab(this,'cs-class')">개별 강의</button>
+        <button class="active" onclick="ctab(this,'cs-class')">클래스</button>
         <button onclick="ctab(this,'cs-about')">소개</button>
       </div>
-      ${commerce.memberships.length?`<div class="csec show" id="cs-membership"><div class="membership-grid">${commerce.memberships.map(plan=>membershipCard(plan,c)).join('')}</div></div>`:''}
-      <div class="csec ${commerce.memberships.length?'':'show'}" id="cs-class"><div class="creator-section-copy"><h2>개별 강의</h2><p>필요한 강의만 단독으로 신청할 수 있습니다. 선수강 조건이 있는 강의는 신청 전 안내됩니다.</p></div><div class="grid">${c.products.map(p=>prodCard(p,c)).join('')}</div></div>
+      <div class="csec show" id="cs-class"><div class="creator-section-copy"><h2>클래스</h2><p>필요한 클래스를 확인하고 바로 수강 신청할 수 있습니다. 선수강 조건이 있는 클래스는 신청 전 안내됩니다.</p></div><div class="grid">${commerce.products.map(p=>prodCard(p,c)).join('')}</div></div>
       <div class="csec" id="cs-about"><div class="about-box">${c.about}</div></div>
     </div>`;
   show('creator');window.scrollTo({top:0});setHash('#/c/'+id);
@@ -189,13 +184,12 @@ function openDetail(pid){
 function goTab(btn,id){document.querySelectorAll('.d-tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth'});}
 
 /* ---------- MYPAGE (grouped by creator) ---------- */
-const learningProgress={'mmoh-basic':50,'mmoh-right':25,'ml-stock':75};
-const endedCourses=new Set(['ml-stock']);
+const learningProgress={'mmoh-basic':50,'mmoh-right':25};
+const endedCourses=new Set();
 const lessonDurations=['88분','92분','76분','81분','68분','74분'];
 const zoomSchedules={
   'mmoh-basic':[{date:'07.05',day:'일',time:'20:00',title:'오리엔테이션 · 경매 절차 이해'},{date:'07.12',day:'일',time:'20:00',title:'물건 검색과 시세 분석'},{date:'07.19',day:'일',time:'20:00',title:'입찰표 작성 실습'}],
-  'mmoh-right':[{date:'07.12',day:'일',time:'20:00',title:'권리분석 핵심 개념'},{date:'07.19',day:'일',time:'20:00',title:'위험 물건 사례 분석'}],
-  'ml-stock':[{date:'07.08',day:'수',time:'20:00',title:'투자 원칙과 종목 분석'}]
+  'mmoh-right':[{date:'07.12',day:'일',time:'20:00',title:'권리분석 핵심 개념'},{date:'07.19',day:'일',time:'20:00',title:'위험 물건 사례 분석'}]
 };
 function renderZoomSchedules(productId){
   const schedules=zoomSchedules[productId]||[{date:'일정',day:'',time:'추후 안내',title:'라이브 일정은 공지로 안내됩니다'}];
@@ -210,10 +204,10 @@ function playLesson(productId,index,title){
   accordion.classList.add('open');
   player.classList.add('show');
   player.querySelector('.learning-player-title').textContent=title;
-  player.querySelector('.learning-player-meta').textContent=`${index+1}강 재생 중 · 데모 플레이어`;
+  player.querySelector('.learning-player-meta').textContent=`${index+1}강 재생 중`;
   document.querySelectorAll(`[data-product="${productId}"]`).forEach(row=>{const playing=Number(row.dataset.lesson)===index;row.classList.toggle('playing',playing);row.querySelector('strong').textContent=playing?'재생 중':(row.querySelector('.lesson-state').classList.contains('done')?'완료':'미완료');});
   player.scrollIntoView({behavior:'smooth',block:'center'});
-  toast(`${title} 재생을 시작합니다 (예시)`);
+  toast(`${title} 재생을 시작합니다`);
 }
 function continueLearning(productId,index){
   const videos=productMap[productId].content.videos,next=Math.min(index,videos.length-1);
@@ -221,23 +215,46 @@ function continueLearning(productId,index){
 }
 function renderLearningTabs(owned){
   const ended=owned.filter(x=>endedCourses.has(x.p.id)).length,active=owned.length-ended;
-  document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`],['payments','결제 내역']].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
+  document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`]].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
 }
 const demoPayments=[
   {id:'P20260629001',date:'2026.06.29',productId:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',amount:290000,payment:'결제 완료',refund:'환불 가능'},
-  {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료',refund:'환불 요청 없음'},
-  {id:'P20260517008',date:'2026.05.17',productId:'ml-stock',title:'직장인 주식 투자 4주 클래스',amount:240000,payment:'결제 취소',refund:'환불 완료'}
+  {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료',refund:'환불 요청 없음'}
 ];
 function renderPaymentHistory(){
-  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>클래스 결제와 환불 처리 상태를 확인하세요.</p></div><select><option>전체 내역</option><option>결제 완료</option><option>환불 완료</option></select></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state ${payment.payment==='결제 취소'?'cancel':''}">${payment.payment}</span><span class="refund-state">${payment.refund}</span></div><button onclick="toast('결제 상세 내역을 확인합니다 (예시)')">상세 보기</button></article>`).join('')}</div></section>`;
+  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>클래스 결제와 환불 처리 상태를 확인하세요.</p></div><select><option>전체 내역</option><option>결제 완료</option><option>환불 완료</option></select></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state ${payment.payment==='결제 취소'?'cancel':''}">${payment.payment}</span><span class="refund-state">${payment.refund}</span></div><button onclick="toast('결제 상세 내역을 확인합니다')">상세 보기</button></article>`).join('')}</div></section>`;
+}
+function renderUserProfile(){
+  const user=state.user;
+  return `<section class="user-profile-card">
+    <div class="user-profile-head">
+      <div class="user-profile-avatar">${user.name.slice(0,1)}</div>
+      <div><span>내 정보</span><h2>${user.name}</h2><p>카카오 간편 로그인으로 연결된 정보입니다.</p></div>
+    </div>
+    <div class="user-profile-grid">
+      <div><small>이름</small><b>${user.name}</b></div>
+      <div><small>전화번호</small><b>${user.phone}</b></div>
+      <div><small>로그인 방식</small><b>카카오 간편 로그인</b></div>
+      <div><small>계정 상태</small><b>정상 이용 중</b></div>
+    </div>
+    <p class="user-profile-note">카카오 계정으로 연결된 내 정보입니다.</p>
+  </section>`;
+}
+function renderLearningEntitlementSummary(owned){
+  const active=owned.filter(x=>!endedCourses.has(x.p.id)).length;
+  const creatorCount=new Set(owned.map(x=>x.c.id)).size;
+  return `<section class="entitlement-summary">
+    <article><span>수강 중 클래스</span><strong>${active}개</strong><p>현재 학습 가능한 클래스입니다.</p></article>
+    <article><span>크리에이터</span><strong>${creatorCount}명</strong><p>구매한 클래스를 크리에이터별로 모아봅니다.</p></article>
+  </section>`;
 }
 
 function renderMy(){
   const box=document.getElementById('myContent');
-  const allOwned=state.user?allProducts().filter(x=>state.purchased.has(x.p.id)):[];
+  const tabs=document.getElementById('myLearningTabs');
+  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  const allOwned=allProducts().filter(x=>state.purchased.has(x.p.id));
   renderLearningTabs(allOwned);
-  if(!state.user){box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
-  if(state.myFilter==='payments'){box.innerHTML=renderPaymentHistory();return;}
   if(!allOwned.length){box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>아직 수강 중인 클래스가 없습니다</h3><p>크리에이터의 클래스를 둘러보세요.</p><button class="btn-red" onclick="show('creators')">둘러보기</button></div>`;return;}
   const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
@@ -267,11 +284,11 @@ function renderMy(){
             </div>
             <div class="learning-acc" id="learn-${p.id}-files">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-files')"><span><i class="file">▤</i>콘텐츠 · 자료 <small>${p.content.files.length}개</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner">${p.content.files.map(file=>`<button class="learning-resource" onclick="toast('&quot;${file}&quot; 다운로드 (예시)')"><i>📄</i><span>${file}<small>강의 자료</small></span><b>다운로드</b></button>`).join('')}</div></div>
+              <div class="learning-acc-body"><div class="learning-acc-inner">${p.content.files.map(file=>`<button class="learning-resource" onclick="toast('&quot;${file}&quot; 다운로드를 시작합니다')"><i>📄</i><span>${file}<small>강의 자료</small></span><b>다운로드</b></button>`).join('')}</div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-operation">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동 (예시)')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>열기 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크 열기 (예시)')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>링크 →</b></button></div></div>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동합니다')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>열기 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크를 엽니다')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>링크 →</b></button></div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-faq">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-faq')"><span><i class="faq">?</i>수강 FAQ <small>${p.faq.length}개</small></span><b>＋</b></button>
@@ -280,6 +297,16 @@ function renderMy(){
           </div>
         </article>`;}).join('')}
     </section>`).join('');
+}
+function setAccountFilter(filter){state.accountFilter=filter;renderAccount();}
+function renderAccountTabs(){
+  document.getElementById('accountTabs').innerHTML=[['payments','결제 내역'],['profile','내 정보']].map(([key,label])=>`<button class="${state.accountFilter===key?'active':''}" onclick="setAccountFilter('${key}')">${label}</button>`).join('');
+}
+function renderAccount(){
+  const box=document.getElementById('accountContent'),tabs=document.getElementById('accountTabs');
+  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>로그인이 필요합니다</h3><p>로그인 후 결제 내역과 내 정보를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  renderAccountTabs();
+  box.innerHTML=state.accountFilter==='profile'?renderUserProfile():renderPaymentHistory();
 }
 
 function renderCreatorLearningFaq(creator,products){
@@ -305,7 +332,7 @@ const commonFaqs=[
   {q:'여러 크리에이터의 클래스를 한 계정으로 들을 수 있나요?',a:'네. 하나의 노하우집 계정으로 모든 크리에이터의 클래스를 구매·수강할 수 있고, 내 학습에서 크리에이터별로 모아 볼 수 있습니다.'},
   {q:'자료·단톡방은 어떻게 이용하나요?',a:'구매한 클래스의 내 학습에서 자료 다운로드와 단톡방·줌 링크가 활성화됩니다. 미구매 클래스는 제한됩니다.'},
   {q:'환불 규정은 어떻게 되나요?',a:'첫 강의 시작 전까지 전액 환불, 이후에는 진행 회차를 제외한 잔여분에 대해 규정에 따라 처리됩니다.'},
-  {q:'크리에이터로 입점하려면요?',a:'고객센터의 크리에이터 입점 안내를 통해 신청할 수 있습니다. (예시)'}
+  {q:'크리에이터로 입점하려면요?',a:'상단 입점 문의 또는 고객센터의 카카오 채널을 통해 신청할 수 있습니다.'}
 ];
 function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
 function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';}
@@ -321,10 +348,12 @@ function show(view){
   if(view==='home')renderHome();
   if(view==='creators')renderCreatorsPage();
   if(view==='mypage')renderMy();
+  if(view==='account')renderAccount();
   if(view==='faq')renderFaq();
   if(view==='home')setHash('');
   if(view==='creators')setHash('#/creators');
   if(view==='mypage')setHash('#/mypage');
+  if(view==='account')setHash('#/account');
   if(view==='faq')setHash('#/faq');
   if(view!=='detail'&&view!=='creator')window.scrollTo({top:0});
 }
@@ -333,33 +362,22 @@ function toggleMnav(){document.getElementById('mnav').classList.toggle('show');}
 /* ---------- auth ---------- */
 function openAuth(m){switchAuth(m);document.getElementById('authModal').classList.add('show');}
 function closeAuth(){document.getElementById('authModal').classList.remove('show');}
-function switchAuth(m){state.authMode=m;
-  document.getElementById('tab-login').classList.toggle('active',m==='login');
-  document.getElementById('tab-signup').classList.toggle('active',m==='signup');
-  document.querySelectorAll('.signup-only').forEach(e=>e.style.display=m==='signup'?'block':'none');
-  document.getElementById('authTitle').textContent=m==='signup'?'회원가입':'로그인';
-  document.getElementById('authDesc').textContent=m==='signup'?'정보를 입력하고 클래스를 시작하세요.':'노하우집 계정으로 클래스를 수강하세요.';
-  document.getElementById('authSubmit').textContent=m==='signup'?'가입하고 시작하기':'로그인';}
-const DEMO_PURCHASES=['mmoh-basic','mmoh-right','ml-stock'];
-function demoLogin(){
-  switchAuth('login');
-  document.getElementById('f-name').value='김노하우';
-  document.getElementById('f-email').value='demo@knowhowzip.kr';
-  document.getElementById('f-pw').value='demo1234';
-  submitAuth();
-}
+function switchAuth(m){state.authMode='kakao';
+  document.getElementById('authTitle').textContent='카카오 간편 로그인';
+  document.getElementById('authDesc').textContent='노하우집을 함께 시작해보세요!';
+  document.getElementById('authSubmit').textContent='카카오로 3초 만에 시작하기';}
+const DEMO_PURCHASES=['mmoh-basic','mmoh-right'];
 function submitAuth(){
-  const email=document.getElementById('f-email').value.trim(),name=document.getElementById('f-name').value.trim();
-  if(!email){toast('이메일을 입력해 주세요');return;}
-  if(state.authMode==='signup'&&!name){toast('이름을 입력해 주세요');return;}
-  state.user={name:name||email.split('@')[0],email};
-  if(state.authMode==='login')DEMO_PURCHASES.forEach(id=>state.purchased.add(id));
+  state.user={name:'김노하우',phone:'010-1234-5678',provider:'kakao'};
+  state.myFilter='active';
+  DEMO_PURCHASES.forEach(id=>state.purchased.add(id));
   document.getElementById('signupBtn').style.display='none';
   document.getElementById('userChip').style.display='flex';document.getElementById('userName').textContent=state.user.name;
   document.getElementById('mAuth').style.display='none';document.getElementById('mUser').style.display='flex';document.getElementById('mUserName').textContent=state.user.name;
-  closeAuth();toast((state.authMode==='signup'?'회원가입':'로그인')+' 완료');
+  closeAuth();toast('카카오 로그인 완료');
   if(state.pending){const id=state.pending;state.pending=null;openPay(id);}
-  else if(state.authMode==='login')show('mypage');}
+  else if(document.getElementById('view-account').classList.contains('show'))show('account');
+  else show('mypage');}
 function logout(){state.user=null;state.purchased.clear();state.cart.clear();updateCart();
   document.getElementById('signupBtn').style.display='';
   document.getElementById('userChip').style.display='none';
@@ -422,9 +440,9 @@ function copyShare(){const v=document.getElementById('shareUrl').value;
   if(navigator.clipboard){navigator.clipboard.writeText(v).then(()=>toast('링크를 복사했어요')).catch(()=>fallbackCopy(v));}else fallbackCopy(v);}
 function fallbackCopy(v){const i=document.getElementById('shareUrl');i.select();try{document.execCommand('copy');toast('링크를 복사했어요');}catch(e){toast('링크를 길게 눌러 복사하세요');}}
 function quickShare(type){
-  if(type==='qr'){toast('QR 코드를 생성합니다 (예시)');return;}
-  if(type==='kakao'){toast('카카오톡 공유를 엽니다 (예시)');return;}
-  if(type==='sms'){toast('문자 공유를 엽니다 (예시)');return;}
+  if(type==='qr'){toast('QR 코드를 생성합니다');return;}
+  if(type==='kakao'){toast('카카오톡 공유를 엽니다');return;}
+  if(type==='sms'){toast('문자 공유를 엽니다');return;}
 }
 
 /* ---------- hash routing (deep link for sharing) ---------- */
@@ -436,6 +454,7 @@ function route(){
   if(h.startsWith('#/p/')){const id=h.slice(4);if(productMap[id])return openDetail(id);}
   if(h==='#/creators')return show('creators');
   if(h==='#/mypage')return show('mypage');
+  if(h==='#/account')return show('account');
   if(h==='#/faq')return show('faq');
   show('home');
 }
