@@ -1,0 +1,249 @@
+<svg width="1800" height="1320" viewBox="0 0 1800 1320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg{fill:#f6f8fc}
+    .title{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:42px;font-weight:900;fill:#111827}
+    .subtitle{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:18px;font-weight:600;fill:#64748b}
+    .lane-title{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:28px;font-weight:900;fill:#111827}
+    .lane-sub{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:15px;font-weight:600;fill:#64748b}
+    .node-title{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:18px;font-weight:850;fill:#111827}
+    .node-sub{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:13px;font-weight:600;fill:#64748b}
+    .small{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:12px;font-weight:700;fill:#64748b}
+    .tag{font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;font-size:12px;font-weight:850;fill:#5368f5}
+    .card{fill:#ffffff;stroke:#dbe3f0;stroke-width:1.4}
+    .root-user{fill:#fff5f5;stroke:#ffb4ae;stroke-width:2}
+    .root-admin{fill:#eef2ff;stroke:#a8b4ff;stroke-width:2}
+    .section-user{fill:#ffffff;stroke:#ffd3cf;stroke-width:1.4}
+    .section-admin{fill:#ffffff;stroke:#cbd5ff;stroke-width:1.4}
+    .subnode{fill:#f8fafc;stroke:#e5e9f2;stroke-width:1.2}
+    .modal{fill:#fff7ed;stroke:#fed7aa;stroke-width:1.4}
+    .line{stroke:#94a3b8;stroke-width:1.5}
+    .line-user{stroke:#ef7d73;stroke-width:1.6}
+    .line-admin{stroke:#6f7df5;stroke-width:1.6}
+    .dash{stroke-dasharray:5 5}
+  </style>
+
+  <defs>
+    <marker id="arrow-gray" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-user" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#ef7d73"/>
+    </marker>
+    <marker id="arrow-admin" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#6f7df5"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect class="bg" width="1800" height="1320"/>
+
+  <text class="title" x="70" y="76">노하우집 현재 화면 구조도</text>
+  <text class="subtitle" x="70" y="110">사용자 화면(index.html)과 크리에이터 관리자 화면(creator-admin.html)의 현재 구현 기준 SVG 구조도</text>
+  <text class="small" x="70" y="139">Figma 가져오기용 · 도형/텍스트 기반 · 파일: knowhowzip-site/docs/knowhowzip-screen-structure.svg</text>
+
+  <rect x="50" y="175" width="820" height="1085" rx="24" fill="#fffafa" stroke="#ffd8d5"/>
+  <rect x="930" y="175" width="820" height="1085" rx="24" fill="#f8f9ff" stroke="#dbe2ff"/>
+  <text class="lane-title" x="90" y="225">사용자 화면</text>
+  <text class="lane-sub" x="90" y="251">공개 랜딩, 크리에이터 탐색, 결제, 내 학습</text>
+  <text class="lane-title" x="970" y="225">크리에이터 관리자 화면</text>
+  <text class="lane-sub" x="970" y="251">크리에이터가 강의, 상품, 수강생, 정산, 채널을 관리</text>
+
+  <!-- User root -->
+  <rect class="root-user" x="325" y="285" width="270" height="70" rx="16" filter="url(#shadow)"/>
+  <text class="node-title" x="373" y="315">사용자 화면</text>
+  <text class="node-sub" x="371" y="338">index.html / app.js</text>
+
+  <!-- User primary nav -->
+  <rect class="section-user" x="90" y="405" width="160" height="72" rx="14"/>
+  <text class="node-title" x="151" y="434" text-anchor="middle">홈</text>
+  <text class="node-sub" x="151" y="457" text-anchor="middle">/</text>
+  <rect class="section-user" x="275" y="405" width="160" height="72" rx="14"/>
+  <text class="node-title" x="355" y="434" text-anchor="middle">크리에이터</text>
+  <text class="node-sub" x="355" y="457" text-anchor="middle">#/creators</text>
+  <rect class="section-user" x="460" y="405" width="160" height="72" rx="14"/>
+  <text class="node-title" x="540" y="434" text-anchor="middle">내 학습</text>
+  <text class="node-sub" x="540" y="457" text-anchor="middle">#/mypage</text>
+  <rect class="section-user" x="645" y="405" width="160" height="72" rx="14"/>
+  <text class="node-title" x="725" y="434" text-anchor="middle">고객센터</text>
+  <text class="node-sub" x="725" y="457" text-anchor="middle">#/faq</text>
+
+  <path class="line-user" d="M460 355 V382 H170 V405" marker-end="url(#arrow-user)"/>
+  <path class="line-user" d="M460 355 V382 H355 V405" marker-end="url(#arrow-user)"/>
+  <path class="line-user" d="M460 355 V382 H540 V405" marker-end="url(#arrow-user)"/>
+  <path class="line-user" d="M460 355 V382 H725 V405" marker-end="url(#arrow-user)"/>
+
+  <!-- Home detail -->
+  <rect class="subnode" x="82" y="525" width="175" height="220" rx="14"/>
+  <text class="tag" x="105" y="555">HOME</text>
+  <text class="small" x="105" y="584">히어로/검색</text>
+  <text class="small" x="105" y="610">추천 크리에이터</text>
+  <text class="small" x="105" y="636">인기 클래스</text>
+  <text class="small" x="105" y="662">이용 방법</text>
+  <text class="small" x="105" y="688">서비스 장점</text>
+  <text class="small" x="105" y="714">후기/CTA</text>
+  <path class="line-user" d="M170 477 V525" marker-end="url(#arrow-user)"/>
+
+  <!-- Creator directory/detail/product -->
+  <rect class="subnode" x="285" y="525" width="170" height="136" rx="14"/>
+  <text class="tag" x="309" y="555">DIRECTORY</text>
+  <text class="small" x="309" y="584">카테고리 필터</text>
+  <text class="small" x="309" y="610">검색</text>
+  <text class="small" x="309" y="636">카드 목록</text>
+  <rect class="subnode" x="285" y="700" width="170" height="148" rx="14"/>
+  <text class="tag" x="309" y="730">CREATOR</text>
+  <text class="small" x="309" y="759">#/c/{creatorId}</text>
+  <text class="small" x="309" y="785">멤버십 탭</text>
+  <text class="small" x="309" y="811">개별 강의 탭</text>
+  <text class="small" x="309" y="837">소개 탭</text>
+  <rect class="subnode" x="285" y="888" width="170" height="176" rx="14"/>
+  <text class="tag" x="309" y="918">PRODUCT</text>
+  <text class="small" x="309" y="947">#/p/{productId}</text>
+  <text class="small" x="309" y="973">구매 카드</text>
+  <text class="small" x="309" y="999">클래스 소개</text>
+  <text class="small" x="309" y="1025">영상/자료</text>
+  <text class="small" x="309" y="1051">운영 안내/FAQ</text>
+  <path class="line-user" d="M355 477 V525" marker-end="url(#arrow-user)"/>
+  <path class="line-user" d="M370 661 V700" marker-end="url(#arrow-user)"/>
+  <path class="line-user" d="M370 848 V888" marker-end="url(#arrow-user)"/>
+
+  <!-- My page detail -->
+  <rect class="subnode" x="482" y="525" width="170" height="252" rx="14"/>
+  <text class="tag" x="506" y="555">MY LEARNING</text>
+  <text class="small" x="506" y="584">로그인 필요/빈 상태</text>
+  <text class="small" x="506" y="610">수강 중 탭</text>
+  <text class="small" x="506" y="636">수강 종료 탭</text>
+  <text class="small" x="506" y="662">결제 내역 탭</text>
+  <text class="small" x="506" y="688">크리에이터별 그룹</text>
+  <text class="small" x="506" y="714">영상 플레이어</text>
+  <text class="small" x="506" y="740">자료/운영/FAQ</text>
+  <path class="line-user" d="M540 477 V525" marker-end="url(#arrow-user)"/>
+
+  <!-- FAQ detail -->
+  <rect class="subnode" x="675" y="525" width="145" height="116" rx="14"/>
+  <text class="tag" x="698" y="555">SUPPORT</text>
+  <text class="small" x="698" y="584">공통 FAQ</text>
+  <text class="small" x="698" y="610">카카오톡 상담</text>
+  <path class="line-user" d="M725 477 V525" marker-end="url(#arrow-user)"/>
+
+  <!-- User modals -->
+  <rect class="modal" x="520" y="860" width="300" height="204" rx="16"/>
+  <text class="tag" x="548" y="890" fill="#c2410c">MODALS / GLOBAL</text>
+  <text class="small" x="548" y="920">로그인/회원가입 모달</text>
+  <text class="small" x="548" y="946">결제 모달</text>
+  <text class="small" x="548" y="972">공유 모달</text>
+  <text class="small" x="548" y="998">장바구니 카운트</text>
+  <text class="small" x="548" y="1024">토스트/해시 라우팅</text>
+  <path class="line dash" d="M455 976 H520" marker-end="url(#arrow-gray)"/>
+  <path class="line dash" d="M595 355 V860" marker-end="url(#arrow-gray)"/>
+
+  <!-- User data -->
+  <rect class="card" x="90" y="1095" width="730" height="110" rx="16"/>
+  <text class="tag" x="120" y="1128">DATA</text>
+  <text class="node-title" x="120" y="1160">크리에이터/상품 데이터</text>
+  <text class="node-sub" x="120" y="1187">data.js: 애매모홈, 머니로그, 디자인다이브, 코드그라운드 / 각 상품, 커리큘럼, FAQ, 운영 안내</text>
+
+  <!-- Admin root -->
+  <rect class="root-admin" x="1205" y="285" width="270" height="70" rx="16" filter="url(#shadow)"/>
+  <text class="node-title" x="1242" y="315">크리에이터 관리자</text>
+  <text class="node-sub" x="1246" y="338">creator-admin.html / admin.js</text>
+
+  <!-- Admin primary nav top row -->
+  <rect class="section-admin" x="970" y="405" width="155" height="72" rx="14"/>
+  <text class="node-title" x="1048" y="434" text-anchor="middle">대시보드</text>
+  <text class="node-sub" x="1048" y="457" text-anchor="middle">#dashboard</text>
+  <rect class="section-admin" x="1150" y="405" width="155" height="72" rx="14"/>
+  <text class="node-title" x="1228" y="434" text-anchor="middle">강의 관리</text>
+  <text class="node-sub" x="1228" y="457" text-anchor="middle">#classes</text>
+  <rect class="section-admin" x="1330" y="405" width="170" height="72" rx="14"/>
+  <text class="node-title" x="1415" y="434" text-anchor="middle">상품·멤버십</text>
+  <text class="node-sub" x="1415" y="457" text-anchor="middle">#products</text>
+  <rect class="section-admin" x="1525" y="405" width="155" height="72" rx="14"/>
+  <text class="node-title" x="1603" y="434" text-anchor="middle">수강생</text>
+  <text class="node-sub" x="1603" y="457" text-anchor="middle">#students</text>
+
+  <!-- Admin primary nav second row -->
+  <rect class="section-admin" x="970" y="525" width="155" height="72" rx="14"/>
+  <text class="node-title" x="1048" y="554" text-anchor="middle">매출·정산</text>
+  <text class="node-sub" x="1048" y="577" text-anchor="middle">#sales</text>
+  <rect class="section-admin" x="1150" y="525" width="155" height="72" rx="14"/>
+  <text class="node-title" x="1228" y="554" text-anchor="middle">알림톡</text>
+  <text class="node-sub" x="1228" y="577" text-anchor="middle">#alimtalk</text>
+  <rect class="section-admin" x="1330" y="525" width="170" height="72" rx="14"/>
+  <text class="node-title" x="1415" y="554" text-anchor="middle">채널 설정</text>
+  <text class="node-sub" x="1415" y="577" text-anchor="middle">#settings</text>
+
+  <path class="line-admin" d="M1340 355 V382 H1048 V405" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1340 355 V382 H1228 V405" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1340 355 V382 H1415 V405" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1340 355 V382 H1603 V405" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1340 355 V502 H1048 V525" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1340 355 V502 H1228 V525" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1340 355 V502 H1415 V525" marker-end="url(#arrow-admin)"/>
+
+  <!-- Admin detail sections -->
+  <rect class="subnode" x="970" y="650" width="175" height="150" rx="14"/>
+  <text class="tag" x="994" y="680">DASHBOARD</text>
+  <text class="small" x="994" y="709">매출/수강생/강의</text>
+  <text class="small" x="994" y="735">강의 운영 현황</text>
+  <text class="small" x="994" y="761">최근 수강 신청</text>
+
+  <rect class="subnode" x="1170" y="650" width="210" height="230" rx="14"/>
+  <text class="tag" x="1194" y="680">CLASS EDITOR</text>
+  <text class="small" x="1194" y="709">#class-new</text>
+  <text class="small" x="1194" y="735">#class-edit-{id}</text>
+  <text class="small" x="1194" y="761">#class-clone-{id}</text>
+  <text class="small" x="1194" y="787">1. 강의 정보</text>
+  <text class="small" x="1194" y="813">2. 일정·가격</text>
+  <text class="small" x="1194" y="839">3. 콘텐츠·혜택</text>
+  <text class="small" x="1194" y="865">4. 운영 / 5. FAQ·공개</text>
+
+  <rect class="subnode" x="1405" y="650" width="210" height="204" rx="14"/>
+  <text class="tag" x="1429" y="680">PRODUCT EDITOR</text>
+  <text class="small" x="1429" y="709">#product-new</text>
+  <text class="small" x="1429" y="735">상품 유형</text>
+  <text class="small" x="1429" y="761">상품 정보</text>
+  <text class="small" x="1429" y="787">포함 강의</text>
+  <text class="small" x="1429" y="813">가격·이용 기간</text>
+  <text class="small" x="1429" y="839">환불·공개 정책</text>
+
+  <rect class="subnode" x="970" y="910" width="175" height="144" rx="14"/>
+  <text class="tag" x="994" y="940">STUDENTS / SALES</text>
+  <text class="small" x="994" y="969">수강생 목록/검색</text>
+  <text class="small" x="994" y="995">매출 요약</text>
+  <text class="small" x="994" y="1021">정산/주문 표</text>
+
+  <rect class="subnode" x="1170" y="920" width="210" height="176" rx="14"/>
+  <text class="tag" x="1194" y="950">ALIMTALK</text>
+  <text class="small" x="1194" y="979">템플릿 목록</text>
+  <text class="small" x="1194" y="1005">문구 편집/미리보기</text>
+  <text class="small" x="1194" y="1031">변수 삽입</text>
+  <text class="small" x="1194" y="1057">관리자 승인 요청</text>
+
+  <rect class="subnode" x="1405" y="900" width="210" height="196" rx="14"/>
+  <text class="tag" x="1429" y="930">SETTINGS</text>
+  <text class="small" x="1429" y="959">공개 채널</text>
+  <text class="small" x="1429" y="985">운영 알림</text>
+  <text class="small" x="1429" y="1011">정산 정보</text>
+  <text class="small" x="1429" y="1037">관리자 권한</text>
+  <text class="small" x="1429" y="1063">공개 페이지 미리보기</text>
+
+  <path class="line-admin" d="M1048 597 V650" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1228 477 V650" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1415 477 V650" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1603 477 V820 H1145 V910" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1048 597 V910" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1228 597 V920" marker-end="url(#arrow-admin)"/>
+  <path class="line-admin" d="M1415 597 V900" marker-end="url(#arrow-admin)"/>
+
+  <!-- Preview / public link -->
+  <rect class="modal" x="1218" y="1132" width="350" height="74" rx="16"/>
+  <text class="tag" x="1244" y="1162" fill="#c2410c">PREVIEW LINK</text>
+  <text class="small" x="1244" y="1188">강의 미리보기 iframe → index.html#/p/{classId}</text>
+  <path class="line dash" d="M1275 880 V1132" marker-end="url(#arrow-gray)"/>
+
+  <!-- Cross relationship -->
+  <path class="line dash" d="M1568 1169 C1648 1169 1686 1100 1686 1010 V102 C1686 72 1662 55 1630 55 H760" marker-end="url(#arrow-gray)"/>
+  <text class="small" x="1110" y="88">관리자 미리보기/내 페이지 보기 동선은 사용자 상세 화면으로 연결</text>
+</svg>
