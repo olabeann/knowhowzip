@@ -218,11 +218,11 @@ function renderLearningTabs(owned){
   document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`]].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
 }
 const demoPayments=[
-  {id:'P20260629001',date:'2026.06.29',productId:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',amount:290000,payment:'결제 완료',refund:'환불 가능'},
-  {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료',refund:'환불 요청 없음'}
+  {id:'P20260629001',date:'2026.06.29',productId:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',amount:290000,payment:'결제 완료'},
+  {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료'}
 ];
 function renderPaymentHistory(){
-  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>클래스 결제와 환불 처리 상태를 확인하세요.</p></div><select><option>전체 내역</option><option>결제 완료</option><option>환불 완료</option></select></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state ${payment.payment==='결제 취소'?'cancel':''}">${payment.payment}</span><span class="refund-state">${payment.refund}</span></div><button onclick="toast('결제 상세 내역을 확인합니다')">상세 보기</button></article>`).join('')}</div></section>`;
+  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제 완료된 클래스 내역을 확인합니다.</p></div></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div></article>`).join('')}</div></section>`;
 }
 function renderUserProfile(){
   const user=state.user;
