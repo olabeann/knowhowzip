@@ -344,6 +344,7 @@ function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,nor
 function show(view){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
   document.getElementById('view-'+view).classList.add('show');
+  document.getElementById('creatorInquiryStrip').hidden=view!=='home';
   document.querySelectorAll('.gnb-menu button').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));
   if(view==='home')renderHome();
   if(view==='creators')renderCreatorsPage();
