@@ -510,7 +510,7 @@ main{min-height:50vh}
 
 /* footer */
 footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
-.foot-in{display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap}
+.foot-in{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;flex-wrap:wrap}
 .foot-brand{color:#fff;font-weight:900;display:flex;align-items:center;gap:10px;font-size:18px}
 .foot-logo-icon{width:30px;height:30px;object-fit:contain;display:block;flex-shrink:0}
 .foot-brand small{display:block;color:#667085;font-size:11px;font-weight:600;margin-top:3px}
