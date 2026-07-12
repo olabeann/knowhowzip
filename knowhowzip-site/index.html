@@ -255,15 +255,11 @@
 
 <!-- SHARE MODAL -->
 <div class="modal-bg" id="shareModal"><div class="modal" role="dialog" aria-modal="true">
-  <div class="modal-head"><div><h3 id="shareTitle">페이지 공유</h3><p id="shareDesc">이 링크를 공유하면 누구나 바로 들어와 수강신청할 수 있어요.</p></div><button class="modal-x" onclick="closeShare()">&times;</button></div>
+  <div class="modal-head"><div><h3 id="shareTitle">링크 복사</h3><p id="shareDesc">링크를 복사해 공유할 수 있어요.</p></div><button class="modal-x" onclick="closeShare()">&times;</button></div>
   <div class="modal-body">
     <div class="share-card" id="sharePreview"></div>
-    <div class="share-link"><input id="shareUrl" type="text" readonly><button class="btn-red" onclick="copyShare()">복사</button></div>
-    <div class="share-quick">
-      <button onclick="quickShare('kakao')"><span class="qi" style="background:#FEE500">💬</span>카카오톡</button>
-      <button onclick="quickShare('sms')"><span class="qi" style="background:#E8F0FE">✉️</span>문자</button>
-      <button onclick="quickShare('qr')"><span class="qi" style="background:#EEF1FF">▦</span>QR 코드</button>
-    </div>
+    <input id="shareUrl" type="text" readonly hidden>
+    <button class="btn-red share-copy-only" onclick="copyShare()">링크 복사</button>
     <p class="share-note">공유 주소는 실제 배포 도메인 기준으로 제공됩니다.</p>
   </div>
 </div></div>

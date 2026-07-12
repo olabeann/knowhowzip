@@ -429,20 +429,24 @@ function openShare(title,desc,url,logoHTML,sub){
   document.getElementById('shareDesc').textContent=desc;
   document.getElementById('sharePreview').innerHTML=`<div class="sc-logo">${logoHTML}</div><div style="min-width:0"><div class="sc-name">${title}</div><div class="sc-sub">${sub}</div></div>`;
   document.getElementById('shareUrl').value=url;
-  // 모바일 네이티브 공유 시트가 있으면 우선 사용
-  if(navigator.share){navigator.share({title,text:sub,url}).catch(()=>document.getElementById('shareModal').classList.add('show'));}
-  else document.getElementById('shareModal').classList.add('show');
+  document.getElementById('shareModal').classList.add('show');
 }
-function shareCreator(id){const c=creators.find(x=>x.id===id);openShare(c.name,'이 페이지를 공유하면 누구나 들어와 수강신청할 수 있어요.',creatorUrl(c),creatorLogo(c,42),c.tagline);}
-function shareProduct(pid){const p=productMap[pid],c=creatorOf[pid];openShare(p.title.split(' · ')[0],'이 클래스를 공유하면 바로 수강신청 페이지로 연결돼요.',productUrl(c,p),(c.logoType==='house'?houseSVG(34,{ink:p.deep,text:false}):creatorLogo(c,42)),c.name+' · '+won(p.price));}
+function shareCreator(id){const c=creators.find(x=>x.id===id);openShare(c.name,'링크를 복사해 공유할 수 있어요.',creatorUrl(c),creatorLogo(c,42),c.tagline);}
+function shareProduct(pid){const p=productMap[pid],c=creatorOf[pid];openShare(p.title.split(' · ')[0],'링크를 복사해 공유할 수 있어요.',productUrl(c,p),(c.logoType==='house'?houseSVG(34,{ink:p.deep,text:false}):creatorLogo(c,42)),c.name+' · '+won(p.price));}
 function closeShare(){document.getElementById('shareModal').classList.remove('show');}
 function copyShare(){const v=document.getElementById('shareUrl').value;
   if(navigator.clipboard){navigator.clipboard.writeText(v).then(()=>toast('링크를 복사했어요')).catch(()=>fallbackCopy(v));}else fallbackCopy(v);}
-function fallbackCopy(v){const i=document.getElementById('shareUrl');i.select();try{document.execCommand('copy');toast('링크를 복사했어요');}catch(e){toast('링크를 길게 눌러 복사하세요');}}
-function quickShare(type){
-  if(type==='qr'){toast('QR 코드를 생성합니다');return;}
-  if(type==='kakao'){toast('카카오톡 공유를 엽니다');return;}
-  if(type==='sms'){toast('문자 공유를 엽니다');return;}
+function fallbackCopy(v){
+  const area=document.createElement('textarea');
+  area.value=v;
+  area.setAttribute('readonly','');
+  area.style.position='fixed';
+  area.style.left='-9999px';
+  document.body.appendChild(area);
+  area.select();
+  try{document.execCommand('copy');toast('링크를 복사했어요');}
+  catch(e){toast('링크를 복사하지 못했어요');}
+  document.body.removeChild(area);
 }
 
 /* ---------- hash routing (deep link for sharing) ---------- */
