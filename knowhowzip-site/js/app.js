@@ -38,7 +38,7 @@ function renderHome(){
   const showCategoryFilters=cats.length>2;
   homeCats.hidden=!showCategoryFilters;
   homeCats.innerHTML=showCategoryFilters?cats.map(ct=>`<button class="chip ${state.cat===ct?'active':''}" onclick="setCat('${ct}')">${ct}</button>`).join(''):'';
-  const cs=creators.filter(c=>state.cat==='전체'||c.cat===state.cat);
+  const cs=creators.filter(c=>state.cat==='전체'||c.cat===state.cat).slice(0,4);
   document.getElementById('creatorGrid').innerHTML=cs.map(c=>`
     <div class="ccard" onclick="openCreator('${c.id}')">
       <div class="cc-cover" style="background:${c.cover}"><div class="cc-logo">${creatorLogo(c,54)}</div></div>
