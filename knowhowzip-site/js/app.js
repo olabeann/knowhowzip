@@ -8,7 +8,7 @@ function creatorLogo(c,size){
   if(c.logoType==='house')return houseSVG(size*0.82,{ink:c.themeDeep});
   return `<div style="width:${size}px;height:${size}px;background:${c.theme};display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans';font-size:${size*0.4}px;color:${c.themeDeep}">${c.monogram}</div>`;
 }
-document.getElementById('pmark-foot').innerHTML=platMark(30);
+var _pf=document.getElementById('pmark-foot');if(_pf)_pf.innerHTML=platMark(30);
 var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{ink:'#1c3a4a'});
 
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
