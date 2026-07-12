@@ -376,7 +376,6 @@ main{min-height:50vh}
 .user-profile-grid>div{background:var(--bg-alt);border:1px solid var(--line2);border-radius:13px;padding:16px}
 .user-profile-grid small{display:block;color:var(--ink-mute);font-size:12px;font-weight:800;margin-bottom:6px}
 .user-profile-grid b{display:block;color:var(--ink);font-size:16px;font-weight:900}
-.user-profile-note{margin:18px 0 0;color:var(--ink-soft);font-size:13px;line-height:1.6}
 .learning-group{margin-bottom:38px}
 .learning-group-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
 .learning-group-head .logo{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}

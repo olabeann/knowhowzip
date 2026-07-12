@@ -229,15 +229,12 @@ function renderUserProfile(){
   return `<section class="user-profile-card">
     <div class="user-profile-head">
       <div class="user-profile-avatar">${user.name.slice(0,1)}</div>
-      <div><span>내 정보</span><h2>${user.name}</h2><p>카카오 간편 로그인으로 연결된 정보입니다.</p></div>
+      <div><span>내 정보</span><h2>${user.name}</h2><p>카카오 계정으로 연결된 정보입니다.</p></div>
     </div>
     <div class="user-profile-grid">
       <div><small>이름</small><b>${user.name}</b></div>
       <div><small>전화번호</small><b>${user.phone}</b></div>
-      <div><small>로그인 방식</small><b>카카오 간편 로그인</b></div>
-      <div><small>계정 상태</small><b>정상 이용 중</b></div>
     </div>
-    <p class="user-profile-note">카카오 계정으로 연결된 내 정보입니다.</p>
   </section>`;
 }
 function renderLearningEntitlementSummary(owned){
