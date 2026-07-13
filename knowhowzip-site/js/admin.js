@@ -273,11 +273,23 @@ function openStudentDetail(email){
   modal.classList.add('show');
 }
 
+let salesSelectedMonth='2026-06';
+const salesMonthlyData={
+  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일',refund:186000,refundCount:1,trend:'↑ 12.4%',rows:[{count:24,amount:6960000},{count:20,amount:7800000},{count:11,amount:4950000}]},
+  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일',refund:273600,refundCount:2,trend:'↑ 18.6%',rows:[{count:21,amount:6090000},{count:18,amount:7020000},{count:9,amount:4050000}]},
+  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일',refund:198000,refundCount:1,trend:'↑ 6.8%',rows:[{count:17,amount:4930000},{count:14,amount:5460000},{count:6,amount:2700000}]},
+  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,refundCount:0,trend:'-',rows:[{count:12,amount:3480000},{count:9,amount:3510000},{count:3,amount:1350000}]}
+};
+function setSalesMonth(month){salesSelectedMonth=month;showAdminView('sales');}
 function renderSales(){
-  return `${pageHeader('Sales & payout','매출·정산','클래스별 매출과 정산 예정 금액을 확인합니다.')}
-  <section class="payout-hero"><div><span>다음 정산 예정 금액</span><strong>₩15,936,000</strong><p>2026년 7월 10일 입금 예정 · 환불·취소 반영 후</p></div><button onclick="openSettingsPanel('payout')">정산 계좌 관리</button></section>
-  <section class="metric-grid two"><article class="metric-card"><span>6월 총 결제</span><strong>₩18,420,000</strong><small class="up">↑ 18.6%</small></article><article class="metric-card"><span>환불·취소</span><strong>₩273,600</strong><small><i>2건</i></small></article></section>
-  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>2026년 6월 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const gross=c.students*c.price,fee=Math.round(gross*.12);return `<tr><td><b>${c.title}</b></td><td>${c.students}건</td><td>${won(gross)}</td><td><strong>${won(gross-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
+  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  const gross=data.rows.reduce((sum,row)=>sum+row.amount,0);
+  const payout=Math.max(0,Math.round((gross-data.refund)*.88));
+  return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.','<button class="btn ghost" onclick="openSettingsPanel(\'payout\')">정산 계좌 관리</button>')}
+  <div class="sales-month-toolbar"><label>조회 월<select onchange="setSalesMonth(this.value)">${Object.entries(salesMonthlyData).map(([value,item])=>`<option value="${value}" ${value===salesSelectedMonth?'selected':''}>${item.label}</option>`).join('')}</select></label></div>
+  <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div><button onclick="openSettingsPanel('payout')">정산 계좌 관리</button></section>
+  <section class="metric-grid two"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong><small class="${data.trend==='-'?'':'up'}">${data.trend}</small></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong><small><i>${data.refundCount}건</i></small></article></section>
+  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0},fee=Math.round(row.amount*.12);return `<tr><td><b>${c.title}</b></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(row.amount-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
 }
 
 const alimtalkTemplates=[
