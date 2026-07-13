@@ -281,6 +281,33 @@ const salesMonthlyData={
   '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,refundCount:0,trend:'-',rows:[{count:12,amount:3480000},{count:9,amount:3510000},{count:3,amount:1350000}]}
 };
 function setSalesMonth(month){salesSelectedMonth=month;showAdminView('sales');}
+function salesClassStudents(classTitle){
+  const className=classTitle.split(' · ')[0];
+  return students.filter(student=>(student.products||[]).some(item=>item.className===className||student.course===className));
+}
+function salesClassRowData(classId){
+  const index=classes.findIndex(item=>item.id===classId);
+  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  return data.rows[index]||{count:0,amount:0};
+}
+function renderSalesClassStudents(classId){
+  const course=classes.find(item=>item.id===classId);
+  if(!course)return renderSales();
+  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  const className=course.title.split(' · ')[0];
+  const rows=salesClassStudents(course.title);
+  const row=salesClassRowData(classId);
+  const payout=row.amount-Math.round(row.amount*.12);
+  return `${pageHeader('Sales detail','클래스 결제 수강생','선택한 클래스의 월별 결제 수강생을 확인합니다.','<button class="btn ghost" onclick="showAdminView(\'sales\')">← 매출·정산으로 돌아가기</button>')}
+  <section class="sales-detail-head panel"><div><span>${data.label}</span><h2>${className}</h2><p>${course.title}</p></div><div class="sales-detail-metrics"><article><span>결제 건수</span><strong>${row.count}건</strong></article><article><span>총 매출</span><strong>${won(row.amount)}</strong></article><article><span>정산 예정</span><strong>${won(payout)}</strong></article></div></section>
+  <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 완료 기준</p></div></div><div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>최근 결제 상품</th><th>결제일</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(student=>{const item=(student.products||[]).find(product=>product.className===className)||student.products?.[0]||{};return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${item.product||student.recentProduct||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.period||student.period||'-'}</td><td><em class="table-state ${studentStateClass(item.status||student.state)}">${item.status||student.state}</em></td></tr>`;}).join(''):'<tr><td colspan="6" class="empty-table">표시할 결제 수강생이 없습니다.</td></tr>'}</tbody></table></div></article>`;
+}
+function openSalesClassStudents(classId){
+  document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='sales'));
+  document.getElementById('adminContent').innerHTML=renderSalesClassStudents(classId);
+  window.scrollTo({top:0});
+  location.hash=`#sales-class-${classId}`;
+}
 function renderSales(){
   const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
   const gross=data.rows.reduce((sum,row)=>sum+row.amount,0);
@@ -289,7 +316,7 @@ function renderSales(){
   return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
   <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div></section>
   <section class="metric-grid two"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong><small class="${data.trend==='-'?'':'up'}">${data.trend}</small></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong><small><i>${data.refundCount}건</i></small></article></section>
-  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0},fee=Math.round(row.amount*.12);return `<tr><td><b>${c.title}</b></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(row.amount-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
+  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0},fee=Math.round(row.amount*.12);return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(row.amount-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
 }
 
 const alimtalkTemplates=[
@@ -471,6 +498,7 @@ if(initialView==='class-new')openClassEditor('create');
 else if(initialView.startsWith('class-edit-'))openClassEditor('edit',initialView.replace('class-edit-',''));
 else if(initialView==='product-new')openProductEditor('create');
 else if(initialView.startsWith('product-edit-'))openProductEditor('edit',initialView.replace('product-edit-',''));
+else if(initialView.startsWith('sales-class-'))openSalesClassStudents(initialView.replace('sales-class-',''));
 else if(initialView==='settings-payout')openSettingsPanel('payout');
 else showAdminView(viewRenderers[initialView]?initialView:'dashboard');
 
