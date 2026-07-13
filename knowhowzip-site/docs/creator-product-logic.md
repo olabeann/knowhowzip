@@ -1,6 +1,6 @@
 # 크리에이터 상품 구조 변경 로직
 
-기준: 클래스는 학습 콘텐츠 단위이고, 상품은 사용자가 결제하는 대상이다. 결제 완료 후 상품에 설정된 수강생 등급과 포함 클래스별 수강 권한을 생성한다.
+기준: 클래스는 학습 콘텐츠 단위이고, 상품은 사용자가 결제하는 대상이다. 결제 완료 후 상품에 설정된 클래스가 내 학습에 표시된다. 별도의 회원 등급은 두지 않고 구매 이력과 수강 이력으로 접근 조건을 판단한다.
 
 ## 1. 핵심 개념
 
@@ -9,40 +9,38 @@
 - 영상, 자료, FAQ, 운영 안내, 라이브 일정의 묶음이다.
 - 단독으로도 판매될 수 있지만, 결제 대상 자체는 상품이다.
 - 클래스 안에는 여러 개의 강의 영상이 들어갈 수 있다.
-- 선수강 조건은 클래스에 설정한다.
-- 수강 가능 여부는 권한 보유 여부와 선수강 조건 충족 여부를 함께 본다.
+- 수강 조건은 클래스에 설정한다.
+- 수강 가능 여부는 결제/수강 기록과 수강 조건 충족 여부를 함께 본다.
 
 ### 상품
 
 - 사용자가 실제로 결제하는 단위다.
 - 상품 유형은 따로 나누지 않는다.
 - 하나의 상품은 하나 이상의 클래스를 자유롭게 포함할 수 있다.
-- 상품에는 가격, 판매 상태, 판매 기간, 이용 기간 정책, 환불 정책, 결제 후 부여할 수강생 등급이 있다.
-- 사용자가 상품을 구매하면 해당 상품에 설정된 수강생 등급이 자동 부여된다.
+- 상품에는 가격, 판매 상태, 판매 기간, 이용 기간 정책, 환불 정책, 수강 조건이 있다.
+- 사용자가 상품을 구매하면 해당 상품에 포함된 클래스가 내 학습에 표시된다.
 
-### 수강생 등급
+### 수강 조건
 
-- 수강생 등급은 사용자의 열람 등급이다.
-- 노하우집이 기본 등급 세트를 제공한다.
-- 추천 기본 등급은 `루키`, `챌린저`, `프로`, `마스터`, `레전드`다.
-- 크리에이터는 상품을 만들 때 “이 상품 구매 시 어떤 등급을 부여할지”를 선택한다.
-- 크리에이터가 등급명과 등급 개수를 완전히 커스텀하는 기능은 후속 단계로 둔다.
-- 운영자가 수강생의 등급을 예외적으로 수동 변경하는 기능도 후속 단계로 둔다.
+- 상품 구매 가능 여부는 구매 이력과 수강 이력을 기준으로 판단한다.
+- 기본 조건은 `수강 조건 없음` 또는 `기존 클래스 중 1개 이상 선택`이다.
+- 예를 들어 권리분석 실전반은 경매 낙찰 기초반 구매 또는 수강 완료 이력이 있어야 결제할 수 있다.
+- 조건을 충족하지 않은 사용자에게도 상품 상세는 보여줄 수 있지만, 결제 단계에서는 안내 문구를 노출하고 결제를 막는다.
+- 운영 예외는 크리에이터가 수강생 관리에서 무료 수강으로 바로 처리할 수 있다.
 
-### 선수강 조건 설정 위치
+### 수강 조건 설정 위치
 
-- 선수강 과목은 상품이 아니라 클래스에 설정한다.
-- 화면 위치는 `크리에이터 관리자 > 클래스 관리 > 클래스 생성/수정 > 2. 수강 조건·일정`이다.
-- 해당 영역에서 완료해야 하는 선수강 클래스와 수료 기준을 선택한다.
-- 상품 관리의 `포함 클래스` 영역에서는 어떤 클래스 권한을 줄지만 선택한다.
-- 그래서 같은 상품에 A와 B가 함께 포함되어도, B에 `A 완료 필요`가 설정되어 있으면 B는 A 완료 전까지 잠금 상태로 노출된다.
+- 상품 수강 조건은 `크리에이터 관리자 > 상품 관리 > 상품 생성/수정 > 3. 수강 조건`에서 기존 클래스를 선택해 설정한다.
+- 예를 들어 권리분석 실전반 상품의 수강 조건에 `경매 낙찰 기초반`을 선택하면, 해당 클래스를 구매했거나 수강한 사람만 결제할 수 있다.
+- 클래스 관리의 `수강 조건·일정`은 콘텐츠 잠금이나 수료 기준처럼 클래스 내부 학습 흐름이 필요할 때 사용한다.
+- 상품 관리의 `결제 후 볼 수 있는 클래스` 영역에서는 결제 후 내 학습에 보여줄 클래스를 선택한다.
 
-### 수강 권한
+### 수강 가능 상태
 
 - 결제 완료된 주문을 기준으로 생성한다.
-- 상품에 포함된 클래스마다 1개씩 권한을 만든다.
-- 같은 클래스에 대해 여러 상품 권한이 있을 수 있다.
-- 유효한 권한이 하나라도 있으면 해당 클래스를 볼 수 있다.
+- 상품에 포함된 클래스마다 1개씩 수강 가능 상태를 만든다.
+- 같은 클래스에 대해 여러 상품 또는 무료 수강 처리가 있을 수 있다.
+- 유효한 수강 가능 상태가 하나라도 있으면 해당 클래스를 볼 수 있다.
 
 ## 2. 데이터 모델 예시
 
@@ -96,7 +94,7 @@ const products = [
     price: 290000,
     status: "on_sale",
     includedCourseIds: ["mmoh-basic"],
-    grantedMembershipGrade: "챌린저",
+    purchaseRequirement: { type: "none" },
     accessPeriod: {
       type: "course_period",
       days: null
@@ -110,7 +108,7 @@ const products = [
     price: 590000,
     status: "on_sale",
     includedCourseIds: ["mmoh-basic", "mmoh-right"],
-    grantedMembershipGrade: "프로",
+    purchaseRequirement: { type: "none" },
     accessPeriod: {
       type: "course_period",
       days: null
@@ -123,13 +121,14 @@ const products = [
     name: "경매 기초·권리분석 이용권",
     price: 390000,
     status: "on_sale",
-    includedCourseIds: ["mmoh-basic", "mmoh-right"],
-    grantedMembershipGrade: "프로",
+    includedCourseIds: ["mmoh-right"],
+    purchaseRequirement: { type: "completed_course", courseId: "mmoh-basic" },
+    additionalEntitlements: [{ courseId: "mmoh-basic", periodDays: 60 }],
     accessPeriod: {
       type: "from_payment_date",
       days: 120
     },
-    refundPolicyId: "standard-membership-refund"
+    refundPolicyId: "standard-class-refund"
   }
 ];
 
@@ -168,29 +167,16 @@ const entitlements = [
   }
 ];
 
-const membershipAssignments = [
-  {
-    id: "mem-001",
-    userId: "user-001",
-    orderId: "ord-001",
-    productId: "prd-mmoh-middle-pass",
-    creatorId: "mmoh",
-    grade: "프로",
-    status: "active",
-    assignedAt: "2026-07-01T10:00:00+09:00",
-    endsAt: "2026-10-29T23:59:59+09:00"
-  }
-];
 ```
 
-## 3. 상품과 수강생 등급 구성
+## 3. 상품과 수강 가능 상태 구성
 
-상품 유형을 나누지 않는다. 상품은 포함 클래스와 부여 등급을 가진 결제 대상이다.
+상품 유형을 나누지 않는다. 상품은 수강 조건과 결제 후 볼 수 있는 클래스를 가진 결제 대상이다.
 
 ```mermaid
 flowchart TD
-    P["상품"] --> G["부여 수강생 등급"]
-    P --> C["포함 클래스"]
+    P["상품"] --> R["수강 조건"]
+    P --> C["결제 후 볼 수 있는 클래스"]
     C --> A["클래스 A"]
     C --> B["클래스 B"]
     C --> D["클래스 C"]
@@ -200,13 +186,13 @@ flowchart TD
 
 예시:
 
-| 상품명 예시 | 포함 클래스 | 부여 등급 | 결제 후 생성되는 권한 |
+| 상품명 예시 | 수강 조건 | 결제 후 볼 수 있는 클래스 | 결제 후 상태 |
 | --- | --- | --- | --- |
-| 경매 기초 클래스 이용권 | 클래스 A | 챌린저 | 챌린저 등급, 클래스 A 권한 |
-| 경매 기초·권리분석 이용권 | 클래스 A, 클래스 B | 프로 | 프로 등급, 클래스 A 권한, 클래스 B 권한 |
-| 경매 실전 패키지 | 클래스 A, 클래스 B, 클래스 C | 마스터 | 마스터 등급, 클래스 A/B/C 권한 |
+| 경매 기초 클래스 이용권 | 수강 조건 없음 | 클래스 A | 클래스 A가 내 학습에 표시 |
+| 권리분석 실전반 이용권 | 경매 낙찰 기초반 | 클래스 B | 클래스 B가 내 학습에 표시 |
+| 땅부자 루틴클럽 | 경매 낙찰 기초반 또는 권리분석 실전반 | 스터디 클래스 | 스터디 클래스가 내 학습에 표시 |
  
-중요한 점은 상품을 어떤 이름으로 팔든 결제 완료 후에는 “수강생 등급 + 포함 클래스별 권한”으로 풀어서 저장한다는 것이다. 그래서 내 학습은 상품 카드가 아니라 클래스 카드 기준으로 보여준다.
+중요한 점은 상품을 어떤 이름으로 팔든 결제 완료 후에는 클래스별 수강 가능 상태로 풀어서 저장한다는 것이다. 그래서 내 학습은 상품 카드가 아니라 클래스 카드 기준으로 보여준다.
 
 ## 4. 구매 가능 여부
 
@@ -233,45 +219,35 @@ function canPurchaseProduct({ product, now }) {
 }
 ```
 
-### 4.1 선수강 조건이 있는 상품의 구매 가능 여부
+### 4.1 수강 조건이 있는 상품의 구매 가능 여부
 
-상품에 포함된 강의 중 선수강 조건이 있는 강의가 있으면, 결제 가능 여부는 아래처럼 판단한다.
+상품에 수강 조건이 있으면, 사용자의 구매 이력과 수강 이력을 기준으로 결제 가능 여부를 판단한다.
 
 ```mermaid
 flowchart TD
     A["상품 결제 시도"] --> B["상품에 포함된 강의 확인"]
-    B --> C{"포함 강의 중<br/>선수강 조건이 있는가?"}
+    B --> C{"상품에<br/>수강 조건이 있는가?"}
     C -- "없음" --> D["결제 가능"]
-    C -- "있음" --> E{"선수강 조건을<br/>충족했거나<br/>같은 상품에 포함되어 있는가?"}
+    C -- "있음" --> E{"구매/수강 이력으로<br/>조건을 충족했는가?"}
     E -- "예" --> D
-    E -- "아니오" --> F["결제 불가<br/>선수강 완료 후 신청 안내"]
+    E -- "아니오" --> F["결제 불가<br/>수강 조건 안내"]
 ```
 
-정책은 두 가지 중 하나를 선택할 수 있다.
-
-1. 같은 상품 안에 선수강 강의가 함께 포함되어 있으면 결제 허용
-2. 선수강 강의를 이미 완료한 사용자만 결제 허용
-
-현재 추천안은 1번이다. 예를 들어 경매 기초·권리분석 이용권에 `강의 A + 강의 B`가 포함되어 있고, B의 선수강 조건이 A라면 결제는 허용한다. 결제 후 A와 B 권한을 모두 부여하되, B는 A 완료 전까지 내 학습에서 잠금 상태로 둔다.
+예를 들어 권리분석 실전반 상품은 경매 낙찰 기초반 구매 또는 수강 이력이 있어야 결제할 수 있다.
 
 ```js
 function canPurchaseProductWithPrerequisite({ product, userId }) {
-  const included = new Set(product.includedCourseIds);
+  const requiredIds = product.purchaseRequirement?.courseIds || [];
 
-  for (const courseId of product.includedCourseIds) {
-    const course = getCourse(courseId);
-    const requiredIds = course.accessRule?.prerequisiteCourseIds || [];
+  for (const requiredCourseId of requiredIds) {
+    const hasPurchased = hasPurchasedCourse({ userId, courseId: requiredCourseId });
+    const hasCompleted = isCourseCompleted({ userId, courseId: requiredCourseId });
 
-    for (const requiredCourseId of requiredIds) {
-      const prerequisiteIsIncluded = included.has(requiredCourseId);
-      const prerequisiteIsCompleted = isCourseCompleted({ userId, courseId: requiredCourseId });
-
-      if (!prerequisiteIsIncluded && !prerequisiteIsCompleted) {
-        return {
-          ok: false,
-          reason: `${getCourse(requiredCourseId).title} 완료 후 신청할 수 있습니다.`
-        };
-      }
+    if (!hasPurchased && !hasCompleted) {
+      return {
+        ok: false,
+        reason: `${getCourse(requiredCourseId).title} 수강생만 신청할 수 있습니다.`
+      };
     }
   }
 
@@ -279,14 +255,14 @@ function canPurchaseProductWithPrerequisite({ product, userId }) {
 }
 ```
 
-## 5. 결제 완료 후 권한 생성
+## 5. 결제 완료 후 내 학습 표시
 
-실서비스에서는 PG 결과를 서버에서 재검증한 뒤 주문을 `paid`로 확정하고 권한을 생성한다.
+실서비스에서는 PG 결과를 서버에서 재검증한 뒤 주문을 `paid`로 확정하고, 결제한 클래스가 내 학습에 보이도록 수강 가능 상태를 생성한다.
 
 ```js
 function completePayment({ order, product, paidAt }) {
   if (order.paymentStatus !== "paid") {
-    throw new Error("결제 완료 주문만 권한을 생성할 수 있습니다.");
+    throw new Error("결제 완료 주문만 수강 가능 상태를 생성할 수 있습니다.");
   }
 
   return product.includedCourseIds.map((courseId) => {
@@ -338,9 +314,9 @@ function resolveEntitlementPeriod({ product, courseId, paidAt }) {
 
 ```mermaid
 flowchart TD
-    A["상품 결제 완료"] --> B["포함 강의 권한 부여"]
-    B --> C["강의 A 권한"]
-    B --> D["강의 B 권한"]
+    A["상품 결제 완료"] --> B["포함 강의가 내 학습에 표시"]
+    B --> C["강의 A 수강 가능"]
+    B --> D["강의 B 수강 가능 상태"]
     C --> E["A 즉시 수강 가능"]
     D --> F{"A 완료 여부 확인"}
     F -- "완료 전" --> G["B 잠금 상태"]
@@ -355,7 +331,7 @@ function canAccessCourse({ userId, courseId, now }) {
     return {
       ok: false,
       state: "locked",
-      reason: "이 강의를 이용할 수 있는 수강 권한이 없습니다."
+      reason: "이 강의를 볼 수 있는 수강 가능 상태가 없습니다."
     };
   }
 
@@ -441,7 +417,7 @@ function getMyLearning({ userId, now }) {
 
 ## 8. 마이 > 결제 내역 노출 로직
 
-결제 내역은 `마이` 화면에서 주문 기준으로 보여준다. 어떤 수강생 등급과 클래스 권한이 생겼는지는 상품의 부여 등급과 포함 클래스 목록으로 표시한다.
+결제 내역은 `마이` 화면에서 주문 기준으로 보여준다. 어떤 클래스 권한이 생겼는지는 상품의 포함 클래스 목록으로 판단한다.
 
 ```js
 function getPaymentHistory({ userId }) {
@@ -456,10 +432,8 @@ function getPaymentHistory({ userId }) {
         orderId: order.id,
         paidAt: order.paidAt,
         productName: product.name,
-        grantedGrade: product.grantedMembershipGrade,
         amount: order.amount,
         paymentStatus: order.paymentStatus,
-        refundStatus: order.refundStatus,
         includedCourses
       };
     });
@@ -495,7 +469,7 @@ function applyRefund({ orderId, refundStatus, revokeAccess }) {
 - 결제 실패: 주문 생성 가능, 권한 생성 안 함
 - 결제 완료: 권한 생성
 - 환불 요청: 권한은 정책에 따라 유지 또는 임시 제한
-- 환불 완료: 권한 회수 또는 종료일 조정
+- 환불 완료: 수강 가능 상태 회수 또는 종료일 조정
 - 부분 환불: 상품 단위 정책이 필요하므로 MVP에서는 운영자 확인 상태로 둔다
 
 ## 10. 관리자 상품 생성 검증
@@ -504,10 +478,10 @@ function applyRefund({ orderId, refundStatus, revokeAccess }) {
 
 상품 수정 시에는 결제 이력 여부를 먼저 확인한다.
 
-- 결제 이력이 없는 상품: 상품 정보, 포함 클래스, 부여 등급, 가격·이용 기간, 환불·공개 정책을 수정할 수 있다.
+- 결제 이력이 없는 상품: 상품 정보, 결제 후 볼 수 있는 클래스, 수강 조건, 가격·이용 기간, 환불·공개 정책을 수정할 수 있다.
 - 결제 이력이 있는 상품: `1. 상품 정보`만 수정할 수 있다.
 - 결제 이력이 있는 상품에서 수정 가능한 항목은 상품명, 상품 소개, 노출 상태다.
-- 결제 이력이 있는 상품의 포함 클래스, 부여 등급, 가격, 이용 기간, 환불 정책을 바꾸려면 기존 상품을 수정하지 않고 새 상품을 생성한다.
+- 결제 이력이 있는 상품의 결제 후 볼 수 있는 클래스, 수강 조건, 가격, 이용 기간, 환불 정책을 바꾸려면 기존 상품을 수정하지 않고 새 상품을 생성한다.
 
 ```js
 function validateProductForm(product) {
@@ -515,7 +489,7 @@ function validateProductForm(product) {
 
   if (!product.name?.trim()) errors.push("상품명을 입력해 주세요.");
   if (!product.includedCourseIds?.length) errors.push("포함 클래스를 1개 이상 선택해 주세요.");
-  if (!product.grantedMembershipGrade) errors.push("결제 후 부여할 멤버십 등급을 선택해 주세요.");
+  if (!product.purchaseRequirement) errors.push("수강 조건을 선택해 주세요.");
   if (product.price < 0) errors.push("가격은 0원 이상이어야 합니다.");
 
   if (product.accessPeriod.type === "from_payment_date" && !product.accessPeriod.days) {
@@ -534,21 +508,21 @@ function validateProductForm(product) {
 ### 크리에이터 공개 페이지
 
 - 상품 유형 탭은 두지 않는다.
-- 상품 카드는 상품명, 가격, 포함 클래스, 부여 등급, 이용 기간, 판매 상태를 표시한다.
+- 상품 카드는 상품명, 가격, 수강 조건, 결제 후 볼 수 있는 클래스, 이용 기간, 판매 상태를 표시한다.
 - 포함 클래스가 1개인 상품과 여러 개인 상품은 같은 카드 규칙으로 노출한다.
 
 ### 결제 팝업
 
 - 결제 대상은 상품이다.
-- 결제 완료 문구는 “수강생 등급과 포함 클래스 권한이 부여되었습니다”로 표시한다.
-- 부여 등급과 포함 클래스 목록을 결제 요약에 보여준다.
+- 결제 완료 문구는 “내 학습에서 바로 볼 수 있습니다”로 표시한다.
+- 수강 조건과 결제 후 볼 수 있는 클래스 목록을 결제 요약에 보여준다.
 
 ### 내 학습
 
-- 상품 목록이 아니라 강의 권한 목록을 보여준다.
+- 상품 목록이 아니라 사용자가 볼 수 있는 클래스 목록을 보여준다.
 - 같은 강의를 여러 상품으로 샀어도 강의 카드는 1개만 보여준다.
-- 만료된 권한만 있으면 `수강 종료`로 분류한다.
-- 유효 권한은 있지만 선수강 조건 미충족이면 잠금 상태로 보여준다.
+- 수강 기간이 끝났으면 `수강 종료`로 분류한다.
+- 결제 기록은 있지만 수강 조건을 충족하지 못했으면 잠금 상태로 보여준다.
 
 ## 12. 현재 화면 코드에서 바꿀 지점
 
@@ -585,4 +559,4 @@ const learningItems = getMyLearning({
 });
 ```
 
-이렇게 바꾸면 개별 강의, 패키지, 멤버십이 모두 같은 권한 로직으로 처리된다.
+이렇게 바꾸면 개별 강의, 패키지, 스터디형 상품이 모두 같은 권한 로직으로 처리된다.

@@ -108,7 +108,7 @@ function openCreator(id){
         <button class="active" onclick="ctab(this,'cs-class')">클래스</button>
         <button onclick="ctab(this,'cs-about')">소개</button>
       </div>
-      <div class="csec show" id="cs-class"><div class="creator-section-copy"><h2>클래스</h2><p>필요한 클래스를 확인하고 바로 수강 신청할 수 있습니다. 선수강 조건이 있는 클래스는 신청 전 안내됩니다.</p></div><div class="grid">${commerce.products.map(p=>prodCard(p,c)).join('')}</div></div>
+      <div class="csec show" id="cs-class"><div class="creator-section-copy"><h2>클래스</h2><p>필요한 클래스를 확인하고 바로 수강 신청할 수 있습니다. 수강 조건이 있는 클래스는 신청 전 안내됩니다.</p></div><div class="grid">${commerce.products.map(p=>prodCard(p,c)).join('')}</div></div>
       <div class="csec" id="cs-about"><div class="about-box">${c.about}</div></div>
     </div>`;
   show('creator');window.scrollTo({top:0});setHash('#/c/'+id);
@@ -120,9 +120,15 @@ function ctab(btn,id){btn.parentElement.querySelectorAll('button').forEach(b=>b.
 /* ---------- DETAIL ---------- */
 let activeDetail=null;
 function faqAcc(list,prefix){return list.map((f,i)=>`<div class="faq-item"><button class="faq-q" onclick="toggleFaq('${prefix}-${i}')"><span><span class="qmark">Q.</span>${f.q}</span><span class="pm">+</span></button><div class="faq-a" id="fa-${prefix}-${i}"><p>${f.a}</p></div></div>`).join('');}
+function purchaseRequirement(product){
+  const req=product.requirement||{type:'none',label:'처음 참여 가능',message:'사전 수강 이력 없이 신청할 수 있습니다.'};
+  if(req.type==='none')return {ok:true,label:req.label,message:req.message};
+  const ok=state.purchased.has(req.productId);
+  return {ok,label:req.label,message:ok?'신청 조건을 충족했습니다.':req.message};
+}
 function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];activeDetail=pid;
-  const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,seat=Math.round(ch.enrolled/ch.seats*100);
+  const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,seat=Math.round(ch.enrolled/ch.seats*100),req=purchaseRequirement(p);
   document.getElementById('view-detail').innerHTML=`
     <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
     <div class="detail-hero"><div class="wrap detail-hero-in">
@@ -143,6 +149,10 @@ function openDetail(pid){
             <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
             <div class="ch-row"><span>신청 현황</span><b>${ch.enrolled} / ${ch.seats}명</b></div>
             <div class="seat-bar"><i style="width:${seat}%"></i></div>
+          </div>
+          <div class="cohort-box access-box">
+            <div class="ch-row"><span>신청 조건</span><b>${req.label}</b></div>
+            <p>${req.message}</p>
           </div>
           <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
           <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
@@ -325,7 +335,7 @@ function filterCreatorLearningFaq(input){
 
 /* ---------- platform FAQ ---------- */
 const commonFaqs=[
-  {q:'결제 후 바로 수강할 수 있나요?',a:'네. 결제가 완료되면 수강 권한이 자동 부여되고, 내 학습에서 즉시 콘텐츠와 운영 안내를 확인할 수 있습니다.'},
+  {q:'결제 후 바로 수강할 수 있나요?',a:'네. 결제가 완료되면 내 학습에서 바로 콘텐츠와 운영 안내를 확인할 수 있습니다.'},
   {q:'여러 크리에이터의 클래스를 한 계정으로 들을 수 있나요?',a:'네. 하나의 노하우집 계정으로 모든 크리에이터의 클래스를 구매·수강할 수 있고, 내 학습에서 크리에이터별로 모아 볼 수 있습니다.'},
   {q:'자료·단톡방은 어떻게 이용하나요?',a:'구매한 클래스의 내 학습에서 자료 다운로드와 단톡방·줌 링크가 활성화됩니다. 미구매 클래스는 제한됩니다.'},
   {q:'환불 규정은 어떻게 되나요?',a:'첫 강의 시작 전까지 전액 환불, 이후에는 진행 회차를 제외한 잔여분에 대해 규정에 따라 처리됩니다.'},
@@ -385,7 +395,12 @@ function logout(){state.user=null;state.purchased.clear();state.cart.clear();upd
 /* ---------- cart / purchase ---------- */
 function addCart(id){if(state.cart.has(id)){toast('이미 장바구니에 있습니다');return;}state.cart.add(id);updateCart();toast('장바구니에 담았습니다');}
 function updateCart(){const n=state.cart.size,el=document.getElementById('cartCount');el.textContent=n;el.style.display=n?'flex':'none';}
-function startPurchase(id){if(!state.user){state.pending=id;openAuth('login');toast('결제를 위해 먼저 로그인해 주세요');return;}openPay(id);}
+function startPurchase(id){
+  if(!state.user){state.pending=id;openAuth('login');toast('결제를 위해 먼저 로그인해 주세요');return;}
+  const req=purchaseRequirement(productMap[id]);
+  if(!req.ok){toast(req.message);return;}
+  openPay(id);
+}
 function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.payMethod='card';
   document.getElementById('payTitle').textContent='결제하기';
   document.getElementById('payBody').innerHTML=`
@@ -403,7 +418,7 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
 function confirmPay(id){const p=productMap[id],c=creatorOf[id];state.purchased.add(id);state.cart.delete(id);updateCart();
   document.getElementById('payTitle').textContent='결제 완료';
-  document.getElementById('payBody').innerHTML=`<div class="pay-done"><div class="check">✓</div><h3>결제가 완료되었습니다</h3><p>${c.name}의 “${p.title}” 수강 권한이 자동 부여되었습니다.</p><button class="btn-red" style="width:100%" onclick="goMy()">내 학습으로 가기</button></div>`;
+  document.getElementById('payBody').innerHTML=`<div class="pay-done"><div class="check">✓</div><h3>결제가 완료되었습니다</h3><p>${c.name}의 “${p.title}”을 내 학습에서 바로 볼 수 있습니다.</p><button class="btn-red" style="width:100%" onclick="goMy()">내 학습으로 가기</button></div>`;
   refreshOwned();}
 function goMy(){closePay();show('mypage');}
 function closePay(){document.getElementById('payModal').classList.remove('show');}
