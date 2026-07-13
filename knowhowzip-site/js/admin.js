@@ -11,12 +11,25 @@ const classes=[
 ];
 
 const students=[
-  {name:'김지훈',email:'jihoon.kim@email.com',access:'기초 수강',history:'기초 수강 중',course:'경매 낙찰 기초반',cohort:'3기',paid:'290,000원',joined:'06.29',state:'수강 중'},
-  {name:'이서연',email:'seoyeon.lee@email.com',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',cohort:'2기',paid:'390,000원',joined:'06.29',state:'수강 중'},
-  {name:'박민수',email:'minsu.park@email.com',access:'기초 수강',history:'기초 수강 중',course:'경매 낙찰 기초반',cohort:'3기',paid:'290,000원',joined:'06.28',state:'수강 중'},
-  {name:'정유진',email:'yujin.jung@email.com',access:'스터디 참여',history:'기초 완료 · 심화 완료',course:'땅부자 루틴클럽',cohort:'8월',paid:'99,000원',joined:'06.28',state:'수강 대기'},
-  {name:'최현우',email:'hyunwoo.choi@email.com',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',cohort:'2기',paid:'390,000원',joined:'06.27',state:'수강 중'}
+  {name:'김지훈',email:'jihoon.kim@email.com',phone:'010-2384-1129',access:'기초 수강',history:'기초 수강 중',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'3기',paid:'290,000원',period:'2026.07.05 ~ 08.02',joined:'06.29',state:'수강 중',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.07.05 ~ 08.02',purchased:'2026.06.29',status:'수강 중'}]},
+  {name:'이서연',email:'seoyeon.lee@email.com',phone:'010-5418-9032',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.29',state:'수강 중',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.05.05 ~ 06.02',purchased:'2026.04.29',status:'수강 완료'},{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.29',status:'수강 중'}]},
+  {name:'박민수',email:'minsu.park@email.com',phone:'010-8731-2465',access:'기초 수강',history:'기초 수강 중',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'3기',paid:'290,000원',period:'2026.07.05 ~ 08.02',joined:'06.28',state:'수강 중',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.07.05 ~ 08.02',purchased:'2026.06.28',status:'수강 중'}]},
+  {name:'정유진',email:'yujin.jung@email.com',phone:'010-6904-3518',access:'스터디 참여',history:'기초 완료 · 심화 완료',course:'땅부자 루틴클럽',recentProduct:'땅부자 루틴클럽 8월',cohort:'8월',paid:'99,000원',period:'2026.08.01 ~ 08.31',joined:'06.28',state:'수강 대기',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.03.05 ~ 04.02',purchased:'2026.02.26',status:'수강 완료'},{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.05.12 ~ 06.09',purchased:'2026.04.30',status:'수강 완료'},{product:'땅부자 루틴클럽 8월',className:'땅부자 루틴클럽',paid:'99,000원',period:'2026.08.01 ~ 08.31',purchased:'2026.06.28',status:'수강 대기'}]},
+  {name:'최현우',email:'hyunwoo.choi@email.com',phone:'010-4520-7781',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.27',state:'수강 중',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.05.05 ~ 06.02',purchased:'2026.04.27',status:'수강 완료'},{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.27',status:'수강 중'}]}
 ];
+students.push(
+  {name:'한도윤',email:'doyoon.han@email.com',phone:'010-3357-9180',access:'기초 수강',history:'기초 수강 중',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'3기',paid:'290,000원',period:'2026.07.05 ~ 08.02',joined:'06.26',state:'수강 중',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.07.05 ~ 08.02',purchased:'2026.06.26',status:'수강 중'}]},
+  {name:'서민재',email:'minjae.seo@email.com',phone:'010-7271-5408',access:'기초 수강',history:'기초 완료',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'2기',paid:'290,000원',period:'2026.05.05 ~ 06.02',joined:'05.01',state:'수강 완료',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.05.05 ~ 06.02',purchased:'2026.05.01',status:'수강 완료'}]},
+  {name:'오하린',email:'harin.oh@email.com',phone:'010-8840-1263',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.25',state:'수강 중',products:[{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.25',status:'수강 중'}]},
+  {name:'문태오',email:'taeo.moon@email.com',phone:'010-6104-7729',access:'스터디 참여',history:'기초 완료 · 심화 완료',course:'땅부자 루틴클럽',recentProduct:'땅부자 루틴클럽 8월',cohort:'8월',paid:'99,000원',period:'2026.08.01 ~ 08.31',joined:'06.24',state:'수강 대기',products:[{product:'땅부자 루틴클럽 8월',className:'땅부자 루틴클럽',paid:'99,000원',period:'2026.08.01 ~ 08.31',purchased:'2026.06.24',status:'수강 대기'}]},
+  {name:'강서아',email:'seoa.kang@email.com',phone:'010-4927-6501',access:'심화 수강',history:'기초 완료 · 심화 수강 중',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.23',state:'수강 중',products:[{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.23',status:'수강 중'}]},
+  {name:'윤재원',email:'jaewon.yoon@email.com',phone:'010-9762-1184',access:'기초 수강',history:'기간 만료',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'1기',paid:'290,000원',period:'2026.03.05 ~ 04.02',joined:'03.01',state:'기간 만료',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.03.05 ~ 04.02',purchased:'2026.03.01',status:'기간 만료'}]},
+  {name:'배수빈',email:'subin.bae@email.com',phone:'010-3088-4276',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.22',state:'수강 중',products:[{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.22',status:'수강 중'}]},
+  {name:'신예린',email:'yerin.shin@email.com',phone:'010-5536-8027',access:'기초 수강',history:'무료 수강 처리',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 무료 수강',cohort:'3기',paid:'0원',period:'2026.07.13 ~ 09.13',joined:'07.13',state:'무료 수강중',products:[{product:'경매 낙찰 기초반 무료 수강',className:'경매 낙찰 기초반',paid:'0원',period:'2026.07.13 ~ 09.13',purchased:'2026.07.13',status:'무료 수강중'}]}
+);
+
+const studentPageSize=10;
+let studentCurrentPage=1;
 
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const dashboardToday=new Date(2026,6,9);
@@ -169,25 +182,95 @@ function studentAccessClass(access){
   return 'rookie';
 }
 function studentStateClass(state){
+  if(state.includes('무료'))return 'free';
   if(state.includes('대기'))return 'waiting';
   if(state.includes('완료'))return 'done';
   if(state.includes('만료'))return 'expired';
   return 'active';
 }
+function creatorStudentProducts(student){
+  const creatorClasses=classes.map(course=>course.title.split(' · ')[0]).concat('땅부자 루틴클럽');
+  return (student.products||[]).filter(item=>creatorClasses.includes(item.className));
+}
+function studentProductOptions(){
+  return [...new Set(students.map(student=>student.recentProduct).filter(Boolean))];
+}
+function getFilteredStudents(){
+  const q=(document.getElementById('studentSearchInput')?.value||'').trim().toLowerCase();
+  const productFilter=document.getElementById('studentProductFilter')?.value||'전체 최근 결제상품';
+  const stateFilter=document.getElementById('studentStateFilter')?.value||'전체 상태';
+  return students.filter(s=>{
+    const keyword=`${s.name} ${s.email} ${s.phone||''} ${s.history} ${s.course} ${s.recentProduct||''}`.toLowerCase();
+    const matchesKeyword=keyword.includes(q);
+    const matchesProduct=productFilter==='전체 최근 결제상품'||s.recentProduct===productFilter;
+    const matchesState=stateFilter==='전체 상태'||s.state===stateFilter;
+    return matchesKeyword&&matchesProduct&&matchesState;
+  });
+}
 function studentTable(rows,compact=false){
-  return `<div class="table-wrap"><table><thead><tr><th>수강생</th><th>수강 가능</th><th>수강 이력</th><th>클래스</th>${compact?'':'<th>결제 금액</th>'}<th>신청일</th><th>상태</th></tr></thead><tbody>${rows.map(s=>`<tr><td><div class="student-cell"><span>${s.name[0]}</span><div><b>${s.name}</b><small>${s.email}</small></div></div></td><td><span class="student-grade ${studentAccessClass(s.access)}">${s.access}</span></td><td>${s.history}</td><td>${s.course}</td>${compact?'':`<td><b>${s.paid}</b></td>`}<td>${s.joined}</td><td><em class="table-state ${studentStateClass(s.state)}">${s.state}</em></td></tr>`).join('')}</tbody></table></div>`;
+  const emptyRow=`<tr><td class="empty-table-cell" colspan="${compact?4:5}">조건에 맞는 수강생이 없습니다.</td></tr>`;
+  return `<div class="table-wrap"><table><thead><tr><th>이름</th>${compact?'':'<th>전화번호</th>'}<th>최근 결제 상품</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(s=>`<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${s.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${s.email}')}"><td><div class="student-cell"><span>${s.name[0]}</span><div><b>${s.name}</b><small>${s.email}</small></div></div></td>${compact?'':`<td>${s.phone||'-'}</td>`}<td>${s.recentProduct||s.course}</td><td>${s.period||'-'}</td><td><em class="table-state ${studentStateClass(s.state)}">${s.state}</em></td></tr>`).join(''):emptyRow}</tbody></table></div>`;
+}
+function studentStateSummary(){
+  const states=['전체 상태','수강 대기','수강 중','무료 수강중','수강 완료','기간 만료'];
+  const active=document.getElementById('studentStateFilter')?.value||'전체 상태';
+  return `<div class="student-state-tabs">${states.map(state=>{const count=state==='전체 상태'?students.length:students.filter(student=>student.state===state).length;return `<button type="button" class="${active===state?'active':''}" onclick="setStudentStateFilter('${state}')"><span>${state}</span><b>${count}명</b></button>`;}).join('')}</div>`;
+}
+function renderStudentTableSection(){
+  const filtered=getFilteredStudents();
+  const totalPages=Math.max(1,Math.ceil(filtered.length/studentPageSize));
+  studentCurrentPage=Math.min(Math.max(1,studentCurrentPage),totalPages);
+  const start=(studentCurrentPage-1)*studentPageSize;
+  const pageRows=filtered.slice(start,start+studentPageSize);
+  return `${studentTable(pageRows)}
+    <div class="student-pagination"><span>${filtered.length?`${start+1}-${start+pageRows.length}`:'0'} / ${filtered.length}명</span><div><button type="button" onclick="goStudentPage(${studentCurrentPage-1})" ${studentCurrentPage===1?'disabled':''}>이전</button><em>${studentCurrentPage} / ${totalPages}</em><button type="button" onclick="goStudentPage(${studentCurrentPage+1})" ${studentCurrentPage===totalPages?'disabled':''}>다음</button></div></div>`;
 }
 
 function renderStudents(){
-  return `${pageHeader('Student management','수강생 관리','누가 어떤 클래스를 들을 수 있는지 확인합니다.','')}
-  <section class="student-grade-note panel"><div><b>수강 가능 여부는 결제와 수강 기록으로 확인합니다.</b><p>회원 등급을 따로 나누지 않습니다. 예외적으로 열어줘야 하는 클래스는 무료 수강으로 바로 처리할 수 있습니다.</p></div><button type="button" onclick="openAccessRequestModal()">무료 수강 처리</button></section>
-  <div class="filter-bar"><div class="admin-search">⌕ <input placeholder="이름, 이메일, 수강 가능 클래스 검색" oninput="filterStudents(this.value)"></div><select><option>전체 클래스</option><option>경매 낙찰 기초반</option><option>권리분석 실전반</option><option>땅부자 루틴클럽</option></select><select><option>전체 수강 상태</option><option>기초 수강</option><option>심화 수강</option><option>스터디 참여</option></select><select><option>전체 상태</option><option>수강 대기</option><option>수강 중</option><option>수강 완료</option><option>기간 만료</option></select></div>
-  <article class="panel full-table" id="studentTable">${studentTable(students)}</article>`;
+  return `${pageHeader('Student management','수강생 관리',"수강생에 대한 정보를 확인할 수 있습니다. 수강 기간 종료 후 무료로 수강을 하도록 하고자 할 때 '무료 수강 처리' 버튼을 클릭한다.")}
+  <input type="hidden" id="studentStateFilter" value="전체 상태">
+  <section id="studentStateSummary">${studentStateSummary()}</section>
+  <div class="student-table-toolbar"><div class="filter-bar"><div class="admin-search">⌕ <input id="studentSearchInput" placeholder="이름, 이메일, 상품 검색" oninput="filterStudents()"></div><select id="studentProductFilter" onchange="filterStudents()"><option>전체 최근 결제상품</option>${studentProductOptions().map(product=>`<option>${product}</option>`).join('')}</select></div><button class="btn primary" onclick="openAccessRequestModal()">무료수강 처리</button></div>
+  <article class="panel full-table" id="studentTable">${renderStudentTableSection()}</article>`;
 }
 
-function filterStudents(query){
-  const q=query.trim().toLowerCase(),filtered=students.filter(s=>`${s.name} ${s.email} ${s.access} ${s.history} ${s.course}`.toLowerCase().includes(q));
-  document.getElementById('studentTable').innerHTML=studentTable(filtered);
+function filterStudents(resetPage=true){
+  if(resetPage)studentCurrentPage=1;
+  const summary=document.getElementById('studentStateSummary');
+  if(summary)summary.innerHTML=studentStateSummary();
+  document.getElementById('studentTable').innerHTML=renderStudentTableSection();
+}
+function refreshStudentProductFilter(){
+  const select=document.getElementById('studentProductFilter');
+  if(!select)return;
+  const selected=select.value;
+  select.innerHTML=`<option>전체 최근 결제상품</option>${studentProductOptions().map(product=>`<option ${product===selected?'selected':''}>${product}</option>`).join('')}`;
+}
+function setStudentStateFilter(state){
+  const filter=document.getElementById('studentStateFilter');
+  if(filter)filter.value=state;
+  filterStudents(true);
+}
+function goStudentPage(page){
+  studentCurrentPage=page;
+  filterStudents(false);
+}
+
+function openStudentDetail(email){
+  const student=students.find(item=>item.email===email),modal=document.getElementById('accessRequestModal');
+  if(!student||!modal)return;
+  const histories=creatorStudentProducts(student);
+  modal.innerHTML=`<div class="access-request-backdrop" onclick="if(event.target===this)closeAccessRequestModal()">
+    <section class="access-request-dialog student-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="studentDetailTitle">
+      <div class="access-request-head"><div><span>수강생 상세</span><h2 id="studentDetailTitle">${student.name}</h2><p>${student.phone} · ${student.email}</p></div><button type="button" onclick="closeAccessRequestModal()" aria-label="닫기">×</button></div>
+      <div class="student-detail-body">
+        <div class="student-detail-summary"><div><span>최근 결제 상품</span><b>${student.recentProduct||student.course}</b></div><div><span>현재 상태</span><em class="table-state ${studentStateClass(student.state)}">${student.state}</em></div><div><span>수강기간</span><b>${student.period||'-'}</b></div></div>
+        <div class="student-history-head"><h3>결제 상품과 수강 클래스</h3><p>현재 크리에이터 채널의 클래스 이력만 표시합니다.</p></div>
+        <div class="student-history-list">${histories.length?histories.map(item=>`<article><div><b>${item.product}</b><small>${item.purchased} 결제 · ${item.className}</small></div><span>${item.paid}</span><span>${item.period}</span><em class="table-state ${studentStateClass(item.status)}">${item.status}</em></article>`).join(''):'<p class="empty-history">이 크리에이터의 수강 이력이 없습니다.</p>'}</div>
+      </div>
+    </section>
+  </div>`;
+  modal.classList.add('show');
 }
 
 function renderSales(){
@@ -292,7 +375,7 @@ function openAccessRequestModal(){
         <label>수강생<select id="accessRequestStudent" required onchange="syncAccessRequestStudent()"><option value="">수강생 선택</option>${students.map(student=>`<option value="${student.email}">${student.name} · ${student.course}</option>`).join('')}</select></label>
         <div class="access-request-current" id="accessRequestCurrent"><b>현재 수강 상태</b><p>수강생을 선택하면 현재 수강 가능 클래스와 수강 이력이 표시됩니다.</p></div>
         <label>추가로 볼 수 있게 할 클래스<select id="accessRequestClass" required><option value="">클래스 선택</option>${classes.map(course=>`<option>${course.title.split(' · ')[0]}</option>`).join('')}<option>땅부자 루틴클럽</option></select></label>
-        <div class="access-request-grid"><label>시작일<input type="date" value="2026-07-13"></label><label>종료일<input type="date" value="2026-09-13"></label></div>
+        <div class="access-request-grid"><label>시작일<input id="accessRequestStart" type="date" value="2026-07-13"></label><label>종료일<input id="accessRequestEnd" type="date" value="2026-09-13"></label></div>
         <label>처리 사유<textarea id="accessRequestReason" required placeholder="예: 오프라인 결제 확인, 보상 지급, 기존 수강생 확인 등"></textarea></label>
         <p class="access-request-note">처리하면 선택한 클래스가 바로 내 학습에 표시됩니다. 실제 서비스에서는 변경 이력을 남깁니다.</p>
       </div>
@@ -313,18 +396,34 @@ function syncAccessRequestStudent(){
   if(!selected||!box)return;
   box.innerHTML=`<b>현재 수강 상태</b><p><strong>${selected.name}</strong> · ${selected.access}<br>${selected.history} · ${selected.state}</p>`;
 }
+function formatAccessPeriod(start,end){
+  const format=value=>{
+    if(!value)return '';
+    const [year,month,day]=value.split('-');
+    return `${year}.${month}.${day}`;
+  };
+  const startText=format(start),endText=format(end);
+  return startText&&endText?`${startText} ~ ${endText.replace(/^\d{4}\./,'')}`:startText||endText||'-';
+}
 function submitAccessRequest(event){
   event.preventDefault();
   const studentEmail=document.getElementById('accessRequestStudent').value;
   const className=document.getElementById('accessRequestClass').value;
+  const startDate=document.getElementById('accessRequestStart')?.value;
+  const endDate=document.getElementById('accessRequestEnd')?.value;
   const selected=students.find(student=>student.email===studentEmail);
   if(selected){
     selected.access=className.includes('루틴')?'스터디 참여':className.includes('권리')?'심화 수강':'기초 수강';
     selected.history=selected.history.includes('무료 수강 처리')?selected.history:`${selected.history} · 무료 수강 처리`;
     selected.course=selected.course.includes(className)?selected.course:`${selected.course} · ${className}`;
-    selected.state='수강 중';
+    selected.recentProduct=`${className} 무료 수강`;
+    selected.paid='0원';
+    selected.period=formatAccessPeriod(startDate,endDate);
+    selected.state='무료 수강중';
+    selected.products=selected.products||[];
+    selected.products.push({product:`${className} 무료 수강`,className,paid:'0원',period:selected.period,purchased:startDate||'2026-07-13',status:'무료 수강중'});
     const table=document.getElementById('studentTable');
-    if(table)table.innerHTML=studentTable(students);
+    if(table){refreshStudentProductFilter();filterStudents();}
   }
   closeAccessRequestModal();
   adminToast(`${selected?.name||'수강생'}님 ${className} 무료 수강으로 처리했습니다`);
