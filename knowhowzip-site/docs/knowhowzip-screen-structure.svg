@@ -48,7 +48,7 @@
   <text class="lane-title" x="90" y="225">사용자 화면</text>
   <text class="lane-sub" x="90" y="251">공개 랜딩, 크리에이터 탐색, 결제, 내 학습</text>
   <text class="lane-title" x="970" y="225">크리에이터 관리자 화면</text>
-  <text class="lane-sub" x="970" y="251">크리에이터가 강의, 상품, 수강생, 정산, 채널을 관리</text>
+  <text class="lane-sub" x="970" y="251">크리에이터가 클래스 콘텐츠, 상품, 수강생, 정산, 채널을 관리</text>
 
   <!-- User root -->
   <rect class="root-user" x="325" y="285" width="270" height="70" rx="16" filter="url(#shadow)"/>
@@ -79,7 +79,7 @@
   <text class="tag" x="105" y="555">HOME</text>
   <text class="small" x="105" y="584">히어로/검색</text>
   <text class="small" x="105" y="610">추천 크리에이터</text>
-  <text class="small" x="105" y="636">인기 클래스</text>
+  <text class="small" x="105" y="636">추천 상품/클래스</text>
   <text class="small" x="105" y="662">이용 방법</text>
   <text class="small" x="105" y="688">서비스 장점</text>
   <text class="small" x="105" y="714">후기/CTA</text>
@@ -94,14 +94,14 @@
   <rect class="subnode" x="285" y="700" width="170" height="148" rx="14"/>
   <text class="tag" x="309" y="730">CREATOR</text>
   <text class="small" x="309" y="759">#/c/{creatorId}</text>
-  <text class="small" x="309" y="785">클래스 탭</text>
+  <text class="small" x="309" y="785">상품 탭</text>
   <text class="small" x="309" y="811">상품 카드</text>
   <text class="small" x="309" y="837">소개 탭</text>
   <rect class="subnode" x="285" y="888" width="170" height="176" rx="14"/>
   <text class="tag" x="309" y="918">PRODUCT</text>
   <text class="small" x="309" y="947">#/p/{productId}</text>
   <text class="small" x="309" y="973">구매 카드</text>
-  <text class="small" x="309" y="999">클래스 소개</text>
+  <text class="small" x="309" y="999">상품/클래스 소개</text>
   <text class="small" x="309" y="1025">영상/자료</text>
   <text class="small" x="309" y="1051">운영 안내/FAQ</text>
   <path class="line-user" d="M355 477 V525" marker-end="url(#arrow-user)"/>
@@ -142,7 +142,7 @@
   <rect class="card" x="90" y="1095" width="730" height="110" rx="16"/>
   <text class="tag" x="120" y="1128">DATA</text>
   <text class="node-title" x="120" y="1160">크리에이터/상품 데이터</text>
-  <text class="node-sub" x="120" y="1187">data.js: 초기 공개 크리에이터는 애매모홈 단일 / 상품, 커리큘럼, FAQ, 운영 안내</text>
+  <text class="node-sub" x="120" y="1187">data.js: 초기 공개 크리에이터는 애매모홈 단일 / 상품, 클래스, 커리큘럼, FAQ</text>
 
   <!-- Admin root -->
   <rect class="root-admin" x="1205" y="285" width="270" height="70" rx="16" filter="url(#shadow)"/>
@@ -185,7 +185,7 @@
   <!-- Admin detail sections -->
   <rect class="subnode" x="970" y="650" width="175" height="150" rx="14"/>
   <text class="tag" x="994" y="680">DASHBOARD</text>
-  <text class="small" x="994" y="709">매출/수강생/강의</text>
+  <text class="small" x="994" y="709">매출/수강생/클래스</text>
   <text class="small" x="994" y="735">강의 운영 현황</text>
   <text class="small" x="994" y="761">최근 수강 신청</text>
 
@@ -193,26 +193,26 @@
   <text class="tag" x="1194" y="680">CLASS EDITOR</text>
   <text class="small" x="1194" y="709">#class-new</text>
   <text class="small" x="1194" y="735">#class-edit-{id}</text>
-  <text class="small" x="1194" y="761">#class-clone-{id}</text>
-  <text class="small" x="1194" y="787">1. 강의 정보</text>
-  <text class="small" x="1194" y="813">2. 일정·가격</text>
-  <text class="small" x="1194" y="839">3. 콘텐츠·혜택</text>
-  <text class="small" x="1194" y="865">4. 운영 / 5. FAQ·공개</text>
+  <text class="small" x="1194" y="761">복제: 카드 바로 추가</text>
+  <text class="small" x="1194" y="787">1. 클래스 정보</text>
+  <text class="small" x="1194" y="813">2. 콘텐츠</text>
+  <text class="small" x="1194" y="839">3. FAQ</text>
+  <text class="small" x="1194" y="865">수강기간·공개여부는 상품에서 관리</text>
 
   <rect class="subnode" x="1405" y="650" width="210" height="204" rx="14"/>
   <text class="tag" x="1429" y="680">PRODUCT EDITOR</text>
   <text class="small" x="1429" y="709">#product-new</text>
-  <text class="small" x="1429" y="735">상품 유형</text>
-  <text class="small" x="1429" y="761">상품 정보</text>
-  <text class="small" x="1429" y="787">포함 강의</text>
-  <text class="small" x="1429" y="813">가격·이용 기간</text>
-  <text class="small" x="1429" y="839">환불·공개 정책</text>
+  <text class="small" x="1429" y="735">1. 상품 정보</text>
+  <text class="small" x="1429" y="761">2. 결제 후 볼 클래스</text>
+  <text class="small" x="1429" y="787">3. 수강 조건</text>
+  <text class="small" x="1429" y="813">4. 가격·수강 기간</text>
+  <text class="small" x="1429" y="839">5. 환불 정책</text>
 
   <rect class="subnode" x="970" y="910" width="175" height="144" rx="14"/>
   <text class="tag" x="994" y="940">STUDENTS / SALES</text>
-  <text class="small" x="994" y="969">수강생 목록/검색</text>
-  <text class="small" x="994" y="995">매출 요약</text>
-  <text class="small" x="994" y="1021">정산/주문 표</text>
+  <text class="small" x="994" y="969">수강생 목록/상태 탭</text>
+  <text class="small" x="994" y="995">무료 수강 처리</text>
+  <text class="small" x="994" y="1021">월별 정산/매출 상세</text>
 
   <rect class="subnode" x="1170" y="920" width="210" height="176" rx="14"/>
   <text class="tag" x="1194" y="950">ALIMTALK</text>
@@ -240,7 +240,7 @@
   <!-- Preview / public link -->
   <rect class="modal" x="1218" y="1132" width="350" height="74" rx="16"/>
   <text class="tag" x="1244" y="1162" fill="#c2410c">PREVIEW LINK</text>
-  <text class="small" x="1244" y="1188">강의 미리보기 iframe → index.html#/p/{classId}</text>
+  <text class="small" x="1244" y="1188">상품/클래스 미리보기 iframe → index.html#/p/{productId}</text>
   <path class="line dash" d="M1275 880 V1132" marker-end="url(#arrow-gray)"/>
 
   <!-- Cross relationship -->
