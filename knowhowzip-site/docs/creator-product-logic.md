@@ -9,8 +9,8 @@
 - 영상, 자료, FAQ, 운영 안내, 라이브 일정의 묶음이다.
 - 단독으로도 판매될 수 있지만, 결제 대상 자체는 상품이다.
 - 클래스 안에는 여러 개의 강의 영상이 들어갈 수 있다.
-- 수강 조건은 클래스에 설정한다.
-- 수강 가능 여부는 결제/수강 기록과 수강 조건 충족 여부를 함께 본다.
+- 클래스에서는 수료 기준과 수강 일정을 관리한다.
+- 상품 신청 가능 여부는 상품의 수강 조건에서 판단한다.
 
 ### 상품
 
@@ -32,7 +32,7 @@
 
 - 상품 수강 조건은 `크리에이터 관리자 > 상품 관리 > 상품 생성/수정 > 3. 수강 조건`에서 기존 클래스를 선택해 설정한다.
 - 예를 들어 권리분석 실전반 상품의 수강 조건에 `경매 낙찰 기초반`을 선택하면, 해당 클래스를 구매했거나 수강한 사람만 결제할 수 있다.
-- 클래스 관리의 `수강 조건·일정`은 콘텐츠 잠금이나 수료 기준처럼 클래스 내부 학습 흐름이 필요할 때 사용한다.
+- 클래스 관리의 `수료 기준·일정`은 수료 기준, 모집 기간, 수강 기간을 설정할 때 사용한다.
 - 상품 관리의 `결제 후 볼 수 있는 클래스` 영역에서는 결제 후 내 학습에 보여줄 클래스를 선택한다.
 
 ### 수강 가능 상태
@@ -50,9 +50,8 @@ const courses = [
     id: "mmoh-basic",
     creatorId: "mmoh",
     title: "경매 낙찰 기초반",
-    accessRule: {
-      prerequisiteCourseIds: [],
-      completionRequiredPercent: 0
+    completionRule: {
+      requiredPercent: 100
     },
     studyPeriod: {
       startsAt: "2026-07-05",
@@ -69,9 +68,8 @@ const courses = [
     id: "mmoh-right",
     creatorId: "mmoh",
     title: "권리분석 실전반",
-    accessRule: {
-      prerequisiteCourseIds: ["mmoh-basic"],
-      completionRequiredPercent: 100
+    completionRule: {
+      requiredPercent: 100
     },
     studyPeriod: {
       startsAt: "2026-07-12",
@@ -335,15 +333,6 @@ function canAccessCourse({ userId, courseId, now }) {
     };
   }
 
-  const prerequisite = checkPrerequisite({ userId, courseId });
-  if (!prerequisite.ok) {
-    return {
-      ok: false,
-      state: "prerequisite_locked",
-      reason: prerequisite.reason
-    };
-  }
-
   return {
     ok: true,
     state: "available",
@@ -362,25 +351,6 @@ function findActiveEntitlement({ userId, courseId, now }) {
   });
 }
 
-function checkPrerequisite({ userId, courseId }) {
-  const course = getCourse(courseId);
-  const requiredIds = course.accessRule?.prerequisiteCourseIds || [];
-
-  for (const requiredCourseId of requiredIds) {
-    const progress = getCourseProgress({ userId, courseId: requiredCourseId });
-    const requiredPercent = course.accessRule.completionRequiredPercent || 100;
-
-    if (progress.completedPercent < requiredPercent) {
-      const requiredCourse = getCourse(requiredCourseId);
-      return {
-        ok: false,
-        reason: `${requiredCourse.title}을 먼저 수강 완료해야 합니다.`
-      };
-    }
-  }
-
-  return { ok: true, reason: "" };
-}
 ```
 
 ## 7. 내 학습 노출 로직
