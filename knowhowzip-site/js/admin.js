@@ -285,9 +285,9 @@ function renderSales(){
   const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
   const gross=data.rows.reduce((sum,row)=>sum+row.amount,0);
   const payout=Math.max(0,Math.round((gross-data.refund)*.88));
-  return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.','<button class="btn ghost" onclick="openSettingsPanel(\'payout\')">정산 계좌 관리</button>')}
-  <div class="sales-month-toolbar"><label>조회 월<select onchange="setSalesMonth(this.value)">${Object.entries(salesMonthlyData).map(([value,item])=>`<option value="${value}" ${value===salesSelectedMonth?'selected':''}>${item.label}</option>`).join('')}</select></label></div>
-  <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div><button onclick="openSettingsPanel('payout')">정산 계좌 관리</button></section>
+  const monthSelect=`<select class="sales-month-select" aria-label="조회 월" onchange="setSalesMonth(this.value)">${Object.entries(salesMonthlyData).map(([value,item])=>`<option value="${value}" ${value===salesSelectedMonth?'selected':''}>${item.label}</option>`).join('')}</select>`;
+  return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
+  <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div></section>
   <section class="metric-grid two"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong><small class="${data.trend==='-'?'':'up'}">${data.trend}</small></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong><small><i>${data.refundCount}건</i></small></article></section>
   <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0},fee=Math.round(row.amount*.12);return `<tr><td><b>${c.title}</b></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(row.amount-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
 }
