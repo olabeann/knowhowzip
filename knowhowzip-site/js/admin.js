@@ -60,8 +60,8 @@ function renderDashboard(){
     <section class="dashboard-grid single">
 
       <article class="panel cohort-panel">
-        <div class="panel-head"><div><h2>클래스 콘텐츠 현황</h2><p>영상, 자료, FAQ 구성 상태</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
-        <div class="cohort-list">${classes.map((c,i)=>`<button onclick="showAdminView('classes')"><span class="cohort-color" style="background:${c.color}">${i+1}</span><span class="cohort-info"><b>${c.title.split(' · ')[0]}</b><small>영상 4강 · 자료 3개 · FAQ 2개</small></span><span class="cohort-state open">콘텐츠 준비</span><strong>수정</strong></button>`).join('')}</div>
+        <div class="panel-head"><div><h2>클래스 콘텐츠</h2><p>등록한 클래스 콘텐츠를 관리합니다.</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
+        <div class="cohort-list">${classes.map((c,i)=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}">${i+1}</span><span class="cohort-info"><b>${c.title.split(' · ')[0]}</b><small>클래스 정보와 콘텐츠를 수정합니다.</small></span><strong>수정</strong></button>`).join('')}</div>
       </article>
     </section>
 
@@ -75,7 +75,7 @@ function renderDashboard(){
 
 function renderClasses(){
   return `${pageHeader('Class management','클래스 관리','클래스의 영상 강의, 자료, FAQ를 관리합니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 클래스 만들기</button>')}
-  <div class="class-admin-grid">${classes.map((c,i)=>`<article class="admin-class-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${c.title} 관리"><div class="class-cover" style="background:${c.color}">${houseMark(70)}</div><div class="class-card-body"><div class="class-card-top"><div class="class-card-menu"><button type="button" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" onclick="openClassPreview('${c.id}')">미리보기</button><button type="button" onclick="openClassEditor('clone','${c.id}')">클래스 복제</button><button type="button" class="danger" onclick="adminToast('\uc0ad\uc81c\ub294 \uc6b4\uc601\ud300 \ud655\uc778 \ud6c4 \uc9c4\ud589\ub429\ub2c8\ub2e4')">삭제</button></div></div></div><h2>${c.title}</h2><p>영상 4강 · 자료 3개 · FAQ 2개</p><div class="class-card-foot lecture-meta"><strong>마지막 수정 06.28</strong><span>콘텐츠 준비</span></div></div></article>`).join('')}</div>`;
+  <div class="class-admin-grid">${classes.map((c,i)=>`<article class="admin-class-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${c.title} 관리"><div class="class-cover" style="background:${c.color}">${houseMark(70)}</div><div class="class-card-body"><div class="class-card-top"><div class="class-card-menu"><button type="button" aria-label="클래스 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" onclick="openClassPreview('${c.id}')">미리보기</button><button type="button" onclick="openClassEditor('clone','${c.id}')">복제</button><button type="button" class="danger" onclick="adminToast('\uc0ad\uc81c\ub294 \uc6b4\uc601\ud300 \ud655\uc778 \ud6c4 \uc9c4\ud589\ub429\ub2c8\ub2e4')">삭제</button></div></div></div><h2>${c.title}</h2><p>클래스 정보와 콘텐츠를 관리합니다.</p><button type="button" class="class-edit-btn" onclick="event.stopPropagation();openClassEditor('edit','${c.id}')">수정</button></div></article>`).join('')}</div>`;
 }
 
 function openClassPreview(classId=''){
@@ -116,7 +116,7 @@ function renderClassEditor(mode='create',classId=''){
         <section class="panel editor-section" id="editor-faq"><div class="editor-section-head"><i>3</i><div><h2>FAQ</h2><p>수강생이 자주 묻는 질문과 답변을 관리합니다.</p></div></div><div class="faq-editor-block"><div class="content-editor-title"><div><h3>클래스 FAQ</h3><p>신청 전에 자주 묻는 내용을 등록하세요.</p></div></div><div class="faq-editor-row"><input placeholder="질문을 입력하세요"><textarea placeholder="답변을 입력하세요"></textarea></div><button type="button" class="add-row-btn" onclick="adminToast('FAQ 항목을 추가했습니다 (예시)')">＋ FAQ 추가</button></div></section>
       </div>
     </div>
-    <div class="editor-bottom-bar"><span><b>${editing?'클래스 콘텐츠':'새 클래스'}</b><small>${editing?'마지막 수정 2026.06.28 14:32':'필수 항목을 모두 입력해 주세요.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">취소</button><button type="button" class="btn ghost" onclick="adminToast(&quot;임시 저장했습니다&quot;)">임시 저장</button><button type="submit" class="btn primary">${editing?'클래스 저장':cloning?'복제본 저장':'클래스 저장'}</button></div></div>
+    <div class="editor-bottom-bar"><span><b>${editing?'클래스 콘텐츠':'새 클래스'}</b><small>필수 항목을 확인한 뒤 저장해 주세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">취소</button><button type="button" class="btn ghost" onclick="adminToast(&quot;임시 저장했습니다&quot;)">임시 저장</button><button type="submit" class="btn primary">${editing?'클래스 저장':cloning?'복제본 저장':'클래스 저장'}</button></div></div>
   </form>`;
 }
 
