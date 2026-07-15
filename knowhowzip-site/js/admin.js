@@ -415,9 +415,9 @@ function courseChecked(product,course){return product.courses.includes(course)?'
 function requirementChecked(product,course){return product.requirement.includes(course)?'checked':'';}
 function noRequirementChecked(product){return product.requirement==='조건 없음'?'checked':'';}
 function productAlimtalkSection(product){
-  const settings=alimtalkProductSettings.find(item=>item.id===product.id)||alimtalkProductSettings[0];
-  const template=settings.items[0];
-  const checked=product.id&&template.enabled?'checked':'';
+  const settings=alimtalkProductSettings.find(item=>item.id===product.id);
+  const template=(settings||alimtalkProductSettings[0]).items[0];
+  const checked=settings&&template.enabled?'checked':'';
   const hidden=checked?'':' is-hidden';
   return `<section class="panel product-section product-alimtalk-section"><div class="product-section-head"><i>5</i><div><h2>결제 후 안내톡</h2><p>이 상품을 결제한 수강생에게 승인된 알림톡 템플릿을 자동 발송합니다.</p></div></div>
     <label class="product-alimtalk-toggle"><input type="checkbox" ${checked} onchange="toggleProductAlimtalkDetails(this)"><span><b>결제 후 안내톡 보내기</b><small>알리고 템플릿 · 수강 준비 안내 · 결제 완료 후 5분 이내</small></span></label>
