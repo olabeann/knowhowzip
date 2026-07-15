@@ -406,8 +406,7 @@ const saleProducts=[
   {id:'prd-basic-pass',requirement:'조건 없음',name:'경매 낙찰 기초반 이용권',desc:'경매 낙찰 기초반 단일 클래스 수강 상품',price:290000,period:'2026.07.05 ~ 08.02',periodType:'지정 수강 기간 기준',periodDays:'',courses:['경매 낙찰 기초반'],extraAccess:[],status:'판매중',paymentCount:24}
 ];
 function renderProducts(){
-  return `${pageHeader('Product','상품 관리','상품별 수강 조건과 결제 후 볼 수 있는 클래스를 관리합니다.','<button class="btn primary" onclick="openProductEditor(\'create\')">+ 새 상품 만들기</button>')}
-  <section class="product-policy-panel panel"><div><span>상품 관리 사용 설명서</span><h2>상품을 등록해서 수강생이 결제할 수 있도록 사용하세요.</h2><p>결제 이후 볼 수 있는 클래스를 선택하고 가격을 정해요. 수강 조건이 있다면 수강 조건을 선택해 주세요.</p></div></section>
+  return `${pageHeader('Product','상품 관리','수강생이 결제할 상품을 만들고 관리합니다.<br>제공 클래스, 수강 조건, 가격, 수강 기간, 결제 후 안내톡을 상품별로 설정하세요.','<button class="btn primary" onclick="openProductEditor(\'create\')">+ 새 상품 만들기</button>')}
   <div class="product-admin-grid">${saleProducts.map(product=>`<article class="sale-product-card"><div class="sale-product-top"><span>${product.courses.length}개 클래스</span><em class="${product.status==='판매중'?'open':'soon'}">${product.status}</em></div><h2>${product.name}</h2><p>${product.desc}</p><div class="product-card-price"><strong>${won(product.price)}</strong><small>${product.period}</small></div><div class="product-card-summary"><div><b>수강 조건</b><span>${product.requirement}</span></div><div><b>클래스</b><span>${product.courses.join(' · ')}</span></div></div><button type="button" onclick="openProductEditor('edit','${product.id}')">상품 수정</button></article>`).join('')}</div>`;
 }
 
