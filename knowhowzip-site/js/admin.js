@@ -347,7 +347,8 @@ function alimtalkEditableFields(template){
     '<div class="alimtalk-variable-row"><label>#{안내항목4제목}<input placeholder="예: 일정 안내"></label><label>#{안내항목4내용}<input placeholder="일정 또는 안내 문구"></label></div>',
     '<label class="wide">#{문의안내}<input value="궁금한 점은 안내된 채널로 남겨 주세요."></label>',
     '<label>버튼 이름<input value="'+template.button+'"></label>',
-    '<label>버튼 연결<select><option>직접 입력한 링크</option><option>내 학습</option></select></label>'
+    '<label>버튼 연결<select onchange="toggleAlimtalkDirectLink(this)"><option value="direct">직접 입력한 링크</option><option value="learning">내 학습 페이지</option></select></label>',
+    '<label class="wide alimtalk-direct-link-field">직접 입력 링크<input type="url" placeholder="https://example.com"></label>'
   ];
   if(template.id==='start')return [
     '<label>#{강의시작일}<input value="#{강의시작일}"></label>',
@@ -358,7 +359,8 @@ function alimtalkEditableFields(template){
     '<label>#{일정명}<input value="첫 모임 안내"></label>',
     '<label>#{일정일시}<input value="#{일정}"></label>',
     '<label>버튼 이름<input value="'+template.button+'"></label>',
-    '<label>버튼 연결<select><option>직접 입력한 링크</option><option>내 학습</option></select></label>'
+    '<label>버튼 연결<select onchange="toggleAlimtalkDirectLink(this)"><option value="direct">직접 입력한 링크</option><option value="learning">내 학습 페이지</option></select></label>',
+    '<label class="wide alimtalk-direct-link-field">직접 입력 링크<input type="url" placeholder="https://example.com"></label>'
   ];
   return [
     '<label>#{강의종료일}<input value="#{강의종료일}"></label>',
@@ -433,6 +435,7 @@ function productAlimtalkSection(product){
 }
 function toggleProductAlimtalkDetails(control){const detail=document.getElementById('productAlimtalkDetail');if(detail)detail.classList.toggle('is-hidden',!control.checked);adminToast(control.checked?'결제 후 안내톡을 켰습니다':'결제 후 안내톡을 껐습니다');}
 function toggleAlimtalkExample(button){const preview=button.nextElementSibling;if(!preview)return;const open=preview.classList.toggle('is-hidden');button.textContent=open?'예시보기':'예시닫기';}
+function toggleAlimtalkDirectLink(select){const field=select.closest('label')?.nextElementSibling;if(field)field.classList.toggle('is-hidden',select.value!=='direct');}
 function productCourseDates(product){
   const match=(product.period||'').match(/(\d{4})\.(\d{2})\.(\d{2})\s*~\s*(?:(\d{4})\.)?(\d{2})\.(\d{2})/);
   if(!match)return {start:'2026-07-05',end:'2026-08-02'};
