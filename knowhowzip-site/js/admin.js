@@ -319,33 +319,59 @@ function renderSales(){
   <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0},fee=Math.round(row.amount*.12);return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(row.amount-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
 }
 
-const alimtalkTemplates=[
-  {id:'payment',name:'결제 완료 안내',trigger:'결제 완료 즉시',status:'승인 완료',statusClass:'approved',templateCode:'NHZ_PAY_001',content:`#{수강생명}님, #{클래스명} 결제가 완료되었습니다.\n내 학습에서 수강 안내와 자료를 확인해 주세요.`,button:'내 학습 바로가기'},
-  {id:'start',name:'강의 시작 안내',trigger:'강의 시작 당일 · 오전 10시',status:'승인 대기',statusClass:'pending',templateCode:'검수 중',content:`#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}\n준비 사항을 내 학습에서 확인해 주세요.`,button:'수강 안내 확인'},
-  {id:'schedule',name:'일정 안내',trigger:'일정 당일 · 오전 10시',status:'승인 완료',statusClass:'approved',templateCode:'NHZ_SCHEDULE_002',content:`#{수강생명}님, 오늘 #{클래스명} 일정이 있습니다.\n일시: #{일정}\n자세한 내용은 아래 버튼에서 확인해 주세요.`,button:'일정 확인'},
-  {id:'end-before',name:'강의 종료 7일 전 안내',trigger:'강의 종료 7일 전 · 오전 10시',status:'작성 중',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{클래스명} 수강 기간이 7일 후 종료됩니다.\n종료일: #{강의종료일}\n남은 강의와 자료를 확인해 주세요.`,button:'내 학습 확인'},
-  {id:'end',name:'강의 종료 당일 안내',trigger:'강의 종료 당일 · 오전 10시',status:'작성 중',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 수강 기간이 종료됩니다.\n종료일: #{강의종료일}\n남은 강의와 자료를 확인해 주세요.`,button:'내 학습 확인'}
+const alimtalkProductSettings=[
+  {id:'prd-basic-pass',name:'경매 낙찰 기초반 이용권',summary:'단일 클래스 · 2026.07.05 ~ 08.02',items:[
+    {id:'onboarding',name:'수강 준비 안내',trigger:'결제 완료 후 5분 이내',enabled:true,status:'작성 중',statusClass:'draft',templateCode:'미등록',content:`안녕하세요, #{수강생명}님.\n#{상품명} 신청이 완료되었습니다.\n수강 전 준비사항을 확인해 주세요.\n\n1. 커뮤니티 참여\n2. 필수 준비사항 확인\n3. 제출/신청 폼 작성\n4. 첫 모임 일정 확인\n\n문의 안내가 함께 발송됩니다.`,button:'수강 준비사항 확인'},
+    {id:'start',name:'강의 시작 안내',trigger:'강의 시작 당일 · 오전 10시',enabled:true,status:'승인 대기',statusClass:'pending',templateCode:'검수 중',content:`#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}\n준비 사항을 내 학습에서 확인해 주세요.`,button:'수강 안내 확인'},
+    {id:'schedule',name:'일정 안내',trigger:'일정 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 일정이 있습니다.\n일시: #{일정}\n자세한 내용은 아래 버튼에서 확인해 주세요.`,button:'일정 확인'},
+    {id:'end',name:'강의 종료 안내',trigger:'강의 종료 7일 전 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{클래스명} 수강 기간이 곧 종료됩니다.\n종료일: #{강의종료일}\n남은 강의와 자료를 확인해 주세요.`,button:'내 학습 확인'}
+  ]},
+  {id:'prd-middle-pass',name:'권리분석 실전 패키지',summary:'기초 + 심화 · 결제일로부터 120일',items:[
+    {id:'onboarding',name:'수강 준비 안내',trigger:'결제 완료 후 5분 이내',enabled:true,status:'승인 완료',statusClass:'approved',templateCode:'NHZ_RIGHTS_READY_001',content:`#{수강생명}님, #{상품명} 결제가 완료되었습니다.\n권리분석 실전반 수강 전 준비 자료를 내 학습에서 확인해 주세요.`,button:'준비 자료 확인'},
+    {id:'start',name:'강의 시작 안내',trigger:'강의 시작 당일 · 오전 10시',enabled:true,status:'승인 완료',statusClass:'approved',templateCode:'NHZ_START_001',content:`#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}\n내 학습에서 강의와 자료를 확인해 주세요.`,button:'내 학습 바로가기'},
+    {id:'schedule',name:'일정 안내',trigger:'일정 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 일정이 있습니다.\n일시: #{일정}`,button:'일정 확인'},
+    {id:'end',name:'강의 종료 안내',trigger:'강의 종료 7일 전 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{클래스명} 수강 기간이 곧 종료됩니다.\n종료일: #{강의종료일}`,button:'내 학습 확인'}
+  ]},
+  {id:'prd-field-package',name:'경매 실전 풀패키지',summary:'준비중 · 2026.08.01 ~ 08.31',items:[
+    {id:'onboarding',name:'수강 준비 안내',trigger:'결제 완료 후 5분 이내',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{상품명} 신청을 환영합니다.\n수강 전 준비 사항을 이곳에 작성해 주세요.`,button:'수강 준비 확인'},
+    {id:'start',name:'강의 시작 안내',trigger:'강의 시작 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}`,button:'수강 안내 확인'},
+    {id:'schedule',name:'일정 안내',trigger:'일정 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 일정이 있습니다.\n일시: #{일정}`,button:'일정 확인'},
+    {id:'end',name:'강의 종료 안내',trigger:'강의 종료 7일 전 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{클래스명} 수강 기간이 곧 종료됩니다.\n종료일: #{강의종료일}`,button:'내 학습 확인'}
+  ]}
 ];
-function renderAlimtalk(){
-  return pageHeader('Alimtalk management','알림톡 관리','결제와 수강 일정에 맞춰 발송할 안내 문구를 관리합니다.')+'<div class="alimtalk-notice"><span>!</span><div><b>문구를 수정하면 새 템플릿 승인이 필요합니다.</b><p>승인되기 전까지는 현재 승인된 문구가 계속 발송되며, 승인 완료 후 알리고 API에 새 템플릿 코드가 적용됩니다.</p></div></div><div class="alimtalk-layout"><aside class="alimtalk-list">'+alimtalkTemplates.map((template,index)=>'<button class="'+(index===0?'active':'')+'" onclick="selectAlimtalkTemplate('+index+',this)"><span class="alimtalk-status '+template.statusClass+'">'+template.status+'</span><b>'+template.name+'</b><small>'+template.trigger+'</small><em>'+template.templateCode+'</em></button>').join('')+'<div class="alimtalk-custom-request"><b>원하는 알림톡이 없나요?</b><p>필요한 발송 상황을 관리자에게 요청해 보세요.</p><button type="button" onclick="openCustomAlimtalkRequest(this)">관리자에게 요청하기</button></div></aside><section class="alimtalk-editor" id="alimtalkEditor">'+alimtalkEditor(alimtalkTemplates[0])+'</section></div>';
+function alimtalkEditableFields(template){
+  if(template.id==='onboarding')return [
+    '<label>#{커뮤니티링크}<input placeholder="카카오톡방, 카페, 커뮤니티 링크"></label>',
+    '<label>#{필수준비링크}<input placeholder="수강 전 가입 또는 확인이 필요한 링크"></label>',
+    '<label>#{제출폼링크}<input placeholder="정보 제출, 사전 설문, 신청 폼 링크"></label>',
+    '<label>#{첫모임일정}<input placeholder="예: 7/1(수) 오후 9시"></label>',
+    '<label class="wide">#{문의안내}<input value="궁금한 점은 안내된 채널로 남겨 주세요."></label>',
+    '<label>버튼 이름<input value="'+template.button+'"></label>',
+    '<label>버튼 연결<select><option>직접 입력한 링크</option><option>내 학습</option></select></label>'
+  ];
+  if(template.id==='start')return [
+    '<label>#{강의시작일}<input value="#{강의시작일}"></label>',
+    '<label>버튼 이름<input value="'+template.button+'"></label>',
+    '<label class="wide">#{추가안내}<input value="준비 사항을 내 학습에서 확인해 주세요."></label>'
+  ];
+  if(template.id==='schedule')return [
+    '<label>#{일정명}<input value="첫 모임 안내"></label>',
+    '<label>#{일정일시}<input value="#{일정}"></label>',
+    '<label>버튼 이름<input value="'+template.button+'"></label>',
+    '<label>버튼 연결<select><option>직접 입력한 링크</option><option>내 학습</option></select></label>'
+  ];
+  return [
+    '<label>#{강의종료일}<input value="#{강의종료일}"></label>',
+    '<label>버튼 이름<input value="'+template.button+'"></label>',
+    '<label class="wide">#{추가안내}<input value="남은 강의와 자료를 확인해 주세요."></label>'
+  ];
 }
-function alimtalkEditor(template){
-  const variables=['#{수강생명}','#{클래스명}','#{강의시작일}','#{일정}','#{강의종료일}','#{내학습링크}'];
-  return '<div class="alimtalk-form panel"><div class="alimtalk-editor-head"><div><span>'+template.trigger+'</span><h2>'+template.name+'</h2></div><span class="alimtalk-status '+template.statusClass+'">'+template.status+'</span></div><label>안내 문구<textarea id="alimtalkMessage" oninput="syncAlimtalkPreview(this.value)">'+template.content+'</textarea><small>승인된 템플릿의 문구와 변수 구조가 달라지면 재승인이 필요합니다.</small></label><div class="alimtalk-variables"><b>사용 가능한 변수</b><div>'+variables.map(variable=>'<button type="button" data-value="'+variable+'" onclick="insertAlimtalkVariable(this.dataset.value)">'+variable+'</button>').join('')+'</div></div><label>버튼 이름<input value="'+template.button+'"></label><label>상세 설명<textarea id="alimtalkRequestDetail" placeholder="관리자에게 전달할 요청사항이나 참고 내용을 입력해 주세요."></textarea><small>작성한 내용은 노하우집 관리자에게 전달되며 슬랙으로 알림을 보냅니다.</small></label><div class="alimtalk-form-actions"><button class="btn ghost" onclick="adminToast(&quot;임시 저장했습니다&quot;)">임시 저장</button><button class="btn primary" onclick="requestAlimtalkApproval()">알림톡 생성 요청</button></div></div><aside class="alimtalk-preview"><span>카카오 알림톡 미리보기</span><div class="alimtalk-phone"><div class="alimtalk-phone-head">노하우집</div><div class="alimtalk-bubble" id="alimtalkPreviewText">'+template.content.replace(/\n/g,'<br>')+'</div><button>'+template.button+'</button></div><p>템플릿 코드 · '+template.templateCode+'</p></aside>';
+function alimtalkFixedPreview(template){
+  if(template.id==='onboarding')return '안녕하세요, #{수강생명}님.\n#{상품명} 신청이 완료되었습니다.\n수강 전 준비사항을 확인해 주세요.\n\n1. 커뮤니티 참여: #{커뮤니티링크}\n2. 필수 준비사항: #{필수준비링크}\n3. 제출/신청 폼: #{제출폼링크}\n4. 첫 모임 일정: #{첫모임일정}\n\n#{문의안내}';
+  if(template.id==='start')return '#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}\n#{추가안내}';
+  if(template.id==='schedule')return '#{수강생명}님, #{클래스명} 일정이 있습니다.\n일정명: #{일정명}\n일시: #{일정일시}';
+  return '#{수강생명}님, #{클래스명} 수강 기간이 곧 종료됩니다.\n종료일: #{강의종료일}\n#{추가안내}';
 }
-function openCustomAlimtalkRequest(button){
-  document.querySelectorAll('.alimtalk-list>button').forEach(item=>item.classList.remove('active'));
-  document.getElementById('alimtalkEditor').innerHTML='<div class="alimtalk-form panel"><div class="alimtalk-editor-head"><div><span>Custom request</span><h2>새 알림톡 요청</h2></div><span class="alimtalk-status draft">요청 작성</span></div><label>알림톡 이름<input id="customAlimtalkName" placeholder="예: 과제 제출 마감 안내"></label><label>원하는 발송 상황<input id="customAlimtalkTiming" placeholder="예: 과제 마감 1일 전 오전 10시"></label><label>상세 설명<textarea id="customAlimtalkDetail" placeholder="발송 목적, 대상, 포함할 내용 등을 자세히 적어 주세요."></textarea><small>작성한 요청은 노하우집 관리자에게 전달되고 슬랙으로 알림을 보냅니다.</small></label><div class="alimtalk-form-actions"><button class="btn primary" onclick="submitCustomAlimtalkRequest()">관리자에게 요청하기</button></div></div><aside class="alimtalk-request-guide panel"><b>요청 후 진행 과정</b><ol><li>관리자 요청 확인</li><li>알림톡 문구 및 변수 검토</li><li>카카오 템플릿 승인</li><li>승인 완료 후 자동 발송 적용</li></ol><p>승인 진행 상황은 관리자 확인 후 안내됩니다.</p></aside>';
-}
-function submitCustomAlimtalkRequest(){
-  const name=document.getElementById('customAlimtalkName'),timing=document.getElementById('customAlimtalkTiming'),detail=document.getElementById('customAlimtalkDetail');
-  if(!name.value.trim()||!timing.value.trim()||!detail.value.trim()){adminToast('알림톡 이름, 발송 상황, 상세 설명을 모두 입력해 주세요');return;}
-  adminToast('알림톡 요청을 보냈습니다 · 관리자 슬랙 알림 전송 완료');
-}
-function selectAlimtalkTemplate(index,button){document.querySelectorAll('.alimtalk-list button').forEach(item=>item.classList.remove('active'));button.classList.add('active');document.getElementById('alimtalkEditor').innerHTML=alimtalkEditor(alimtalkTemplates[index]);}
-function syncAlimtalkPreview(value){const preview=document.getElementById('alimtalkPreviewText');if(preview)preview.innerHTML=value.replace(/\n/g,'<br>');}
-function insertAlimtalkVariable(value){const textarea=document.getElementById('alimtalkMessage');if(!textarea)return;const start=textarea.selectionStart,end=textarea.selectionEnd;textarea.value=textarea.value.slice(0,start)+value+textarea.value.slice(end);textarea.focus();textarea.selectionStart=textarea.selectionEnd=start+value.length;syncAlimtalkPreview(textarea.value);}
-function requestAlimtalkApproval(){const detail=document.getElementById('alimtalkRequestDetail');if(!detail||!detail.value.trim()){adminToast('관리자에게 전달할 상세 설명을 입력해 주세요');if(detail)detail.focus();return;}adminToast('알림톡 생성 요청을 보냈습니다 · 관리자 슬랙 알림 전송 완료');}
 
 function settingsPanelMarkup(panel){
   if(panel==='payout') return `<div class="settings-grid"><form class="panel settings-form" onsubmit="event.preventDefault();adminToast('정산 정보를 저장했습니다')"><div class="settings-section-title"><div><span>PAYOUT</span><h2>정산 정보</h2><p>매출 정산을 받을 계좌와 사업자 정보를 관리합니다.</p></div><em>확인 완료</em></div><div class="settings-fields two"><label>예금주<input value="애매모홈"></label><label>은행<select><option>국민은행</option></select></label><label class="wide">계좌번호<input value="123-456-789012"></label><label class="wide">정산 이메일<input value="creator@mmoh.kr"></label></div><div class="settings-save"><small>정산 정보는 정산일 7일 전까지 변경해야 합니다. 이후 변경은 주식회사 위이에 직접 요청해 주세요.</small><button class="btn primary" type="submit">정산 정보 저장</button></div></form><aside class="panel settings-help"><span>다음 정산</span><strong>7월 10일</strong><p>예정 금액 ₩15,936,000</p><button type="button" onclick="showAdminView('sales')">매출·정산 보기</button></aside></div>`;
@@ -380,6 +406,18 @@ function selectedOption(value,current){return value===current?'selected':'';}
 function courseChecked(product,course){return product.courses.includes(course)?'checked':'';}
 function requirementChecked(product,course){return product.requirement.includes(course)?'checked':'';}
 function noRequirementChecked(product){return product.requirement==='조건 없음'?'checked':'';}
+function productAlimtalkSection(product){
+  const settings=alimtalkProductSettings.find(item=>item.id===product.id)||alimtalkProductSettings[0];
+  const template=settings.items[0];
+  const checked=product.id&&template.enabled?'checked':'';
+  return `<section class="panel product-section product-alimtalk-section"><div class="product-section-head"><i>5</i><div><h2>결제 후 안내톡</h2><p>이 상품을 결제한 수강생에게 승인된 알림톡 템플릿을 자동 발송합니다.</p></div></div>
+    <label class="product-alimtalk-toggle"><input type="checkbox" ${checked}><span><b>결제 후 안내톡 보내기</b><small>알리고 템플릿 · 수강 준비 안내 · 결제 완료 후 5분 이내</small></span></label>
+    <div class="alimtalk-lock-note"><b>고정 문구는 수정할 수 없어요.</b><span>아래 입력값이 승인 템플릿의 변수 자리에 들어갑니다.</span></div>
+    <div class="alimtalk-setting-grid">${alimtalkEditableFields(template).join('')}</div>
+    <div class="alimtalk-fixed-preview"><b>고정 문구 미리보기</b><p>${alimtalkFixedPreview(template).replace(/\n/g,'<br>')}</p></div>
+    <p class="product-alimtalk-help">저장 후 새로 결제하는 수강생부터 이 설정으로 안내톡이 발송됩니다.</p>
+  </section>`;
+}
 function productCourseDates(product){
   const match=(product.period||'').match(/(\d{4})\.(\d{2})\.(\d{2})\s*~\s*(?:(\d{4})\.)?(\d{2})\.(\d{2})/);
   if(!match)return {start:'2026-07-05',end:'2026-08-02'};
@@ -392,15 +430,16 @@ function renderProductEditor(mode='create',productId=''){
   const courseDates=productCourseDates(current);
   return `<form class="product-editor" onsubmit="saveProductForm(event,'${mode}')">
     <div class="editor-head product-editor-head"><button type="button" class="editor-back" onclick="showAdminView('products')">← 상품 관리</button><div><span>${editing?'Product editing':'Product setup'}</span><h1>${editing?'상품 수정':'새 상품 만들기'}</h1><p>${locked?'이미 결제한 수강생이 있어 상품명과 소개만 수정할 수 있습니다. 수강 조건, 가격, 기간을 바꾸려면 새 상품을 만들어 주세요.':'이 상품을 누가 신청할 수 있고, 결제 후 어떤 클래스를 볼 수 있는지 설정합니다.'}</p></div><div class="editor-actions product-editor-actions"><label>노출 상태<select><option ${selectedOption('판매중',current.status)}>공개</option><option ${selectedOption('비공개',current.status)}>비공개</option></select></label><button type="submit" class="btn primary">${editing?'변경사항 저장':'상품 등록'}</button></div></div>
-    <details class="product-setup-hero panel"><summary><div><span>상품 만들기 안내</span><h2>유저가 실제 결제하는 상품을 만드는 화면입니다.</h2></div><em>자세히 보기</em></summary><div class="product-setup-detail"><p>1. 상품 정보는 유저가 결제 전 확인하는 문구입니다.<br>2. 결제 후 볼 수 있는 클래스를 정할 수 있어요.<br>3. 어떤 강의를 수강해야 하는 조건이 있다면 수강 조건에서 설정할 수 있어요.<br>4. 가격과 판매 시작일, 판매 종료일을 정할 수 있어요.</p></div></details>
+    <details class="product-setup-hero panel"><summary><div><span>상품 만들기 안내</span><h2>유저가 실제 결제하는 상품을 만드는 화면입니다.</h2></div><em>자세히 보기</em></summary><div class="product-setup-detail"><p>1. 상품 정보는 유저가 결제 전 확인하는 문구입니다.<br>2. 결제 후 볼 수 있는 클래스를 정할 수 있어요.<br>3. 어떤 강의를 수강해야 하는 조건이 있다면 수강 조건에서 설정할 수 있어요.<br>4. 가격과 판매 시작일, 판매 종료일을 정할 수 있어요.<br>5. 결제 후 안내톡을 켜고 필요한 변수값을 입력할 수 있어요.</p></div></details>
     ${locked?`<section class="product-lock-notice"><b>결제 이력 ${current.paymentCount}건</b><span>이미 결제가 발생한 상품이라 상품 정보만 수정할 수 있습니다. 수강 조건이나 가격을 바꾸려면 새 상품을 생성하세요.</span></section>`:''}
     <div class="product-editor-grid"><div class="product-editor-main">
       <section class="panel product-section editable"><div class="product-section-head"><i>1</i><div><h2>상품 정보</h2><p>공개 페이지와 결제 화면에 보이는 이름과 설명을 입력합니다.</p></div></div><div class="editor-fields"><label class="wide">상품명 <em>*</em><input required value="${current.name}" placeholder="예: 경매 기초 클래스 이용권, 경매 실전 패키지"></label><label class="wide">상품 소개 <em>*</em><textarea required placeholder="상품에 포함된 클래스와 수강 흐름을 설명해 주세요.">${current.desc}</textarea></label></div></section>
       <section class="panel product-section${lockClass}"><div class="product-section-head"><i>2</i><div><h2>결제 후 볼 수 있는 클래스</h2><p>수강생이 결제한 뒤 내 학습에서 볼 클래스를 선택합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="included-lecture-list"><label><input type="checkbox" ${courseChecked(current,'경매 낙찰 기초반')} ${lockAttr}><span><b>경매 낙찰 기초반</b><small>기초 과정 · 처음 참여 가능</small></span></label><label><input type="checkbox" ${courseChecked(current,'권리분석 실전반')} ${lockAttr}><span><b>권리분석 실전반</b><small>심화 과정 · 기초 수강 이력 필요</small></span></label><label><input type="checkbox" ${courseChecked(current,'땅부자 루틴클럽')} ${lockAttr}><span><b>땅부자 루틴클럽</b><small>스터디 · 기존 수강생 전용</small></span></label></div><div class="product-warning"><b>결제하면 선택한 클래스가 내 학습에 열립니다.</b><p>심화 과정 결제 후 기초 과정을 추가로 더 보여줘야 한다면 아래 수강 조건 섹션에서 함께 적어 주세요.</p></div></section>
       <section class="panel product-section${lockClass}"><div class="product-section-head"><i>3</i><div><h2>수강 조건</h2><p>선택한 기존 클래스를 들은 수강생만 이 상품을 신청할 수 있습니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="condition-class-list"><label><input type="checkbox" ${noRequirementChecked(current)} ${lockAttr}><span><b>수강 조건 없음</b><small>누구나 바로 신청할 수 있습니다.</small></span></label><label><input type="checkbox" ${requirementChecked(current,'경매 낙찰 기초반')} ${lockAttr}><span><b>경매 낙찰 기초반</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label><label><input type="checkbox" ${requirementChecked(current,'권리분석 실전반')} ${lockAttr}><span><b>권리분석 실전반</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label><label><input type="checkbox" ${requirementChecked(current,'땅부자 루틴클럽')} ${lockAttr}><span><b>땅부자 루틴클럽</b><small>참여 이력이 있는 수강생만 신청 가능</small></span></label></div></section>
       <section class="panel product-section${lockClass}"><div class="product-section-head"><i>4</i><div><h2>가격·이용 기간</h2><p>1회 결제와 상품별 수강 기간을 우선 적용합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="editor-fields"><label>결제 방식<select ${lockAttr}><option>1회 결제</option><option disabled>월 정기결제 · 후속 단계</option><option disabled>연 정기결제 · 후속 단계</option></select></label><label>판매 가격 <em>*</em><div class="input-suffix"><input required type="number" min="0" step="1000" value="${current.price}" ${lockAttr}><span>원</span></div></label><label>판매 시작일<input type="date" value="2026-07-01" ${lockAttr}></label><label>판매 종료일<input type="date" value="2026-07-31" ${lockAttr}></label><label>수강 시작일<input type="date" value="${courseDates.start}" ${lockAttr}></label><label>수강 종료일<input type="date" value="${courseDates.end}" ${lockAttr}></label></div></section>
-      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>5</i><div><h2>환불 정책</h2><p>상품 결제 전 확인할 정책과 결제 완료 안내를 설정합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="editor-fields"><label class="wide">환불 안내 <em>*</em><textarea required ${lockAttr}>결제 후 수강 시작 전까지 취소할 수 있으며, 수강 시작 후에는 노하우집 운영 정책에 따라 환불됩니다.</textarea></label><label class="wide">결제 완료 안내<textarea ${lockAttr}>결제가 완료되면 선택한 클래스가 내 학습에 표시됩니다.</textarea></label></div></section>
-    </div><aside class="product-editor-side"><div class="panel product-summary"><span>상품 요약</span><h3>${current.name}</h3><p>수강 조건 · ${current.requirement}</p><strong>${won(current.price)}</strong><div><b>볼 수 있는 클래스</b>${current.courses.concat(current.extraAccess).map(course=>`<em>${course}</em>`).join('')}</div><small>${locked?'이미 결제한 수강생이 있어 상품 정보만 수정할 수 있습니다.':'결제 완료 후 내 학습에 표시됩니다.'}</small></div><div class="panel product-side-guide"><b>${editing?'수정 가능 범위':'생성 후 흐름'}</b>${editing?`<ol><li>상품명</li><li>상품 소개</li><li>노출 상태</li></ol>`:`<ol><li>상품 공개</li><li>수강 조건 확인</li><li>사용자 결제</li><li>내 학습에 클래스 표시</li><li>수강 시작</li></ol>`}</div></aside></div>
+      ${productAlimtalkSection(current)}
+      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>6</i><div><h2>환불 정책</h2><p>상품 결제 전 확인할 정책과 결제 완료 안내를 설정합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="editor-fields"><label class="wide">환불 안내 <em>*</em><textarea required ${lockAttr}>결제 후 수강 시작 전까지 취소할 수 있으며, 수강 시작 후에는 노하우집 운영 정책에 따라 환불됩니다.</textarea></label><label class="wide">결제 완료 안내<textarea ${lockAttr}>결제가 완료되면 선택한 클래스가 내 학습에 표시됩니다.</textarea></label></div></section>
+    </div><aside class="product-editor-side"><div class="panel product-summary"><span>상품 요약</span><h3>${current.name}</h3><p>수강 조건 · ${current.requirement}</p><strong>${won(current.price)}</strong><div><b>볼 수 있는 클래스</b>${current.courses.concat(current.extraAccess).map(course=>`<em>${course}</em>`).join('')}</div><small>${locked?'이미 결제한 수강생이 있어 상품 정보만 수정할 수 있습니다.':'결제 완료 후 내 학습에 표시됩니다.'}</small></div><div class="panel product-side-guide"><b>${editing?'수정 가능 범위':'생성 후 흐름'}</b>${editing?`<ol><li>상품명</li><li>상품 소개</li><li>노출 상태</li><li>결제 후 안내톡</li></ol>`:`<ol><li>상품 공개</li><li>수강 조건 확인</li><li>사용자 결제</li><li>안내톡 발송</li><li>내 학습에 클래스 표시</li></ol>`}</div></aside></div>
     <div class="editor-bottom-bar"><span><b>${editing?current.name:'새 상품'}</b><small>${locked?'결제 이력 상품 · 상품 정보만 수정 가능':'필수 항목을 확인한 뒤 등록하세요.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('products')">취소</button><button type="submit" class="btn primary">${editing?'변경사항 저장':'상품 등록'}</button></div></div>
   </form>`;
 }
@@ -481,7 +520,7 @@ function renderSettings(activePanel='profile'){
   <section id="settingsPanel">${settingsPanelMarkup(activePanel)}</section>`;
 }
 
-const viewRenderers={dashboard:renderDashboard,classes:renderClasses,products:renderProducts,students:renderStudents,sales:renderSales,alimtalk:renderAlimtalk,settings:renderSettings};
+const viewRenderers={dashboard:renderDashboard,classes:renderClasses,products:renderProducts,students:renderStudents,sales:renderSales,settings:renderSettings};
 function showAdminView(view){
   document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
   document.getElementById('adminContent').innerHTML=viewRenderers[view]();
