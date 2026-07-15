@@ -341,10 +341,10 @@ const alimtalkProductSettings=[
 ];
 function alimtalkEditableFields(template){
   if(template.id==='onboarding')return [
-    '<label>#{커뮤니티링크}<input placeholder="카카오톡방, 카페, 커뮤니티 링크"></label>',
-    '<label>#{필수준비링크}<input placeholder="수강 전 가입 또는 확인이 필요한 링크"></label>',
-    '<label>#{제출폼링크}<input placeholder="정보 제출, 사전 설문, 신청 폼 링크"></label>',
-    '<label>#{첫모임일정}<input placeholder="예: 7/1(수) 오후 9시"></label>',
+    '<div class="alimtalk-variable-row"><label>#{안내항목1제목}<input placeholder="예: 참여 링크"></label><label>#{안내항목1내용}<input placeholder="링크 또는 안내 문구"></label></div>',
+    '<div class="alimtalk-variable-row"><label>#{안내항목2제목}<input placeholder="예: 준비사항"></label><label>#{안내항목2내용}<input placeholder="링크 또는 안내 문구"></label></div>',
+    '<div class="alimtalk-variable-row"><label>#{안내항목3제목}<input placeholder="예: 신청 폼"></label><label>#{안내항목3내용}<input placeholder="링크 또는 안내 문구"></label></div>',
+    '<div class="alimtalk-variable-row"><label>#{안내항목4제목}<input placeholder="예: 일정 안내"></label><label>#{안내항목4내용}<input placeholder="일정 또는 안내 문구"></label></div>',
     '<label class="wide">#{문의안내}<input value="궁금한 점은 안내된 채널로 남겨 주세요."></label>',
     '<label>버튼 이름<input value="'+template.button+'"></label>',
     '<label>버튼 연결<select><option>직접 입력한 링크</option><option>내 학습</option></select></label>'
@@ -366,11 +366,20 @@ function alimtalkEditableFields(template){
     '<label class="wide">#{추가안내}<input value="남은 강의와 자료를 확인해 주세요."></label>'
   ];
 }
-function alimtalkFixedPreview(template){
-  if(template.id==='onboarding')return '안녕하세요, #{수강생명}님.\n#{상품명} 신청이 완료되었습니다.\n수강 전 준비사항을 확인해 주세요.\n\n1. 커뮤니티 참여: #{커뮤니티링크}\n2. 필수 준비사항: #{필수준비링크}\n3. 제출/신청 폼: #{제출폼링크}\n4. 첫 모임 일정: #{첫모임일정}\n\n#{문의안내}';
+function alimtalkTemplatePreview(template){
+  if(template.id==='onboarding')return '안녕하세요, #{수강생명}님.\n#{상품명} 신청이 완료되었습니다.\n수강 전 안내를 확인해 주세요.\n\n1. #{안내항목1제목}: #{안내항목1내용}\n2. #{안내항목2제목}: #{안내항목2내용}\n3. #{안내항목3제목}: #{안내항목3내용}\n4. #{안내항목4제목}: #{안내항목4내용}\n\n#{문의안내}';
   if(template.id==='start')return '#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}\n#{추가안내}';
   if(template.id==='schedule')return '#{수강생명}님, #{클래스명} 일정이 있습니다.\n일정명: #{일정명}\n일시: #{일정일시}';
   return '#{수강생명}님, #{클래스명} 수강 기간이 곧 종료됩니다.\n종료일: #{강의종료일}\n#{추가안내}';
+}
+function alimtalkFilledExample(template){
+  if(template.id==='onboarding')return '안녕하세요, 김노하우님.\n경매입문반 신청이 완료되었습니다.\n수강 전 안내를 확인해 주세요.\n\n1. 닉네임 변경: 본인 이름으로 닉네임을 변경해 주세요.\n2. 네이버 카페 가입 (필수): 강의 수강을 위해 반드시 가입이 필요합니다.\n링크: https://cafe.naver.com/mmohome\n3. 탱크옥션 가입 + 정보 제출 (필수): 경매 사이트 2개월 무료 이용을 위해 진행해 주세요.\n탱크옥션 가입: https://www.tankauction.com/\n정보 제출: https://walla.my/v/cP4iFiDGfiq81DaQKoah\n4. OT(오리엔테이션) 안내: 7/1(수) 오후 9시 (약 20분)\n\n위 2, 3번은 OT 모임 전까지 반드시 완료 부탁드립니다.\nZoom 링크는 시작 10분 전 카톡방에 공지됩니다.\n참석이 어려운 경우 녹화본이 제공됩니다.';
+  if(template.id==='start')return '안녕하세요, 김노하우님.\n오늘 경매입문반 강의가 시작됩니다.\n시작일: 7/1(수)\n준비 사항을 내 학습에서 확인해 주세요.';
+  if(template.id==='schedule')return '안녕하세요, 김노하우님.\n경매입문반 일정이 있습니다.\n일정명: OT 안내\n일시: 7/1(수) 오후 9시';
+  return '안녕하세요, 김노하우님.\n경매입문반 수강 기간이 곧 종료됩니다.\n종료일: 8/2(일)\n남은 강의와 자료를 확인해 주세요.';
+}
+function alimtalkExampleMarkup(template){
+  return '<div class="alimtalk-example-block"><b>입력값 적용 예시</b><p>'+alimtalkFilledExample(template).replace(/\n/g,'<br>')+'</p></div>';
 }
 
 function settingsPanelMarkup(panel){
@@ -410,14 +419,21 @@ function productAlimtalkSection(product){
   const settings=alimtalkProductSettings.find(item=>item.id===product.id)||alimtalkProductSettings[0];
   const template=settings.items[0];
   const checked=product.id&&template.enabled?'checked':'';
+  const hidden=checked?'':' is-hidden';
   return `<section class="panel product-section product-alimtalk-section"><div class="product-section-head"><i>5</i><div><h2>결제 후 안내톡</h2><p>이 상품을 결제한 수강생에게 승인된 알림톡 템플릿을 자동 발송합니다.</p></div></div>
-    <label class="product-alimtalk-toggle"><input type="checkbox" ${checked}><span><b>결제 후 안내톡 보내기</b><small>알리고 템플릿 · 수강 준비 안내 · 결제 완료 후 5분 이내</small></span></label>
-    <div class="alimtalk-lock-note"><b>고정 문구는 수정할 수 없어요.</b><span>아래 입력값이 승인 템플릿의 변수 자리에 들어갑니다.</span></div>
-    <div class="alimtalk-setting-grid">${alimtalkEditableFields(template).join('')}</div>
-    <div class="alimtalk-fixed-preview"><b>고정 문구 미리보기</b><p>${alimtalkFixedPreview(template).replace(/\n/g,'<br>')}</p></div>
-    <p class="product-alimtalk-help">저장 후 새로 결제하는 수강생부터 이 설정으로 안내톡이 발송됩니다.</p>
+    <label class="product-alimtalk-toggle"><input type="checkbox" ${checked} onchange="toggleProductAlimtalkDetails(this)"><span><b>결제 후 안내톡 보내기</b><small>알리고 템플릿 · 수강 준비 안내 · 결제 완료 후 5분 이내</small></span></label>
+    <div class="product-alimtalk-detail${hidden}" id="productAlimtalkDetail">
+      <div class="alimtalk-lock-note"><b>고정 문구는 수정할 수 없어요.</b><span>아래 입력값이 승인 템플릿의 변수 자리에 들어갑니다. 이모지는 사용할 수 없습니다.</span></div>
+      <div class="alimtalk-template-structure"><b>템플릿 구조</b><p>${alimtalkTemplatePreview(template).replace(/\n/g,'<br>')}</p></div>
+      <div class="alimtalk-setting-grid">${alimtalkEditableFields(template).join('')}</div>
+      <button type="button" class="alimtalk-example-toggle" onclick="toggleAlimtalkExample(this)">예시보기</button>
+      <div class="alimtalk-fixed-preview is-hidden">${alimtalkExampleMarkup(template)}</div>
+      <p class="product-alimtalk-help">필요 없는 안내 항목은 비워둘 수 있습니다. 저장 후 새로 결제하는 수강생부터 이 설정으로 안내톡이 발송됩니다.</p>
+    </div>
   </section>`;
 }
+function toggleProductAlimtalkDetails(control){const detail=document.getElementById('productAlimtalkDetail');if(detail)detail.classList.toggle('is-hidden',!control.checked);adminToast(control.checked?'결제 후 안내톡을 켰습니다':'결제 후 안내톡을 껐습니다');}
+function toggleAlimtalkExample(button){const preview=button.nextElementSibling;if(!preview)return;const open=preview.classList.toggle('is-hidden');button.textContent=open?'예시보기':'예시닫기';}
 function productCourseDates(product){
   const match=(product.period||'').match(/(\d{4})\.(\d{2})\.(\d{2})\s*~\s*(?:(\d{4})\.)?(\d{2})\.(\d{2})/);
   if(!match)return {start:'2026-07-05',end:'2026-08-02'};
