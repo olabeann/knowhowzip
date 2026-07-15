@@ -482,7 +482,7 @@ main{min-height:50vh}
 .pay-sum .row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;gap:12px}.pay-sum .row b{text-align:right}
 .pay-sum .tot{border-top:1px solid var(--line);margin-top:8px;padding-top:12px;font-weight:900;font-size:16px}
 .pay-sum .tot .p{color:var(--brand-dk);font-size:20px;font-weight:900}
-.pay-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.pay-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px}
 .pay-methods button{border:1px solid var(--line);background:#fff;padding:13px 6px;border-radius:11px;font-weight:800;font-size:13px}
 .pay-methods button.active{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
 .pay-done{text-align:center;padding:14px 0}

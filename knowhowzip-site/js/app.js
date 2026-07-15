@@ -412,7 +412,7 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
       <div class="row tot"><span>결제 금액</span><span class="p">${won(p.price)}</span></div>
     </div>
     <div style="font-weight:800;font-size:13px;margin-bottom:8px">결제 수단</div>
-    <div class="pay-methods" id="payMethods"><button class="active" data-m="card" onclick="pickMethod('card')">신용카드</button><button data-m="bank" onclick="pickMethod('bank')">계좌이체</button><button data-m="kakao" onclick="pickMethod('kakao')">카카오페이</button></div>
+    <div class="pay-methods" id="payMethods"><button class="active" data-m="card" onclick="pickMethod('card')">신용카드</button><button data-m="bank" onclick="pickMethod('bank')">계좌이체</button></div>
     <button class="btn-red" onclick="confirmPay('${id}')">${won(p.price)} 결제하기</button>`;
   document.getElementById('payModal').classList.add('show');}
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
