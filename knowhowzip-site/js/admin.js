@@ -61,7 +61,7 @@ function renderDashboard(){
 
       <article class="panel cohort-panel">
         <div class="panel-head"><div><h2>클래스 콘텐츠</h2><p>등록한 클래스 콘텐츠를 관리합니다.</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
-        <div class="cohort-list">${classes.map((c,i)=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}">${i+1}</span><span class="cohort-info"><b>${c.title.split(' · ')[0]}</b><small>클래스 정보와 콘텐츠를 수정합니다.</small></span><strong>수정</strong></button>`).join('')}</div>
+        <div class="cohort-list">${classes.map(c=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}"></span><span class="cohort-info"><b>${c.title.split(' · ')[0]}</b><small>클래스 정보와 콘텐츠를 수정합니다.</small></span><strong>수정</strong></button>`).join('')}</div>
       </article>
     </section>
 

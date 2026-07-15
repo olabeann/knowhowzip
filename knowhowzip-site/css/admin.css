@@ -69,9 +69,9 @@ a{text-decoration:none;color:inherit}
 .bar-item i{width:100%;max-width:25px;background:linear-gradient(180deg,#7C93FF,#4F66F5);border-radius:5px 5px 1px 1px;position:relative;min-height:10px}
 .bar-item i span{display:none;position:absolute;top:-23px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:3px 5px;border-radius:4px;font-style:normal;font-size:8px;white-space:nowrap}.bar-item i:hover span{display:block}
 .bar-item small{font-size:8.5px;color:var(--ink-mute);margin:6px 0 -18px}
-.cohort-list{display:flex;flex-direction:column;gap:4px}
-.cohort-list button{width:100%;border:0;background:none;display:flex;align-items:center;gap:10px;padding:10px 7px;border-radius:9px;text-align:left}.cohort-list button:hover{background:var(--bg)}
-.cohort-color{width:35px;height:35px;border-radius:9px;color:rgba(0,0,0,.55);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cohort-list{display:flex;flex-direction:column;gap:6px}
+.cohort-list button{width:100%;border:0;background:none;display:flex;align-items:center;gap:12px;padding:12px 8px;border-radius:9px;text-align:left}.cohort-list button:hover{background:var(--bg)}
+.cohort-color{width:4px;height:38px;border-radius:999px;flex-shrink:0}
 .cohort-info{flex:1;min-width:0}.cohort-info b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cohort-info small{font-size:9.5px;color:var(--ink-mute)}
 .cohort-state{font-size:9px;font-weight:850;padding:3px 6px;border-radius:5px}.cohort-state.open{background:#E8F8F0;color:var(--green)}.cohort-state.soon{background:#FFF4E5;color:var(--amber)}.cohort-state.ended{background:#eef2f7;color:#64748b}
 .cohort-list button>strong{font-size:11px;min-width:34px;text-align:right}
