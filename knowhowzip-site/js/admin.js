@@ -52,9 +52,9 @@ function pageHeader(kicker,title,desc,actions=''){
 function renderDashboard(){
   return `${pageHeader('2026년 7월 9일 목요일','안녕하세요, 애매모홈님 👋','강의와 상품 운영 현황을 한눈에 확인하세요.','<button class="btn ghost" onclick="adminToast(\'미리보기 페이지를 엽니다 (예시)\')">내 페이지 보기 ↗</button>')}
     <section class="metric-grid three">
-      <article class="metric-card"><div class="metric-icon blue">₩</div><span>이번 달 매출</span><strong>₩18,420,000</strong><small class="up">↑ 18.6% <i>지난달 대비</i></small></article>
-      <article class="metric-card"><div class="metric-icon violet">♙</div><span>전체 수강생</span><strong>48명</strong><small class="up">↑ 7명 <i>이번 주 신규</i></small></article>
-      <article class="metric-card"><div class="metric-icon green">▶</div><span>등록 클래스</span><strong>3개</strong><small><i>콘텐츠 관리 중</i></small></article>
+      <article class="metric-card"><div class="metric-icon blue">💸</div><span>이번 달 매출</span><strong>₩18,420,000</strong><small class="up">↑ 18.6% <i>지난달 대비</i></small></article>
+      <article class="metric-card"><div class="metric-icon violet">👥</div><span>전체 수강생</span><strong>48명</strong><small class="up">↑ 7명 <i>이번 주 신규</i></small></article>
+      <article class="metric-card"><div class="metric-icon green">🏫</div><span>등록 클래스</span><strong>3개</strong><small><i>콘텐츠 관리 중</i></small></article>
     </section>
 
     <section class="dashboard-grid single">
