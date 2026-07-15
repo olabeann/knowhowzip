@@ -227,7 +227,7 @@ function renderStudentTableSection(){
 }
 
 function renderStudents(){
-  return `${pageHeader('Student management','수강생 관리',"수강생에 대한 정보를 확인할 수 있습니다. 수강 기간 종료 후 무료로 수강을 하도록 하고자 할 때 '무료 수강 처리' 버튼을 클릭한다.")}
+  return `${pageHeader('Student management','수강생 관리',"수강생에 대한 정보를 확인할 수 있습니다. 수강 기간 종료 후 무료로 수강을 하도록 하고자 할 때 '무료 수강 처리' 버튼을 클릭합니다.")}
   <input type="hidden" id="studentStateFilter" value="전체 상태">
   <section id="studentStateSummary">${studentStateSummary()}</section>
   <div class="student-table-toolbar"><div class="filter-bar"><div class="admin-search">⌕ <input id="studentSearchInput" placeholder="이름, 이메일, 상품 검색" oninput="filterStudents()"></div><select id="studentProductFilter" onchange="filterStudents()"><option>전체 최근 결제상품</option>${studentProductOptions().map(product=>`<option>${product}</option>`).join('')}</select></div><button class="btn primary" onclick="openAccessRequestModal()">무료수강 처리</button></div>
