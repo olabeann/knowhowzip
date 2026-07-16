@@ -264,8 +264,9 @@ main{min-height:50vh}
 .crumb a:hover{color:var(--ink)}.crumb .sep{color:var(--ink-mute)}
 .crumb-share{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 13px;font-weight:800;font-size:13px;color:var(--ink-soft)}
 .crumb-share:hover{border-color:var(--ink);color:var(--ink)}
-.detail-hero{background:#fff;border-bottom:1px solid var(--line);padding:8px 0 34px}
-.detail-hero-in{display:grid;grid-template-columns:1.55fr 1fr;gap:36px;align-items:start}
+.detail-hero{background:#fff;border-bottom:1px solid var(--line);padding:18px 0 0}
+.detail-hero-in{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.9fr);grid-template-rows:auto auto;column-gap:42px;align-items:start}
+.detail-hero-in>aside{grid-column:2;grid-row:1 / 3;align-self:start;z-index:15;position:relative}
 .d-creatorchip{display:inline-flex;align-items:center;gap:8px;background:var(--bg-alt);border:1px solid var(--line);border-radius:30px;padding:5px 14px 5px 6px;font-weight:800;font-size:14px;margin-bottom:16px;cursor:pointer}
 .d-creatorchip .mini{width:26px;height:26px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .d-tags{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
@@ -274,11 +275,13 @@ main{min-height:50vh}
 .d-lead{color:var(--ink-soft);font-size:16px;margin:0 0 16px;line-height:1.6}
 .d-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;color:var(--ink-soft)}
 .d-meta .stars{color:var(--amber)}.d-meta b{color:var(--ink);font-weight:800}
-.d-visual{aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin-top:20px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
+.d-visual{aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin-top:22px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
 
-.buycard{position:sticky;top:calc(var(--gnb-h) + 20px);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden}
-.bc-body{padding:22px}
-.cohort-box{background:var(--brand-soft);border:1px solid #DCE3FF;border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.buycard{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden;max-width:440px;margin:var(--buycard-start-offset,0px) 0 0 auto}
+.buycard.is-fixed{position:fixed;top:calc(var(--gnb-h) + 20px);right:var(--buycard-fixed-right,0px);width:var(--buycard-fixed-width,440px);margin:0;z-index:30}
+.buycard.is-bottom{position:absolute;top:var(--buycard-bottom-top,0px);right:0;width:var(--buycard-fixed-width,440px);margin:0;z-index:30}
+.bc-body{padding:22px;display:grid;gap:16px}
+.cohort-box{background:var(--brand-soft);border:1px solid #DCE3FF;border-radius:14px;padding:15px 16px;margin-bottom:0}
 .cohort-box .ch-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .cohort-box .ch-no{font-weight:900;font-size:15px;color:var(--brand-dk)}
 .cohort-box .ch-st{font-size:11px;font-weight:800;color:#fff;background:var(--ok);padding:3px 9px;border-radius:6px}
@@ -289,14 +292,14 @@ main{min-height:50vh}
 .included-class-box{background:#fff;border-color:var(--line)}
 .included-class-list{display:grid;gap:7px;margin-top:10px}
 .included-class-list em{font-style:normal;background:var(--bg-alt);border:1px solid var(--line2);border-radius:9px;padding:9px 10px;color:var(--ink);font-size:12px;font-weight:800}
-.bc-price{margin-bottom:6px}
+.bc-price{margin-bottom:0}
 .bc-price .disc{color:var(--red);font-weight:900;font-size:20px;margin-right:8px}
 .bc-price .final{font-weight:900;font-size:28px;letter-spacing:-.5px}
 .bc-price .orig{display:block;color:var(--ink-mute);text-decoration:line-through;font-size:15px;margin-top:2px}
-.bc-actions{display:flex;flex-direction:column;gap:9px;margin:16px 0 0}
+.bc-actions{display:flex;flex-direction:column;gap:9px;margin:0}
 .bc-actions .btn-red{width:100%}
 .bc-owned{display:none;text-align:center;background:#E7F8EF;color:var(--ok);font-weight:800;padding:13px;border-radius:11px;margin:16px 0}
-.detail-body{padding:30px 0 80px}
+.detail-body{grid-column:1;grid-row:2;padding:30px 0 80px}
 .d-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px;position:sticky;top:var(--gnb-h);background:rgba(255,255,255,.92);backdrop-filter:blur(8px);z-index:20;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 .d-tabs::-webkit-scrollbar{display:none}
 .d-tabs button{background:none;border:0;padding:15px 16px;font-weight:800;font-size:15px;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
@@ -550,8 +553,15 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
 @media(max-width:980px){
   .hero-in{grid-template-columns:1fr;gap:40px}
   .hero-art{width:100%;max-width:360px;margin:0 auto}
-  .detail-hero-in{grid-template-columns:1fr}
-  .buycard{position:static;margin-bottom:18px}
+  .detail-hero{padding-top:12px}
+  .detail-hero-in{grid-template-columns:1fr;grid-template-rows:auto;gap:24px}
+  .detail-hero-in>aside{grid-column:auto;grid-row:auto;align-self:auto;position:static}
+  .detail-body{grid-column:auto;grid-row:auto}
+  .buycard{position:static;margin:0 0 18px;max-width:none}
+  .buycard.is-fixed,.buycard.is-bottom{position:static;width:auto;margin:0 0 18px}
+  .bc-body{grid-template-columns:1fr 1fr;gap:14px}
+  .cohort-box{padding:14px}
+  .bc-price,.bc-actions,.bc-owned{grid-column:1/-1}
   .buycard .bc-actions,.buycard .bc-owned{display:none!important}
   #view-detail.show .buybar{display:flex}#view-detail.show{padding-bottom:84px}
   .feat-grid{grid-template-columns:1fr}
@@ -605,8 +615,14 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .detail-hero{padding-bottom:26px}
   .detail-hero h1{font-size:25px}
   .d-lead{font-size:15px}
+  .d-creatorchip{margin-bottom:12px}
+  .d-tags{margin-bottom:12px}
+  .d-visual{margin-top:18px;border-radius:14px}
   .detail-body{padding:24px 0 96px}
-  .bc-body{padding:18px}
+  .bc-body{grid-template-columns:1fr;padding:16px;gap:12px}
+  .cohort-box{border-radius:13px;padding:13px 14px}
+  .included-class-list{gap:6px}
+  .included-class-list em{padding:8px 9px;font-size:11.5px}
   .curr li{gap:9px;padding:13px 12px;font-size:14px}
   .curr li .wk{width:42px}
   .op-card{flex-wrap:wrap}

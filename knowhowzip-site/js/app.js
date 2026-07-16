@@ -184,9 +184,8 @@ function openDetail(pid){
           <div class="bc-owned" data-owned="${pid}" style="display:${owned?'block':'none'}">✓ 수강 중 · 내 학습에서 확인</div>
         </div>
       </div></aside>
-    </div></div>
 
-    <div class="detail-body"><div class="wrap">
+      <div class="detail-body">
       <div class="d-tabs">
         <button class="active" onclick="goTab(this,'sec-intro')">클래스 소개</button>
         <button onclick="goTab(this,'sec-content')">콘텐츠</button>
@@ -206,13 +205,52 @@ function openDetail(pid){
         <div class="op-card"><span class="oi oi-zoom">🎥</span><span><span class="ot">줌(Zoom) 라이브</span><br><span class="od">매주 라이브 입장 링크</span></span>${owned?'<span class="obtn">링크 보기 →</span>':'<span class="olock">🔒 수강 후 제공</span>'}</div>
       </div>
       <div class="d-section" id="sec-faq"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div>
+      </div>
     </div></div>
     <div class="buybar" id="buybar"></div>`;
   const bar=document.getElementById('buybar');
   bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>`;
-  show('detail');window.scrollTo({top:0});setHash('#/p/'+pid);
+  show('detail');window.scrollTo({top:0});setHash('#/p/'+pid);requestAnimationFrame(updateDetailBuycardPosition);
 }
 function goTab(btn,id){document.querySelectorAll('.d-tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+function updateDetailBuycardPosition(){
+  const grid=document.querySelector('#view-detail.show .detail-hero-in');
+  const aside=grid?.querySelector('aside');
+  const visual=grid?.querySelector('.d-visual');
+  const card=grid?.querySelector('.buycard');
+  if(!grid||!aside||!visual||!card)return;
+  card.classList.remove('is-fixed','is-bottom');
+  if(window.matchMedia('(max-width:980px)').matches){
+    grid.style.removeProperty('--buycard-start-offset');
+    card.style.removeProperty('--buycard-fixed-width');
+    card.style.removeProperty('--buycard-fixed-right');
+    card.style.removeProperty('--buycard-bottom-top');
+    return;
+  }
+  const y=window.scrollY;
+  const topGap=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gnb-h'))||72)+20;
+  const gridRect=grid.getBoundingClientRect();
+  const asideRect=aside.getBoundingClientRect();
+  const visualRect=visual.getBoundingClientRect();
+  const gridTop=gridRect.top+y;
+  const visualBottom=visualRect.bottom+y;
+  const offset=Math.max(0,Math.round(visualBottom-gridTop-card.offsetHeight));
+  const startY=gridTop+offset-topGap;
+  const endY=gridTop+grid.offsetHeight-card.offsetHeight-topGap;
+  const fixedRight=Math.max(0,window.innerWidth-asideRect.right);
+  const fixedWidth=asideRect.width;
+  grid.style.setProperty('--buycard-start-offset',`${offset}px`);
+  card.style.setProperty('--buycard-fixed-width',`${fixedWidth}px`);
+  card.style.setProperty('--buycard-fixed-right',`${fixedRight}px`);
+  if(y>=endY){
+    card.style.setProperty('--buycard-bottom-top',`${Math.max(0,grid.offsetHeight-card.offsetHeight)}px`);
+    card.classList.add('is-bottom');
+  }else if(y>=startY){
+    card.classList.add('is-fixed');
+  }
+}
+window.addEventListener('resize',()=>requestAnimationFrame(updateDetailBuycardPosition));
+window.addEventListener('scroll',()=>requestAnimationFrame(updateDetailBuycardPosition),{passive:true});
 
 /* ---------- MYPAGE (grouped by creator) ---------- */
 const learningProgress={'mmoh-basic':50,'mmoh-right':25};
