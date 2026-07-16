@@ -4,11 +4,29 @@ function houseMark(size=56){
   return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true"><path d="M18 45 50 18l32 27v38H60V61H40v22H18Z" fill="#AFD6E7" stroke="#1c3a4a" stroke-width="6" stroke-linejoin="round"/><path d="m12 43 38-31 38 31" fill="none" stroke="#4F66F5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
-const classes=[
-  {id:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',cohort:'3기',status:'모집중',period:'07.05 ~ 08.02',students:21,seats:30,price:290000,color:'linear-gradient(135deg,#AFD6E7,#7DB8D4)'},
-  {id:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',cohort:'2기',status:'모집중',period:'07.12 ~ 08.09',students:18,seats:25,price:390000,color:'linear-gradient(135deg,#F3C7C2,#D9332A)'},
-  {id:'mmoh-field',title:'현장 임장 마스터 · 발품 전략',cohort:'1기',status:'모집예정',period:'07.19 ~ 08.16',students:9,seats:20,price:450000,color:'linear-gradient(135deg,#CFE3D2,#5B9E72)'}
+const publicCreator=typeof creators!=='undefined'?creators.find(item=>item.id==='mmoh'):null;
+const publicProducts=publicCreator?publicCreator.products:[
+  {id:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',tag:'BEST',price:290000,lead:'경매가 처음인 직장인을 위한 입문 과정. 한 달이면 혼자 입찰표를 쓸 수 있습니다.',intro:'복잡한 경매 절차를 직장인 눈높이로 풀었습니다.',grad:'linear-gradient(135deg,#AFD6E7,#7DB8D4)',tags:['입문','입찰 실습','직장인 추천'],cohort:{no:3,status:'모집중',period:'2026.07.05 ~ 08.02',deadline:'2026.06.30',seats:30,enrolled:21},requirement:{label:'처음 참여 가능'},content:{videos:['경매 절차와 권리의 이해','물건 검색과 시세 분석','입찰표 작성 실습','모의 입찰 & 라이브 Q&A'],files:['주차별 강의 노트(PDF)','입찰표 작성 템플릿','물건 분석 체크리스트']},operation:{guide:'매주 화요일 저녁 8시 줌 라이브로 진행됩니다. 입장 링크는 시작 30분 전 단톡방에 안내됩니다.'}},
+  {id:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',tag:'심화',price:390000,lead:'등기부와 매각물건명세서를 직접 읽고 위험 물건을 걸러내는 눈을 기릅니다.',intro:'낙찰의 성패는 권리분석에서 갈립니다.',grad:'linear-gradient(135deg,#F3C7C2,#D9332A)',tags:['심화','권리분석','사례 스터디'],cohort:{no:2,status:'모집중',period:'2026.07.12 ~ 08.09',deadline:'2026.07.07',seats:25,enrolled:18},requirement:{label:'경매 낙찰 기초반 수강 이력 필요'},content:{videos:['등기부등본 정밀 분석','말소기준권리와 인수/소멸','대항력·우선변제 임차인','위험 물건 사례 스터디'],files:['권리분석 워크북(PDF)','사례 50선 자료집']}},
+  {id:'mmoh-field',title:'현장 임장 마스터 · 발품 전략',tag:'현장',price:450000,lead:'임장 동선 설계부터 명도 협상까지, 발로 뛰는 노하우를 담았습니다.',intro:'좋은 물건은 현장에서 확인됩니다.',grad:'linear-gradient(135deg,#CFE3D2,#5B9E72)',tags:['현장','임장','명도 협상'],cohort:{no:1,status:'모집중',period:'2026.07.19 ~ 08.16',deadline:'2026.07.14',seats:20,enrolled:9},requirement:{label:'권리분석 실전반 수강 이력 필요'},content:{videos:['임장 준비와 동선 설계','현장 체크포인트','명도 시나리오 작성','협상 롤플레잉 + 현장 동행'],files:['임장 체크리스트(PDF)','명도 합의서 양식']}}
 ];
+function classShortTitle(title){return (title||'').split(' · ')[0];}
+function shortPeriod(period){return (period||'').replace(/^2026\./,'');}
+const classes=publicProducts.map(product=>({
+  id:product.id,
+  title:product.title,
+  cohort:`${product.cohort?.no||1}기`,
+  status:product.cohort?.status||'모집중',
+  period:shortPeriod(product.cohort?.period||''),
+  students:product.cohort?.enrolled||0,
+  seats:product.cohort?.seats||0,
+  price:product.price,
+  color:product.grad,
+  lead:product.lead,
+  intro:product.intro,
+  tags:product.tags||[],
+  content:product.content||{videos:[],files:[]}
+}));
 
 const students=[
   {name:'김지훈',email:'jihoon.kim@email.com',phone:'010-2384-1129',access:'기초 수강',history:'기초 수강 중',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'3기',paid:'290,000원',period:'2026.07.05 ~ 08.02',joined:'06.29',state:'수강 중',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.07.05 ~ 08.02',purchased:'2026.06.29',status:'수강 중'}]},
@@ -111,14 +129,14 @@ document.addEventListener('click',()=>document.querySelectorAll('.class-card-men
 function renderClassEditor(mode='create',classId=''){
   const editing=mode==='edit',course=classes.find(c=>c.id===classId)||{};
   const title=course.title||'',parts=title.split(' · '),name=parts[0]||'',subtitle=parts.slice(1).join(' · ');
-  const curriculum=editing?['경매 절차와 권리의 이해','물건 검색과 시세 분석','입찰표 작성 실습','모의 입찰 & 라이브 Q&A']:[''];
-  const materials=editing?['주차별 강의 노트(PDF)','입찰표 작성 템플릿','물건 분석 체크리스트']:[''];
+  const curriculum=editing&&course.content?.videos?.length?course.content.videos:[''];
+  const materials=editing&&course.content?.files?.length?course.content.files:[''];
   return `<form class="class-editor" onsubmit="saveClassForm(event,'${mode}')">
     <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 클래스 관리</button><div><span>${editing?'Class editing':'New class'}</span><h1>${editing?'클래스 수정':'새 클래스 만들기'}</h1><p>${editing?'클래스 정보와 콘텐츠를 수정합니다.':'클래스 소개와 콘텐츠, FAQ를 순서대로 입력하세요.'}</p></div><div class="editor-actions"><button type="button" class="btn ghost" onclick="openClassPreview('${classId}')">미리보기 ↗</button><button type="submit" class="btn primary">클래스 저장</button></div></div>
     <div class="editor-layout">
       <nav class="editor-steps"><button type="button" class="active" onclick="scrollEditorSection('editor-basic',this)"><i>1</i><span>클래스 정보<small>소개·난이도·태그</small></span></button><button type="button" onclick="scrollEditorSection('editor-content',this)"><i>2</i><span>콘텐츠<small>영상·자료</small></span></button><button type="button" onclick="scrollEditorSection('editor-faq',this)"><i>3</i><span>FAQ<small>자주 묻는 질문</small></span></button></nav>
       <div class="editor-sections">
-        <section class="panel editor-section" id="editor-basic"><div class="editor-section-head"><i>1</i><div><h2>판매 페이지</h2><p>수강생이 신청 전에 확인하는 핵심 정보를 구성합니다.</p></div><span>필수</span></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:${course.color||'linear-gradient(135deg,#DCE3FF,#AFC0FF)'}">${houseMark(72)}<button type="button" onclick="adminToast('커버 이미지 업로드 (예시)')">커버 변경</button></div><div class="editor-cover-guide"><b>커버 이미지</b><p>권장 크기 1280×800px · JPG, PNG · 최대 5MB</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택 (예시)')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스 제목 <em>*</em><input required maxlength="60" value="${name}" placeholder="예: 경매 낙찰 기초반"><small>핵심 주제와 수강 결과가 드러나는 제목을 권장합니다. 기수가 있다면 제목에 함께 적어주세요.</small></label><label class="wide">부제목<input maxlength="80" value="${subtitle}" placeholder="예: 직장인을 위한 4주 완성"></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option><option>디자인</option><option>개발</option></select></label><label>난이도 <em>*</em><select required><option>입문</option><option>중급</option><option>심화</option></select></label><label class="wide">한 줄 소개 <em>*</em><input required value="${editing?'경매가 처음인 직장인을 위한 실전 입문 과정':''}" placeholder="수강생에게 약속하는 핵심 변화를 한 문장으로 적어주세요"></label><label class="wide">상세 소개 <em>*</em><textarea required placeholder="클래스에서 무엇을, 어떻게 배우는지 자세히 소개해 주세요.">${editing?'복잡한 경매 절차를 직장인 눈높이로 풀었습니다. 실제 물건을 분석하고 입찰표까지 직접 작성합니다.':''}</textarea></label><label class="wide">검색 태그<input maxlength="80" placeholder="예: 경매 입문, 직장인, 실전"><small>쉼표로 구분해 최대 5개까지 입력하세요.</small></label></div></section>
+        <section class="panel editor-section" id="editor-basic"><div class="editor-section-head"><i>1</i><div><h2>판매 페이지</h2><p>수강생이 신청 전에 확인하는 핵심 정보를 구성합니다.</p></div><span>필수</span></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:${course.color||'linear-gradient(135deg,#DCE3FF,#AFC0FF)'}">${houseMark(72)}<button type="button" onclick="adminToast('커버 이미지 업로드 (예시)')">커버 변경</button></div><div class="editor-cover-guide"><b>대표 이미지</b><p>공개 클래스 상세 화면의 대표 이미지와 동일하게 노출됩니다.</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택 (예시)')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스 제목 <em>*</em><input required maxlength="60" value="${name}" placeholder="예: 경매 낙찰 기초반"><small>공개 페이지와 내 학습에 표시되는 클래스명입니다.</small></label><label class="wide">부제목<input maxlength="80" value="${subtitle}" placeholder="예: 4주 완성"></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option><option>디자인</option><option>개발</option></select></label><label>난이도 <em>*</em><select required><option ${course.tags?.includes('입문')?'selected':''}>입문</option><option>중급</option><option ${course.tags?.includes('심화')?'selected':''}>심화</option></select></label><label class="wide">한 줄 소개 <em>*</em><input required value="${editing?(course.lead||''):''}" placeholder="수강생에게 약속하는 핵심 변화를 한 문장으로 적어주세요"></label><label class="wide">상세 소개 <em>*</em><textarea required placeholder="클래스에서 무엇을, 어떻게 배우는지 자세히 소개해 주세요.">${editing?(course.intro||''):''}</textarea></label><label class="wide">태그<input maxlength="80" value="${editing?(course.tags||[]).join(', '):''}" placeholder="예: 입문, 입찰 실습, 직장인 추천"><small>공개 상세 상단 태그와 동일한 톤으로 노출됩니다.</small></label></div></section>
 
         <section class="panel editor-section" id="editor-content"><div class="editor-section-head"><i>2</i><div><h2>콘텐츠</h2><p>수강생에게 제공할 영상 커리큘럼과 다운로드 자료를 구성합니다.</p></div><span>필수</span></div><div class="content-import-bar"><div><b>기존 클래스에서 가져오기</b><small>선택한 클래스의 커리큘럼과 자료를 복사한 뒤 자유롭게 수정할 수 있습니다.</small></div><select id="contentImportClass"><option value="">클래스 선택</option><option value="mmoh-basic">경매 낙찰 기초반</option><option value="mmoh-right">권리분석 실전반</option><option value="mmoh-field">현장 임장 마스터</option></select><button type="button" class="btn ghost" onclick="importClassContent()">콘텐츠 불러오기</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>각 강의의 제목과 설명을 입력하고 영상 파일을 업로드하세요. 재생시간은 자동으로 입력됩니다.</p></div><span id="curriculumCount">${curriculum.length}강</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>자료 제목과 설명을 입력하고 수강생이 내려받을 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
 
@@ -129,11 +147,7 @@ function renderClassEditor(mode='create',classId=''){
   </form>`;
 }
 
-const reusableClassContent={
-  'mmoh-basic':{videos:['경매 절차와 권리의 이해','물건 검색과 시세 분석','입찰표 작성 실습','모의 입찰 & 라이브 Q&A'],files:['주차별 강의 노트(PDF)','입찰표 작성 템플릿','물건 분석 체크리스트']},
-  'mmoh-right':{videos:['등기부 기본 정보 읽기','말소기준권리와 인수·소멸','대항력·우선변제권 판단','위험 물건 사례 분석'],files:['권리분석 워크북(PDF)','사례 50선 자료집']},
-  'mmoh-field':{videos:['임장 준비와 동선 설계','현장 체크포인트','명도 시나리오 작성','협상 롤플레이'],files:['현장 체크리스트(PDF)','명도 합의서 양식']}
-};
+const reusableClassContent=classes.reduce((acc,course)=>{acc[course.id]={videos:course.content?.videos||[],files:course.content?.files||[]};return acc;},{});
 function importClassContent(){
   const id=document.getElementById('contentImportClass')?.value,data=reusableClassContent[id];
   if(!data){adminToast('불러올 클래스를 선택해 주세요');return;}
@@ -189,27 +203,33 @@ function studentStateClass(state){
   return 'active';
 }
 function creatorStudentProducts(student){
-  const creatorClasses=classes.map(course=>course.title.split(' · ')[0]).concat('땅부자 루틴클럽');
+  const creatorClasses=classes.map(course=>course.title.split(' · ')[0]);
   return (student.products||[]).filter(item=>creatorClasses.includes(item.className));
 }
+function publicProductTitle(name=''){
+  const match=classes.find(course=>name.includes(classShortTitle(course.title)));
+  if(!match)return name;
+  return name.includes('무료')?`${match.title} 무료 수강`:match.title;
+}
 function studentProductOptions(){
-  return [...new Set(students.map(student=>student.recentProduct).filter(Boolean))];
+  return [...new Set(students.map(student=>publicProductTitle(student.recentProduct)).filter(Boolean))];
 }
 function getFilteredStudents(){
   const q=(document.getElementById('studentSearchInput')?.value||'').trim().toLowerCase();
   const productFilter=document.getElementById('studentProductFilter')?.value||'전체 최근 결제상품';
   const stateFilter=document.getElementById('studentStateFilter')?.value||'전체 상태';
   return students.filter(s=>{
-    const keyword=`${s.name} ${s.email} ${s.phone||''} ${s.history} ${s.course} ${s.recentProduct||''}`.toLowerCase();
+    const displayProduct=publicProductTitle(s.recentProduct);
+    const keyword=`${s.name} ${s.email} ${s.phone||''} ${s.history} ${s.course} ${displayProduct||''}`.toLowerCase();
     const matchesKeyword=keyword.includes(q);
-    const matchesProduct=productFilter==='전체 최근 결제상품'||s.recentProduct===productFilter;
+    const matchesProduct=productFilter==='전체 최근 결제상품'||displayProduct===productFilter;
     const matchesState=stateFilter==='전체 상태'||s.state===stateFilter;
     return matchesKeyword&&matchesProduct&&matchesState;
   });
 }
 function studentTable(rows,compact=false){
   const emptyRow=`<tr><td class="empty-table-cell" colspan="${compact?4:5}">조건에 맞는 수강생이 없습니다.</td></tr>`;
-  return `<div class="table-wrap"><table><thead><tr><th>이름</th>${compact?'':'<th>전화번호</th>'}<th>최근 결제 상품</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(s=>`<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${s.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${s.email}')}"><td><div class="student-cell"><span>${s.name[0]}</span><div><b>${s.name}</b><small>${s.email}</small></div></div></td>${compact?'':`<td>${s.phone||'-'}</td>`}<td>${s.recentProduct||s.course}</td><td>${s.period||'-'}</td><td><em class="table-state ${studentStateClass(s.state)}">${s.state}</em></td></tr>`).join(''):emptyRow}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>이름</th>${compact?'':'<th>전화번호</th>'}<th>최근 결제 상품</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(s=>`<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${s.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${s.email}')}"><td><div class="student-cell"><span>${s.name[0]}</span><div><b>${s.name}</b><small>${s.email}</small></div></div></td>${compact?'':`<td>${s.phone||'-'}</td>`}<td>${publicProductTitle(s.recentProduct)||s.course}</td><td>${s.period||'-'}</td><td><em class="table-state ${studentStateClass(s.state)}">${s.state}</em></td></tr>`).join(''):emptyRow}</tbody></table></div>`;
 }
 function studentStateSummary(){
   const states=['전체 상태','수강 대기','수강 중','무료 수강중','수강 완료','기간 만료'];
@@ -264,9 +284,9 @@ function openStudentDetail(email){
     <section class="access-request-dialog student-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="studentDetailTitle">
       <div class="access-request-head"><div><span>수강생 상세</span><h2 id="studentDetailTitle">${student.name}</h2><p>${student.phone} · ${student.email}</p></div><button type="button" onclick="closeAccessRequestModal()" aria-label="닫기">×</button></div>
       <div class="student-detail-body">
-        <div class="student-detail-summary"><div><span>최근 결제 상품</span><b>${student.recentProduct||student.course}</b></div><div><span>현재 상태</span><em class="table-state ${studentStateClass(student.state)}">${student.state}</em></div><div><span>수강기간</span><b>${student.period||'-'}</b></div></div>
+        <div class="student-detail-summary"><div><span>최근 결제 상품</span><b>${publicProductTitle(student.recentProduct)||student.course}</b></div><div><span>현재 상태</span><em class="table-state ${studentStateClass(student.state)}">${student.state}</em></div><div><span>수강기간</span><b>${student.period||'-'}</b></div></div>
         <div class="student-history-head"><h3>결제 상품과 수강 클래스</h3><p>현재 크리에이터 채널의 클래스 이력만 표시합니다.</p></div>
-        <div class="student-history-list">${histories.length?histories.map(item=>`<article><div><b>${item.product}</b><small>${item.purchased} 결제 · ${item.className}</small></div><span>${item.paid}</span><span>${item.period}</span><em class="table-state ${studentStateClass(item.status)}">${item.status}</em></article>`).join(''):'<p class="empty-history">이 크리에이터의 수강 이력이 없습니다.</p>'}</div>
+        <div class="student-history-list">${histories.length?histories.map(item=>`<article><div><b>${publicProductTitle(item.product)}</b><small>${item.purchased} 결제 · ${item.className}</small></div><span>${item.paid}</span><span>${item.period}</span><em class="table-state ${studentStateClass(item.status)}">${item.status}</em></article>`).join(''):'<p class="empty-history">이 크리에이터의 수강 이력이 없습니다.</p>'}</div>
       </div>
     </section>
   </div>`;
@@ -300,7 +320,7 @@ function renderSalesClassStudents(classId){
   const payout=row.amount-Math.round(row.amount*.12);
   return `${pageHeader('Sales detail','클래스 결제 수강생','선택한 클래스의 월별 결제 수강생을 확인합니다.','<button class="btn ghost" onclick="showAdminView(\'sales\')">← 매출·정산으로 돌아가기</button>')}
   <section class="sales-detail-head panel"><div><span>${data.label}</span><h2>${className}</h2><p>${course.title}</p></div><div class="sales-detail-metrics"><article><span>결제 건수</span><strong>${row.count}건</strong></article><article><span>총 매출</span><strong>${won(row.amount)}</strong></article><article><span>정산 예정</span><strong>${won(payout)}</strong></article></div></section>
-  <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 완료 기준</p></div></div><div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>최근 결제 상품</th><th>결제일</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(student=>{const item=(student.products||[]).find(product=>product.className===className)||student.products?.[0]||{};return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${item.product||student.recentProduct||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.period||student.period||'-'}</td><td><em class="table-state ${studentStateClass(item.status||student.state)}">${item.status||student.state}</em></td></tr>`;}).join(''):'<tr><td colspan="6" class="empty-table">표시할 결제 수강생이 없습니다.</td></tr>'}</tbody></table></div></article>`;
+  <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 완료 기준</p></div></div><div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>최근 결제 상품</th><th>결제일</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(student=>{const item=(student.products||[]).find(product=>product.className===className)||student.products?.[0]||{};return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${publicProductTitle(item.product||student.recentProduct)||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.period||student.period||'-'}</td><td><em class="table-state ${studentStateClass(item.status||student.state)}">${item.status||student.state}</em></td></tr>`;}).join(''):'<tr><td colspan="6" class="empty-table">표시할 결제 수강생이 없습니다.</td></tr>'}</tbody></table></div></article>`;
 }
 function openSalesClassStudents(classId){
   document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='sales'));
@@ -320,19 +340,19 @@ function renderSales(){
 }
 
 const alimtalkProductSettings=[
-  {id:'prd-basic-pass',name:'경매 낙찰 기초반 이용권',summary:'단일 클래스 · 2026.07.05 ~ 08.02',items:[
+  {id:'mmoh-basic',name:'경매 낙찰 기초반 · 4주 완성',summary:'단일 클래스 · 2026.07.05 ~ 08.02',items:[
     {id:'onboarding',name:'수강 준비 안내',trigger:'결제 완료 후 5분 이내',enabled:true,status:'작성 중',statusClass:'draft',templateCode:'미등록',content:`안녕하세요, #{수강생명}님.\n#{상품명} 신청이 완료되었습니다.\n수강 전 준비사항을 확인해 주세요.\n\n1. 커뮤니티 참여\n2. 필수 준비사항 확인\n3. 제출/신청 폼 작성\n4. 첫 모임 일정 확인\n\n문의 안내가 함께 발송됩니다.`,button:'수강 준비사항 확인'},
     {id:'start',name:'강의 시작 안내',trigger:'강의 시작 당일 · 오전 10시',enabled:true,status:'승인 대기',statusClass:'pending',templateCode:'검수 중',content:`#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}\n준비 사항을 내 학습에서 확인해 주세요.`,button:'수강 안내 확인'},
     {id:'schedule',name:'일정 안내',trigger:'일정 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 일정이 있습니다.\n일시: #{일정}\n자세한 내용은 아래 버튼에서 확인해 주세요.`,button:'일정 확인'},
     {id:'end',name:'강의 종료 안내',trigger:'강의 종료 7일 전 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{클래스명} 수강 기간이 곧 종료됩니다.\n종료일: #{강의종료일}\n남은 강의와 자료를 확인해 주세요.`,button:'내 학습 확인'}
   ]},
-  {id:'prd-middle-pass',name:'권리분석 실전 패키지',summary:'기초 + 심화 · 결제일로부터 120일',items:[
+  {id:'mmoh-right',name:'권리분석 실전반 · 위험물건 거르기',summary:'심화 클래스 · 2026.07.12 ~ 08.09',items:[
     {id:'onboarding',name:'수강 준비 안내',trigger:'결제 완료 후 5분 이내',enabled:true,status:'승인 완료',statusClass:'approved',templateCode:'NHZ_RIGHTS_READY_001',content:`#{수강생명}님, #{상품명} 결제가 완료되었습니다.\n권리분석 실전반 수강 전 준비 자료를 내 학습에서 확인해 주세요.`,button:'준비 자료 확인'},
     {id:'start',name:'강의 시작 안내',trigger:'강의 시작 당일 · 오전 10시',enabled:true,status:'승인 완료',statusClass:'approved',templateCode:'NHZ_START_001',content:`#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}\n내 학습에서 강의와 자료를 확인해 주세요.`,button:'내 학습 바로가기'},
     {id:'schedule',name:'일정 안내',trigger:'일정 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 일정이 있습니다.\n일시: #{일정}`,button:'일정 확인'},
     {id:'end',name:'강의 종료 안내',trigger:'강의 종료 7일 전 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{클래스명} 수강 기간이 곧 종료됩니다.\n종료일: #{강의종료일}`,button:'내 학습 확인'}
   ]},
-  {id:'prd-field-package',name:'경매 실전 풀패키지',summary:'준비중 · 2026.08.01 ~ 08.31',items:[
+  {id:'mmoh-field',name:'현장 임장 마스터 · 발품 전략',summary:'현장 클래스 · 2026.07.19 ~ 08.16',items:[
     {id:'onboarding',name:'수강 준비 안내',trigger:'결제 완료 후 5분 이내',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, #{상품명} 신청을 환영합니다.\n수강 전 준비 사항을 이곳에 작성해 주세요.`,button:'수강 준비 확인'},
     {id:'start',name:'강의 시작 안내',trigger:'강의 시작 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 강의가 시작됩니다.\n시작일: #{강의시작일}`,button:'수강 안내 확인'},
     {id:'schedule',name:'일정 안내',trigger:'일정 당일 · 오전 10시',enabled:false,status:'작성 전',statusClass:'draft',templateCode:'미등록',content:`#{수강생명}님, 오늘 #{클래스명} 일정이 있습니다.\n일시: #{일정}`,button:'일정 확인'},
@@ -401,21 +421,36 @@ function openSettingsPanel(panel='profile'){
   window.scrollTo({top:0,behavior:'smooth'});
   location.hash=panel==='payout'?'#settings-payout':'#settings';
 }
-const saleProducts=[
-  {id:'prd-intro-pass',requirement:'조건 없음',name:'경매 기초 클래스 이용권',desc:'경매 낙찰 기초반을 90일 동안 수강할 수 있는 상품',price:190000,period:'결제일로부터 90일',periodType:'결제일 기준',periodDays:90,courses:['경매 낙찰 기초반'],extraAccess:[],status:'판매중',paymentCount:18},
-  {id:'prd-middle-pass',requirement:'경매 낙찰 기초반 수강 이력 필요',name:'권리분석 실전 패키지',desc:'기초와 권리분석을 함께 구성한 심화 과정 상품',price:390000,period:'결제일로부터 120일',periodType:'결제일 기준',periodDays:120,courses:['경매 낙찰 기초반','권리분석 실전반'],extraAccess:[],status:'판매중',paymentCount:11},
-  {id:'prd-field-package',requirement:'권리분석 실전반 수강 이력 필요',name:'경매 실전 풀패키지',desc:'기초, 권리분석, 루틴클럽을 한 번에 구성한 상품',price:790000,period:'2026.08.01 ~ 08.31',periodType:'지정 수강 기간 기준',periodDays:'',courses:['경매 낙찰 기초반','권리분석 실전반','땅부자 루틴클럽'],extraAccess:[],status:'준비중',paymentCount:0},
-  {id:'prd-basic-pass',requirement:'조건 없음',name:'경매 낙찰 기초반 이용권',desc:'경매 낙찰 기초반 단일 클래스 수강 상품',price:290000,period:'2026.07.05 ~ 08.02',periodType:'지정 수강 기간 기준',periodDays:'',courses:['경매 낙찰 기초반'],extraAccess:[],status:'판매중',paymentCount:24}
-];
+const saleProducts=publicProducts.map(product=>({
+  id:product.id,
+  requirement:product.requirement?.label||'조건 없음',
+  name:product.title,
+  desc:product.lead,
+  price:product.price,
+  period:product.cohort?.period||'',
+  periodType:'지정 수강 기간 기준',
+  periodDays:'',
+  courses:[classShortTitle(product.title)],
+  extraAccess:[],
+  status:product.cohort?.status||'판매중',
+  paymentCount:product.cohort?.enrolled||0,
+  operation:product.operation||{}
+}));
 function renderProducts(){
   return `${pageHeader('Product','상품 관리','수강생이 결제할 상품을 만들고 관리합니다.<br>제공 클래스, 수강 조건, 가격, 수강 기간, 결제 후 안내톡을 상품별로 설정하세요.','<button class="btn primary" onclick="openProductEditor(\'create\')">+ 새 상품 만들기</button>')}
-  <div class="product-admin-grid">${saleProducts.map(product=>`<article class="sale-product-card"><div class="sale-product-top"><span>${product.courses.length}개 클래스</span><em class="${product.status==='판매중'?'open':'soon'}">${product.status}</em></div><h2>${product.name}</h2><p>${product.desc}</p><div class="product-card-price"><strong>${won(product.price)}</strong><small>${product.period}</small></div><div class="product-card-summary"><div><b>수강 조건</b><span>${product.requirement}</span></div><div><b>클래스</b><span>${product.courses.join(' · ')}</span></div></div><button type="button" onclick="openProductEditor('edit','${product.id}')">상품 수정</button></article>`).join('')}</div>`;
+  <div class="product-admin-grid">${saleProducts.map(product=>`<article class="sale-product-card"><div class="sale-product-top"><span>${product.courses.length}개 클래스</span><em class="${product.status==='비공개'||product.status==='준비중'?'soon':'open'}">${product.status}</em></div><h2>${product.name}</h2><p>${product.desc}</p><div class="product-card-price"><strong>${won(product.price)}</strong><small>${product.period}</small></div><div class="product-card-summary"><div><b>수강 조건</b><span>${product.requirement}</span></div><div><b>클래스</b><span>${product.courses.join(' · ')}</span></div></div><button type="button" onclick="openProductEditor('edit','${product.id}')">상품 수정</button></article>`).join('')}</div>`;
 }
 
 function selectedOption(value,current){return value===current?'selected':'';}
 function courseChecked(product,course){return product.courses.includes(course)?'checked':'';}
 function requirementChecked(product,course){return product.requirement.includes(course)?'checked':'';}
 function noRequirementChecked(product){return product.requirement==='조건 없음'?'checked':'';}
+function classChoiceList(product,lockAttr){
+  return classes.map(course=>{const name=classShortTitle(course.title);return `<label><input type="checkbox" ${courseChecked(product,name)} ${lockAttr}><span><b>${name}</b><small>${course.title.split(' · ').slice(1).join(' · ')||course.status}</small></span></label>`;}).join('');
+}
+function requirementChoiceList(product,lockAttr){
+  return `<label><input type="checkbox" ${noRequirementChecked(product)} ${lockAttr}><span><b>수강 조건 없음</b><small>누구나 바로 신청할 수 있습니다.</small></span></label>${classes.map(course=>{const name=classShortTitle(course.title);return `<label><input type="checkbox" ${requirementChecked(product,name)} ${lockAttr}><span><b>${name}</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label>`;}).join('')}`;
+}
 function productAlimtalkSection(product){
   const settings=alimtalkProductSettings.find(item=>item.id===product.id);
   const template=(settings||alimtalkProductSettings[0]).items[0];
@@ -496,16 +531,16 @@ function productCourseDates(product){
 }
 function renderProductEditor(mode='create',productId=''){
   const editing=mode==='edit',product=editing?saleProducts.find(item=>item.id===productId):null,locked=!!(product&&product.paymentCount>0),lockAttr=locked?'disabled':'',lockClass=locked?' locked':'';
-  const current=product||{id:'',requirement:'조건 없음',name:'새 상품',desc:'상품에 포함된 클래스와 수강 흐름을 설명해 주세요.',price:290000,period:'결제일로부터 90일',periodType:'결제일 기준',periodDays:90,courses:['경매 낙찰 기초반'],extraAccess:[],status:'판매중',paymentCount:0};
+  const current=product||{id:'',requirement:'조건 없음',name:'새 상품',desc:'상품에 포함된 클래스와 수강 흐름을 설명해 주세요.',price:290000,period:'2026.07.05 ~ 08.02',periodType:'지정 수강 기간 기준',periodDays:'',courses:[classShortTitle(classes[0]?.title||'경매 낙찰 기초반')],extraAccess:[],status:'판매중',paymentCount:0};
   const courseDates=productCourseDates(current);
   return `<form class="product-editor" onsubmit="saveProductForm(event,'${mode}')">
-    <div class="editor-head product-editor-head"><button type="button" class="editor-back" onclick="showAdminView('products')">← 상품 관리</button><div><span>${editing?'Product editing':'Product setup'}</span><h1>${editing?'상품 수정':'새 상품 만들기'}</h1><p>${locked?'이미 결제한 수강생이 있어 상품명과 소개만 수정할 수 있습니다. 수강 조건, 가격, 기간을 바꾸려면 새 상품을 만들어 주세요.':'이 상품을 누가 신청할 수 있고, 결제 후 어떤 클래스를 볼 수 있는지 설정합니다.'}</p></div><div class="editor-actions product-editor-actions"><label>노출 상태<select><option ${selectedOption('판매중',current.status)}>공개</option><option ${selectedOption('비공개',current.status)}>비공개</option></select></label><button type="submit" class="btn primary">${editing?'변경사항 저장':'상품 등록'}</button></div></div>
+    <div class="editor-head product-editor-head"><button type="button" class="editor-back" onclick="showAdminView('products')">← 상품 관리</button><div><span>${editing?'Product editing':'Product setup'}</span><h1>${editing?'상품 수정':'새 상품 만들기'}</h1><p>${locked?'이미 결제한 수강생이 있어 상품명과 소개만 수정할 수 있습니다. 수강 조건, 가격, 기간을 바꾸려면 새 상품을 만들어 주세요.':'이 상품을 누가 신청할 수 있고, 결제 후 어떤 클래스를 볼 수 있는지 설정합니다.'}</p></div><div class="editor-actions product-editor-actions"><label>노출 상태<select><option ${current.status!=='비공개'?'selected':''}>공개</option><option ${selectedOption('비공개',current.status)}>비공개</option></select></label><button type="submit" class="btn primary">${editing?'변경사항 저장':'상품 등록'}</button></div></div>
     <details class="product-setup-hero panel"><summary><div><span>상품 만들기 안내</span><h2>유저가 실제 결제하는 상품을 만드는 화면입니다.</h2></div><em>자세히 보기</em></summary><div class="product-setup-detail"><p>1. 상품 정보는 유저가 결제 전 확인하는 문구입니다.<br>2. 결제 후 볼 수 있는 클래스를 정할 수 있어요.<br>3. 어떤 강의를 수강해야 하는 조건이 있다면 수강 조건에서 설정할 수 있어요.<br>4. 가격과 판매 시작일, 판매 종료일을 정할 수 있어요.<br>5. 단톡방, 줌, 라이브 일정 같은 운영 안내를 상품별로 등록할 수 있어요.<br>6. 결제 후 안내톡을 켜고 필요한 변수값을 입력할 수 있어요.</p></div></details>
     ${locked?`<section class="product-lock-notice"><b>결제 이력 ${current.paymentCount}건</b><span>이미 결제가 발생한 상품이라 상품 정보만 수정할 수 있습니다. 수강 조건이나 가격을 바꾸려면 새 상품을 생성하세요.</span></section>`:''}
     <div class="product-editor-grid"><div class="product-editor-main">
-      <section class="panel product-section editable"><div class="product-section-head"><i>1</i><div><h2>상품 정보</h2><p>공개 페이지와 결제 화면에 보이는 이름과 설명을 입력합니다.</p></div></div><div class="editor-fields"><label class="wide">상품명 <em>*</em><input required value="${current.name}" placeholder="예: 경매 기초 클래스 이용권, 경매 실전 패키지"></label><label class="wide">상품 소개 <em>*</em><textarea required placeholder="상품에 포함된 클래스와 수강 흐름을 설명해 주세요.">${current.desc}</textarea></label></div></section>
-      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>2</i><div><h2>결제 후 볼 수 있는 클래스</h2><p>수강생이 결제한 뒤 내 학습에서 볼 클래스를 선택합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="included-lecture-list"><label><input type="checkbox" ${courseChecked(current,'경매 낙찰 기초반')} ${lockAttr}><span><b>경매 낙찰 기초반</b><small>기초 과정 · 처음 참여 가능</small></span></label><label><input type="checkbox" ${courseChecked(current,'권리분석 실전반')} ${lockAttr}><span><b>권리분석 실전반</b><small>심화 과정 · 기초 수강 이력 필요</small></span></label><label><input type="checkbox" ${courseChecked(current,'땅부자 루틴클럽')} ${lockAttr}><span><b>땅부자 루틴클럽</b><small>스터디 · 기존 수강생 전용</small></span></label></div><div class="product-warning"><b>결제하면 선택한 클래스가 내 학습에 열립니다.</b><p>심화 과정 결제 후 기초 과정을 추가로 더 보여줘야 한다면 아래 수강 조건 섹션에서 함께 적어 주세요.</p></div></section>
-      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>3</i><div><h2>수강 조건</h2><p>선택한 기존 클래스를 들은 수강생만 이 상품을 신청할 수 있습니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="condition-class-list"><label><input type="checkbox" ${noRequirementChecked(current)} ${lockAttr}><span><b>수강 조건 없음</b><small>누구나 바로 신청할 수 있습니다.</small></span></label><label><input type="checkbox" ${requirementChecked(current,'경매 낙찰 기초반')} ${lockAttr}><span><b>경매 낙찰 기초반</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label><label><input type="checkbox" ${requirementChecked(current,'권리분석 실전반')} ${lockAttr}><span><b>권리분석 실전반</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label><label><input type="checkbox" ${requirementChecked(current,'땅부자 루틴클럽')} ${lockAttr}><span><b>땅부자 루틴클럽</b><small>참여 이력이 있는 수강생만 신청 가능</small></span></label></div></section>
+      <section class="panel product-section editable"><div class="product-section-head"><i>1</i><div><h2>상품 정보</h2><p>공개 클래스 상세와 결제 카드에 보이는 이름과 설명을 입력합니다.</p></div></div><div class="editor-fields"><label class="wide">상품명 <em>*</em><input required value="${current.name}" placeholder="예: 경매 낙찰 기초반 · 4주 완성"></label><label class="wide">상품 소개 <em>*</em><textarea required placeholder="공개 상세의 한 줄 소개와 같은 톤으로 작성해 주세요.">${current.desc}</textarea></label></div></section>
+      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>2</i><div><h2>결제 후 볼 수 있는 클래스</h2><p>수강생이 결제한 뒤 내 학습에서 볼 클래스를 선택합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="included-lecture-list">${classChoiceList(current,lockAttr)}</div><div class="product-warning"><b>결제하면 선택한 클래스가 내 학습에 열립니다.</b><p>공개 페이지에 등록된 클래스명과 동일하게 노출됩니다.</p></div></section>
+      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>3</i><div><h2>수강 조건</h2><p>선택한 기존 클래스를 들은 수강생만 이 상품을 신청할 수 있습니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="condition-class-list">${requirementChoiceList(current,lockAttr)}</div></section>
       <section class="panel product-section${lockClass}"><div class="product-section-head"><i>4</i><div><h2>가격·이용 기간</h2><p>1회 결제와 상품별 수강 기간을 우선 적용합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="editor-fields"><label>결제 방식<select ${lockAttr}><option>1회 결제</option><option disabled>월 정기결제 · 후속 단계</option><option disabled>연 정기결제 · 후속 단계</option></select></label><label>판매 가격 <em>*</em><div class="input-suffix"><input required type="number" min="0" step="1000" value="${current.price}" ${lockAttr}><span>원</span></div></label><label>판매 시작일<input type="date" value="2026-07-01" ${lockAttr}></label><label>판매 종료일<input type="date" value="2026-07-31" ${lockAttr}></label><label>수강 시작일<input type="date" value="${courseDates.start}" ${lockAttr}></label><label>수강 종료일<input type="date" value="${courseDates.end}" ${lockAttr}></label></div></section>
       ${productOperationSection(current)}
       ${productAlimtalkSection(current)}
@@ -530,7 +565,7 @@ function openAccessRequestModal(){
       <div class="access-request-body">
         <label>수강생<select id="accessRequestStudent" required onchange="syncAccessRequestStudent()"><option value="">수강생 선택</option>${students.map(student=>`<option value="${student.email}">${student.name} · ${student.course}</option>`).join('')}</select></label>
         <div class="access-request-current" id="accessRequestCurrent"><b>현재 수강 상태</b><p>수강생을 선택하면 현재 수강 가능 클래스와 수강 이력이 표시됩니다.</p></div>
-        <label>추가로 볼 수 있게 할 클래스<select id="accessRequestClass" required><option value="">클래스 선택</option>${classes.map(course=>`<option>${course.title.split(' · ')[0]}</option>`).join('')}<option>땅부자 루틴클럽</option></select></label>
+        <label>추가로 볼 수 있게 할 클래스<select id="accessRequestClass" required><option value="">클래스 선택</option>${classes.map(course=>`<option>${course.title.split(' · ')[0]}</option>`).join('')}</select></label>
         <div class="access-request-grid"><label>시작일<input id="accessRequestStart" type="date" value="2026-07-13"></label><label>종료일<input id="accessRequestEnd" type="date" value="2026-09-13"></label></div>
         <label>처리 사유<textarea id="accessRequestReason" required placeholder="예: 오프라인 결제 확인, 보상 지급, 기존 수강생 확인 등"></textarea></label>
         <p class="access-request-note">처리하면 선택한 클래스가 바로 내 학습에 표시됩니다. 실제 서비스에서는 변경 이력을 남깁니다.</p>

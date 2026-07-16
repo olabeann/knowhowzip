@@ -131,6 +131,7 @@ function openDetail(pid){
   if(!p||!c)return showAccessDenied('product');
   activeDetail=pid;
   const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
+  const hasRequirement=(p.requirement||{}).type&&p.requirement.type!=='none';
   document.getElementById('view-detail').innerHTML=`
     <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
     <div class="detail-hero"><div class="wrap detail-hero-in">
@@ -149,10 +150,10 @@ function openDetail(pid){
             <div class="ch-row"><span>수강 기간</span><b>${ch.period}</b></div>
             <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
           </div>
-          <div class="cohort-box access-box">
+          ${hasRequirement?`<div class="cohort-box access-box">
             <div class="ch-row"><span>신청 조건</span><b>${req.label}</b></div>
             <p>${req.message}</p>
-          </div>
+          </div>`:''}
           <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
           <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
             <button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>
