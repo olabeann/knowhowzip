@@ -334,7 +334,7 @@ function renderMy(){
             </div>
             <div class="learning-acc" id="learn-${p.id}-operation">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동합니다')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>열기 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크를 엽니다')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>링크 →</b></button></div></div>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동합니다')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>입장 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크를 엽니다')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>입장 →</b></button></div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-faq">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-faq')"><span><i class="faq">?</i>수강 FAQ <small>${p.faq.length}개</small></span><b>＋</b></button>
