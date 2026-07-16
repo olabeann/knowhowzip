@@ -230,14 +230,13 @@ function moveLesson(delta){
   openLessonPlayer(state.activeLesson.productId,next);
 }
 function renderLessonPlayer(product,creator,index){
-  const videos=product.content.videos,current=videos[index],progress=productProgress(product.id);
+  const videos=product.content.videos,current=videos[index];
   const watched=Math.min(index+1,videos.length);
   document.getElementById('view-player').innerHTML=`
     <div class="lesson-player-page">
       <header class="lesson-player-top">
         <button class="lesson-back" onclick="show('mypage')" aria-label="내 학습으로 돌아가기">←</button>
         <div class="lesson-player-titlebar"><h1>${current}</h1><span>${product.title}</span></div>
-        <div class="lesson-player-stats"><span>수강률 ${progress}%</span><span>수강시간 ${lessonDurations[index%lessonDurations.length]}</span><span>강의시간 37:22:20</span></div>
       </header>
       <section class="lesson-stage">
         <div class="lesson-video-shell">
@@ -258,19 +257,8 @@ function renderLessonPlayer(product,creator,index){
           <button onclick="moveLesson(-1)" ${index===0?'disabled':''}>이전 강의</button>
           <span><i style="width:${(watched/videos.length)*100}%"></i></span>
           <button onclick="moveLesson(1)" ${index===videos.length-1?'disabled':''}>다음 강의</button>
-          <button class="lesson-wide" onclick="toast('넓은 화면 모드는 추후 제공됩니다')">넓은 화면</button>
+          <button class="lesson-wide" onclick="toast('전체 화면 모드는 추후 제공됩니다')">전체 화면</button>
         </div>
-      </section>
-      <nav class="lesson-tabs">
-        <button class="active">공지사항</button>
-        <button>강의소개</button>
-        <button>강사소개</button>
-        <button>강의자료</button>
-        <button>학습통계</button>
-      </nav>
-      <section class="lesson-tab-panel">
-        <article><b>공지사항</b><p>${product.operation.guide}</p></article>
-        <article><b>강의자료</b><p>${product.content.files.join(' · ')}</p></article>
       </section>
     </div>`;
 }
