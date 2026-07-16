@@ -421,7 +421,7 @@ function productAlimtalkSection(product){
   const template=(settings||alimtalkProductSettings[0]).items[0];
   const checked=settings&&template.enabled?'checked':'';
   const hidden=checked?'':' is-hidden';
-  return `<section class="panel product-section product-alimtalk-section"><div class="product-section-head"><i>5</i><div><h2>결제 후 안내톡</h2><p>이 상품을 결제한 수강생에게 승인된 알림톡 템플릿을 자동 발송합니다.</p></div></div>
+  return `<section class="panel product-section product-alimtalk-section"><div class="product-section-head"><i>6</i><div><h2>결제 후 안내톡</h2><p>이 상품을 결제한 수강생에게 승인된 알림톡 템플릿을 자동 발송합니다.</p></div></div>
     <label class="product-alimtalk-toggle"><input type="checkbox" ${checked} onchange="toggleProductAlimtalkDetails(this)"><span><b>결제 후 안내톡 보내기</b><small>알리고 템플릿 · 수강 준비 안내 · 결제 완료 후 5분 이내</small></span></label>
     <div class="product-alimtalk-detail${hidden}" id="productAlimtalkDetail">
       <div class="alimtalk-lock-note"><b>고정 문구는 수정할 수 없어요.</b><span>아래 입력값이 승인 템플릿의 변수 자리에 들어갑니다. 이모지는 사용할 수 없습니다.</span></div>
@@ -432,6 +432,65 @@ function productAlimtalkSection(product){
       <p class="product-alimtalk-help">필요 없는 안내 항목은 비워둘 수 있습니다. 저장 후 새로 결제하는 수강생부터 이 설정으로 안내톡이 발송됩니다.</p>
     </div>
   </section>`;
+}
+function productOperationDefaults(product){
+  return Object.assign({
+    hasKakao:false,
+    hasZoom:false,
+    guide:'매주 온라인 라이브로 진행되며 다시보기가 제공됩니다.',
+    kakaoTitle:'수강생 단톡방 입장',
+    kakaoDesc:'공지 · 질문 · 다시보기 공유',
+    kakaoUrl:'',
+    zoomTitle:'줌(Zoom) 라이브 입장',
+    zoomDesc:'매주 라이브 강의 입장 링크',
+    zoomUrl:'',
+    schedules:[{title:'권리분석 핵심 개념',date:'2026-07-12',time:'20:00'},{title:'위험 물건 사례 분석',date:'2026-07-19',time:'20:00'}]
+  },product.operation||{});
+}
+function productOperationSection(product){
+  const operation=productOperationDefaults(product);
+  const schedules=operation.schedules&&operation.schedules.length?operation.schedules:productOperationDefaults({}).schedules;
+  const kakaoHidden=operation.hasKakao?'':' is-hidden';
+  const zoomHidden=operation.hasZoom?'':' is-hidden';
+  return `<section class="panel product-section product-operation-section"><div class="product-section-head"><i>5</i><div><h2>운영 안내</h2><p>유저 페이지와 내 학습에 표시될 단톡방, 줌, 라이브 일정을 상품별로 등록합니다.</p></div></div>
+    <div class="editor-fields">
+      <label class="wide">운영 안내 문구 <em>*</em><textarea required name="operationGuide" placeholder="예: 매주 온라인 라이브로 진행되며 다시보기가 제공됩니다.">${operation.guide}</textarea></label>
+    </div>
+    <div class="operation-toggle-list">
+      <label><input type="checkbox" name="operationHasKakao" ${operation.hasKakao?'checked':''} onchange="toggleOperationOption(this,'kakao')"><span><b>수강생 단톡방 있음</b><small>${operation.hasKakao?'단톡방 정보를 입력해 주세요.':'현재 설정: 단톡방 없음'}</small></span></label>
+      <div class="operation-option-empty${operation.hasKakao?' is-hidden':''}" data-operation-empty="kakao">단톡방 없음</div>
+      <div class="operation-option-fields${kakaoHidden}" data-operation-fields="kakao">
+        <div class="operation-link-grid">
+          <label><span>수강생 단톡방</span><input name="operationKakaoTitle" value="${operation.kakaoTitle}" placeholder="수강생 단톡방 입장"><small>유저 화면 버튼명</small></label>
+          <label><span>단톡방 설명</span><input name="operationKakaoDesc" value="${operation.kakaoDesc}" placeholder="공지 · 질문 · 다시보기 공유"><small>버튼 아래 보조 문구</small></label>
+          <label class="wide"><span>단톡방 링크</span><input name="operationKakaoUrl" value="${operation.kakaoUrl}" placeholder="https://open.kakao.com/..."><small>결제한 수강생에게만 열리는 링크입니다.</small></label>
+        </div>
+      </div>
+      <label><input type="checkbox" name="operationHasZoom" ${operation.hasZoom?'checked':''} onchange="toggleOperationOption(this,'zoom')"><span><b>줌 라이브 있음</b><small>${operation.hasZoom?'줌 링크와 라이브 일정을 입력해 주세요.':'현재 설정: 줌 없음'}</small></span></label>
+      <div class="operation-option-empty${operation.hasZoom?' is-hidden':''}" data-operation-empty="zoom">줌 없음</div>
+      <div class="operation-option-fields${zoomHidden}" data-operation-fields="zoom">
+        <div class="operation-link-grid">
+          <label><span>줌 라이브</span><input name="operationZoomTitle" value="${operation.zoomTitle}" placeholder="줌(Zoom) 라이브 입장"><small>유저 화면 버튼명</small></label>
+          <label><span>줌 설명</span><input name="operationZoomDesc" value="${operation.zoomDesc}" placeholder="매주 라이브 강의 입장 링크"><small>버튼 아래 보조 문구</small></label>
+          <label class="wide"><span>줌 링크</span><input name="operationZoomUrl" value="${operation.zoomUrl}" placeholder="https://zoom.us/j/..."><small>일정별 링크가 다르면 아래 일정 메모에 함께 적어 주세요.</small></label>
+        </div>
+        <div class="operation-schedule-editor">
+          <div class="operation-schedule-head"><b>줌 라이브 일정</b><small>상품별로 노출됩니다. 일정 변경 시 공지로 안내됩니다.</small></div>
+          ${schedules.map((schedule,index)=>`<div class="operation-schedule-row"><em>${index+1}</em><input name="operationScheduleTitle[]" value="${schedule.title}" placeholder="일정명"><input type="date" name="operationScheduleDate[]" value="${schedule.date}"><input type="time" name="operationScheduleTime[]" value="${schedule.time}"><button type="button" class="remove-row" aria-label="일정 삭제">×</button></div>`).join('')}
+          <button type="button" class="operation-add-button" onclick="adminToast('일정 추가는 저장 연동 시 활성화됩니다')">+ 일정 추가</button>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+function toggleOperationOption(control,type){
+  const section=control.closest('.product-operation-section');
+  const fields=section?.querySelector(`[data-operation-fields="${type}"]`);
+  const empty=section?.querySelector(`[data-operation-empty="${type}"]`);
+  fields?.classList.toggle('is-hidden',!control.checked);
+  empty?.classList.toggle('is-hidden',control.checked);
+  const small=control.closest('label')?.querySelector('small');
+  if(small)small.textContent=control.checked?(type==='kakao'?'단톡방 정보를 입력해 주세요.':'줌 링크와 라이브 일정을 입력해 주세요.'):(type==='kakao'?'현재 설정: 단톡방 없음':'현재 설정: 줌 없음');
 }
 function toggleProductAlimtalkDetails(control){const detail=document.getElementById('productAlimtalkDetail');if(detail)detail.classList.toggle('is-hidden',!control.checked);adminToast(control.checked?'결제 후 안내톡을 켰습니다':'결제 후 안내톡을 껐습니다');}
 function toggleAlimtalkExample(button){const preview=button.nextElementSibling;if(!preview)return;const open=preview.classList.toggle('is-hidden');button.textContent=open?'예시보기':'예시닫기';}
@@ -448,16 +507,17 @@ function renderProductEditor(mode='create',productId=''){
   const courseDates=productCourseDates(current);
   return `<form class="product-editor" onsubmit="saveProductForm(event,'${mode}')">
     <div class="editor-head product-editor-head"><button type="button" class="editor-back" onclick="showAdminView('products')">← 상품 관리</button><div><span>${editing?'Product editing':'Product setup'}</span><h1>${editing?'상품 수정':'새 상품 만들기'}</h1><p>${locked?'이미 결제한 수강생이 있어 상품명과 소개만 수정할 수 있습니다. 수강 조건, 가격, 기간을 바꾸려면 새 상품을 만들어 주세요.':'이 상품을 누가 신청할 수 있고, 결제 후 어떤 클래스를 볼 수 있는지 설정합니다.'}</p></div><div class="editor-actions product-editor-actions"><label>노출 상태<select><option ${selectedOption('판매중',current.status)}>공개</option><option ${selectedOption('비공개',current.status)}>비공개</option></select></label><button type="submit" class="btn primary">${editing?'변경사항 저장':'상품 등록'}</button></div></div>
-    <details class="product-setup-hero panel"><summary><div><span>상품 만들기 안내</span><h2>유저가 실제 결제하는 상품을 만드는 화면입니다.</h2></div><em>자세히 보기</em></summary><div class="product-setup-detail"><p>1. 상품 정보는 유저가 결제 전 확인하는 문구입니다.<br>2. 결제 후 볼 수 있는 클래스를 정할 수 있어요.<br>3. 어떤 강의를 수강해야 하는 조건이 있다면 수강 조건에서 설정할 수 있어요.<br>4. 가격과 판매 시작일, 판매 종료일을 정할 수 있어요.<br>5. 결제 후 안내톡을 켜고 필요한 변수값을 입력할 수 있어요.</p></div></details>
+    <details class="product-setup-hero panel"><summary><div><span>상품 만들기 안내</span><h2>유저가 실제 결제하는 상품을 만드는 화면입니다.</h2></div><em>자세히 보기</em></summary><div class="product-setup-detail"><p>1. 상품 정보는 유저가 결제 전 확인하는 문구입니다.<br>2. 결제 후 볼 수 있는 클래스를 정할 수 있어요.<br>3. 어떤 강의를 수강해야 하는 조건이 있다면 수강 조건에서 설정할 수 있어요.<br>4. 가격과 판매 시작일, 판매 종료일을 정할 수 있어요.<br>5. 단톡방, 줌, 라이브 일정 같은 운영 안내를 상품별로 등록할 수 있어요.<br>6. 결제 후 안내톡을 켜고 필요한 변수값을 입력할 수 있어요.</p></div></details>
     ${locked?`<section class="product-lock-notice"><b>결제 이력 ${current.paymentCount}건</b><span>이미 결제가 발생한 상품이라 상품 정보만 수정할 수 있습니다. 수강 조건이나 가격을 바꾸려면 새 상품을 생성하세요.</span></section>`:''}
     <div class="product-editor-grid"><div class="product-editor-main">
       <section class="panel product-section editable"><div class="product-section-head"><i>1</i><div><h2>상품 정보</h2><p>공개 페이지와 결제 화면에 보이는 이름과 설명을 입력합니다.</p></div></div><div class="editor-fields"><label class="wide">상품명 <em>*</em><input required value="${current.name}" placeholder="예: 경매 기초 클래스 이용권, 경매 실전 패키지"></label><label class="wide">상품 소개 <em>*</em><textarea required placeholder="상품에 포함된 클래스와 수강 흐름을 설명해 주세요.">${current.desc}</textarea></label></div></section>
       <section class="panel product-section${lockClass}"><div class="product-section-head"><i>2</i><div><h2>결제 후 볼 수 있는 클래스</h2><p>수강생이 결제한 뒤 내 학습에서 볼 클래스를 선택합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="included-lecture-list"><label><input type="checkbox" ${courseChecked(current,'경매 낙찰 기초반')} ${lockAttr}><span><b>경매 낙찰 기초반</b><small>기초 과정 · 처음 참여 가능</small></span></label><label><input type="checkbox" ${courseChecked(current,'권리분석 실전반')} ${lockAttr}><span><b>권리분석 실전반</b><small>심화 과정 · 기초 수강 이력 필요</small></span></label><label><input type="checkbox" ${courseChecked(current,'땅부자 루틴클럽')} ${lockAttr}><span><b>땅부자 루틴클럽</b><small>스터디 · 기존 수강생 전용</small></span></label></div><div class="product-warning"><b>결제하면 선택한 클래스가 내 학습에 열립니다.</b><p>심화 과정 결제 후 기초 과정을 추가로 더 보여줘야 한다면 아래 수강 조건 섹션에서 함께 적어 주세요.</p></div></section>
       <section class="panel product-section${lockClass}"><div class="product-section-head"><i>3</i><div><h2>수강 조건</h2><p>선택한 기존 클래스를 들은 수강생만 이 상품을 신청할 수 있습니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="condition-class-list"><label><input type="checkbox" ${noRequirementChecked(current)} ${lockAttr}><span><b>수강 조건 없음</b><small>누구나 바로 신청할 수 있습니다.</small></span></label><label><input type="checkbox" ${requirementChecked(current,'경매 낙찰 기초반')} ${lockAttr}><span><b>경매 낙찰 기초반</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label><label><input type="checkbox" ${requirementChecked(current,'권리분석 실전반')} ${lockAttr}><span><b>권리분석 실전반</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label><label><input type="checkbox" ${requirementChecked(current,'땅부자 루틴클럽')} ${lockAttr}><span><b>땅부자 루틴클럽</b><small>참여 이력이 있는 수강생만 신청 가능</small></span></label></div></section>
       <section class="panel product-section${lockClass}"><div class="product-section-head"><i>4</i><div><h2>가격·이용 기간</h2><p>1회 결제와 상품별 수강 기간을 우선 적용합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="editor-fields"><label>결제 방식<select ${lockAttr}><option>1회 결제</option><option disabled>월 정기결제 · 후속 단계</option><option disabled>연 정기결제 · 후속 단계</option></select></label><label>판매 가격 <em>*</em><div class="input-suffix"><input required type="number" min="0" step="1000" value="${current.price}" ${lockAttr}><span>원</span></div></label><label>판매 시작일<input type="date" value="2026-07-01" ${lockAttr}></label><label>판매 종료일<input type="date" value="2026-07-31" ${lockAttr}></label><label>수강 시작일<input type="date" value="${courseDates.start}" ${lockAttr}></label><label>수강 종료일<input type="date" value="${courseDates.end}" ${lockAttr}></label></div></section>
+      ${productOperationSection(current)}
       ${productAlimtalkSection(current)}
-      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>6</i><div><h2>환불 정책</h2><p>상품 결제 전 확인할 정책과 결제 완료 안내를 설정합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="editor-fields"><label class="wide">환불 안내 <em>*</em><textarea required ${lockAttr}>결제 후 수강 시작 전까지 취소할 수 있으며, 수강 시작 후에는 노하우집 운영 정책에 따라 환불됩니다.</textarea></label><label class="wide">결제 완료 안내<textarea ${lockAttr}>결제가 완료되면 선택한 클래스가 내 학습에 표시됩니다.</textarea></label></div></section>
-    </div><aside class="product-editor-side"><div class="panel product-summary"><span>상품 요약</span><h3>${current.name}</h3><p>수강 조건 · ${current.requirement}</p><strong>${won(current.price)}</strong><div><b>볼 수 있는 클래스</b>${current.courses.concat(current.extraAccess).map(course=>`<em>${course}</em>`).join('')}</div><small>${locked?'이미 결제한 수강생이 있어 상품 정보만 수정할 수 있습니다.':'결제 완료 후 내 학습에 표시됩니다.'}</small></div><div class="panel product-side-guide"><b>${editing?'수정 가능 범위':'생성 후 흐름'}</b>${editing?`<ol><li>상품명</li><li>상품 소개</li><li>노출 상태</li><li>결제 후 안내톡</li></ol>`:`<ol><li>상품 공개</li><li>수강 조건 확인</li><li>사용자 결제</li><li>안내톡 발송</li><li>내 학습에 클래스 표시</li></ol>`}</div></aside></div>
+      <section class="panel product-section${lockClass}"><div class="product-section-head"><i>7</i><div><h2>환불 정책</h2><p>상품 결제 전 확인할 정책과 결제 완료 안내를 설정합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="editor-fields"><label class="wide">환불 안내 <em>*</em><textarea required ${lockAttr}>결제 후 수강 시작 전까지 취소할 수 있으며, 수강 시작 후에는 노하우집 운영 정책에 따라 환불됩니다.</textarea></label><label class="wide">결제 완료 안내<textarea ${lockAttr}>결제가 완료되면 선택한 클래스가 내 학습에 표시됩니다.</textarea></label></div></section>
+    </div><aside class="product-editor-side"><div class="panel product-summary"><span>상품 요약</span><h3>${current.name}</h3><p>수강 조건 · ${current.requirement}</p><strong>${won(current.price)}</strong><div><b>볼 수 있는 클래스</b>${current.courses.concat(current.extraAccess).map(course=>`<em>${course}</em>`).join('')}</div><small>${locked?'이미 결제한 수강생이 있어도 운영 안내는 최신 정보로 관리할 수 있습니다.':'결제 완료 후 내 학습에 표시됩니다.'}</small></div><div class="panel product-side-guide"><b>${editing?'수정 가능 범위':'생성 후 흐름'}</b>${editing?`<ol><li>상품명</li><li>상품 소개</li><li>노출 상태</li><li>운영 안내</li><li>결제 후 안내톡</li></ol>`:`<ol><li>상품 공개</li><li>수강 조건 확인</li><li>사용자 결제</li><li>운영 안내 노출</li><li>안내톡 발송</li><li>내 학습에 클래스 표시</li></ol>`}</div></aside></div>
     <div class="editor-bottom-bar"><span><b>${editing?current.name:'새 상품'}</b><small>${locked?'결제 이력 상품 · 상품 정보만 수정 가능':'필수 항목을 확인한 뒤 등록하세요.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('products')">취소</button><button type="submit" class="btn primary">${editing?'변경사항 저장':'상품 등록'}</button></div></div>
   </form>`;
 }
