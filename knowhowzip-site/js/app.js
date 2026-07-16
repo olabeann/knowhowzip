@@ -290,8 +290,8 @@ function renderLearningEntitlementSummary(owned){
   const active=owned.filter(x=>!endedCourses.has(x.p.id)).length;
   const creatorCount=new Set(owned.map(x=>x.c.id)).size;
   return `<section class="entitlement-summary">
-    <article><span>수강 중 클래스</span><strong>${active}개</strong><p>현재 학습 가능한 클래스입니다.</p></article>
-    <article><span>크리에이터</span><strong>${creatorCount}명</strong><p>구매한 클래스를 크리에이터별로 모아봅니다.</p></article>
+    <article><span>수강 중 클래스</span><strong>${active}개</strong></article>
+    <article><span>크리에이터</span><strong>${creatorCount}명</strong></article>
   </section>`;
 }
 
