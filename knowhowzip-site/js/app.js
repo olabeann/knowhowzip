@@ -198,13 +198,14 @@ const learningProgress={'mmoh-basic':50,'mmoh-right':25};
 const endedCourses=new Set();
 const lessonDurations=['88분','92분','76분','81분','68분','74분'];
 const zoomSchedules={
-  'mmoh-basic':[{date:'07.05',day:'일',time:'20:00',title:'오리엔테이션 · 경매 절차 이해'},{date:'07.12',day:'일',time:'20:00',title:'물건 검색과 시세 분석'},{date:'07.19',day:'일',time:'20:00',title:'입찰표 작성 실습'}],
-  'mmoh-right':[{date:'07.12',day:'일',time:'20:00',title:'권리분석 핵심 개념'},{date:'07.19',day:'일',time:'20:00',title:'위험 물건 사례 분석'}]
+  'mmoh-basic':[{date:'07.05',day:'일',time:'20:00',title:'오리엔테이션 · 경매 절차 이해',url:'https://zoom.us/j/1000000001'},{date:'07.12',day:'일',time:'20:00',title:'물건 검색과 시세 분석',url:'https://zoom.us/j/1000000002'},{date:'07.19',day:'일',time:'20:00',title:'입찰표 작성 실습',url:'https://zoom.us/j/1000000003'}],
+  'mmoh-right':[{date:'07.12',day:'일',time:'20:00',title:'권리분석 핵심 개념',url:'https://zoom.us/j/2000000001'},{date:'07.19',day:'일',time:'20:00',title:'위험 물건 사례 분석',url:'https://zoom.us/j/2000000002'}]
 };
 function renderZoomSchedules(productId){
-  const schedules=zoomSchedules[productId]||[{date:'일정',day:'',time:'추후 안내',title:'라이브 일정은 공지로 안내됩니다'}];
-  return `<div class="zoom-schedule"><div class="zoom-schedule-head"><b>줌 라이브 일정</b></div>${schedules.map((schedule,index)=>`<div class="zoom-schedule-row"><span class="zoom-order">${index+1}</span><div><b>${schedule.title}</b><small>${schedule.date}${schedule.day?'('+schedule.day+')':''} · ${schedule.time}</small></div></div>`).join('')}</div>`;
+  const schedules=zoomSchedules[productId]||[{date:'일정',day:'',time:'추후 안내',title:'라이브 일정은 공지로 안내됩니다',url:''}];
+  return `<div class="zoom-schedule"><div class="zoom-schedule-head"><b>줌 라이브 일정</b></div>${schedules.map((schedule,index)=>`<div class="zoom-schedule-row"><span class="zoom-order">${index+1}</span><div><b>${schedule.title}</b><small>${schedule.date}${schedule.day?'('+schedule.day+')':''} · ${schedule.time}</small></div><button type="button" onclick="openZoomSchedule('${schedule.url||''}','${schedule.title}')">입장 →</button></div>`).join('')}</div>`;
 }
+function openZoomSchedule(url,title){if(url)window.open(url,'_blank','noopener,noreferrer');else toast(`${title} 줌 링크는 추후 안내됩니다`);}
 function productProgress(id){return learningProgress[id]??20;}
 function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
 function toggleLearningAcc(id){document.getElementById(id)?.classList.toggle('open');}
@@ -334,7 +335,7 @@ function renderMy(){
             </div>
             <div class="learning-acc" id="learn-${p.id}-operation">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동합니다')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>입장 →</b></button><button class="learning-resource" onclick="toast('줌 입장 링크를 엽니다')"><i class="zoom">🎥</i><span>줌(Zoom) 라이브 입장<small>매주 라이브 강의 입장 링크</small></span><b>입장 →</b></button></div></div>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동합니다')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>입장 →</b></button></div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-faq">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-faq')"><span><i class="faq">?</i>수강 FAQ <small>${p.faq.length}개</small></span><b>＋</b></button>

@@ -441,10 +441,8 @@ function productOperationDefaults(product){
     kakaoTitle:'수강생 단톡방 입장',
     kakaoDesc:'공지 · 질문 · 다시보기 공유',
     kakaoUrl:'',
-    zoomTitle:'줌(Zoom) 라이브 입장',
-    zoomDesc:'매주 라이브 강의 입장 링크',
     zoomUrl:'',
-    schedules:[{title:'권리분석 핵심 개념',date:'2026-07-12',time:'20:00'},{title:'위험 물건 사례 분석',date:'2026-07-19',time:'20:00'}]
+    schedules:[{title:'권리분석 핵심 개념',date:'2026-07-12',time:'20:00',url:''},{title:'위험 물건 사례 분석',date:'2026-07-19',time:'20:00',url:''}]
   },product.operation||{});
 }
 function productOperationSection(product){
@@ -469,14 +467,9 @@ function productOperationSection(product){
       <label><input type="checkbox" name="operationHasZoom" ${operation.hasZoom?'checked':''} onchange="toggleOperationOption(this,'zoom')"><span><b>줌 라이브 있음</b><small>${operation.hasZoom?'줌 링크와 라이브 일정을 입력해 주세요.':'현재 설정: 줌 없음'}</small></span></label>
       <div class="operation-option-empty${operation.hasZoom?' is-hidden':''}" data-operation-empty="zoom">줌 없음</div>
       <div class="operation-option-fields${zoomHidden}" data-operation-fields="zoom">
-        <div class="operation-link-grid">
-          <label><span>줌 라이브</span><input name="operationZoomTitle" value="${operation.zoomTitle}" placeholder="줌(Zoom) 라이브 입장"><small>유저 화면 버튼명</small></label>
-          <label><span>줌 설명</span><input name="operationZoomDesc" value="${operation.zoomDesc}" placeholder="매주 라이브 강의 입장 링크"><small>버튼 아래 보조 문구</small></label>
-          <label class="wide"><span>줌 링크</span><input name="operationZoomUrl" value="${operation.zoomUrl}" placeholder="https://zoom.us/j/..."><small>일정별 링크가 다르면 아래 일정 메모에 함께 적어 주세요.</small></label>
-        </div>
         <div class="operation-schedule-editor">
-          <div class="operation-schedule-head"><b>줌 라이브 일정</b><small>상품별로 노출됩니다. 일정 변경 시 공지로 안내됩니다.</small></div>
-          ${schedules.map((schedule,index)=>`<div class="operation-schedule-row"><em>${index+1}</em><input name="operationScheduleTitle[]" value="${schedule.title}" placeholder="일정명"><input type="date" name="operationScheduleDate[]" value="${schedule.date}"><input type="time" name="operationScheduleTime[]" value="${schedule.time}"><button type="button" class="remove-row" aria-label="일정 삭제">×</button></div>`).join('')}
+          <div class="operation-schedule-head"><b>줌 라이브 일정</b><small>각 일정별 입장 링크를 등록합니다.</small></div>
+          ${schedules.map((schedule,index)=>`<div class="operation-schedule-row"><em>${index+1}</em><input name="operationScheduleTitle[]" value="${schedule.title}" placeholder="일정명"><input type="date" name="operationScheduleDate[]" value="${schedule.date}"><input type="time" name="operationScheduleTime[]" value="${schedule.time}"><input name="operationScheduleUrl[]" value="${schedule.url||''}" placeholder="https://zoom.us/j/..."><button type="button" class="remove-row" aria-label="일정 삭제">×</button></div>`).join('')}
           <button type="button" class="operation-add-button" onclick="adminToast('일정 추가는 저장 연동 시 활성화됩니다')">+ 일정 추가</button>
         </div>
       </div>
