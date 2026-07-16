@@ -14,7 +14,7 @@ var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{in
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
-let state={user:null,purchased:new Set(),cart:new Set(),authMode:'kakao',pending:null,cat:'전체',creatorCat:'전체',creatorSearch:'',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
+let state={user:null,purchased:new Set(),cart:new Set(),authMode:'kakao',pending:null,pendingLesson:null,cat:'전체',creatorCat:'전체',creatorSearch:'',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
@@ -87,7 +87,9 @@ function creatorCommerce(c){
 }
 let activeCreator=null;
 function openCreator(id){
-  const c=creators.find(x=>x.id===id);activeCreator=id;
+  const c=creators.find(x=>x.id===id);
+  if(!c)return showAccessDenied('creator');
+  activeCreator=id;
   let savedCover='';try{savedCover=id==='mmoh'?localStorage.getItem('nhz-mmoh-cover')||'':'';}catch(error){}
   const commerce=creatorCommerce(c);
   document.getElementById('view-creator').innerHTML=`
@@ -127,7 +129,9 @@ function purchaseRequirement(product){
   return {ok,label:req.label,message:ok?'신청 조건을 충족했습니다.':req.message};
 }
 function openDetail(pid){
-  const p=productMap[pid],c=creatorOf[pid];activeDetail=pid;
+  const p=productMap[pid],c=creatorOf[pid];
+  if(!p||!c)return showAccessDenied('product');
+  activeDetail=pid;
   const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,seat=Math.round(ch.enrolled/ch.seats*100),req=purchaseRequirement(p);
   document.getElementById('view-detail').innerHTML=`
     <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
@@ -219,8 +223,15 @@ function continueLearning(productId,index){
 }
 function openLessonPlayer(productId,index=0){
   const product=productMap[productId],creator=creatorOf[productId];
-  if(!product||!creator)return;
-  const videos=product.content.videos,next=Math.min(Math.max(index,0),videos.length-1);
+  if(!product||!creator)return showAccessDenied('lesson');
+  const videos=product.content.videos,requested=Number.isFinite(Number(index))?Number(index):0,next=Math.min(Math.max(requested,0),videos.length-1);
+  if(!state.user){
+    state.pendingLesson={productId,index:next};
+    return showAccessDenied('login',productId);
+  }
+  if(!state.purchased.has(productId)){
+    return showAccessDenied('purchase',productId);
+  }
   state.activeLesson={productId,index:next};
   renderLessonPlayer(product,creator,next);
   show('player');
@@ -263,6 +274,10 @@ function renderLessonPlayer(product,creator,index){
         </div>
       </section>
     </div>`;
+}
+
+function showAccessDenied(type,productId){
+  location.href='./access-denied.html?type='+encodeURIComponent(type||'lesson')+(productId?'&product='+encodeURIComponent(productId):'');
 }
 function renderLearningTabs(owned){
   const ended=owned.filter(x=>endedCourses.has(x.p.id)).length,active=owned.length-ended;
@@ -424,6 +439,7 @@ function submitAuth(){
   document.getElementById('mAuth').style.display='none';document.getElementById('mUser').style.display='flex';document.getElementById('mUserName').textContent=state.user.name;
   closeAuth();toast('카카오 로그인 완료');
   if(state.pending){const id=state.pending;state.pending=null;openPay(id);}
+  else if(state.pendingLesson){const lesson=state.pendingLesson;state.pendingLesson=null;openLessonPlayer(lesson.productId,lesson.index);}
   else if(document.getElementById('view-account').classList.contains('show'))show('account');
   else show('mypage');}
 function logout(){state.user=null;state.purchased.clear();state.cart.clear();updateCart();
@@ -507,8 +523,13 @@ let suppressHash=false;
 function setHash(h){suppressHash=true;location.hash=h;setTimeout(()=>{suppressHash=false;},0);}
 function route(){
   const h=location.hash;
-  if(h.startsWith('#/c/')){const id=h.slice(4);if(creators.find(x=>x.id===id))return openCreator(id);}
-  if(h.startsWith('#/p/')){const id=h.slice(4);if(productMap[id])return openDetail(id);}
+  if(h.startsWith('#/c/'))return openCreator(h.slice(4));
+  if(h.startsWith('#/p/'))return openDetail(h.slice(4));
+  if(h.startsWith('#/learn/')){
+    const parts=h.split('/');
+    return openLessonPlayer(parts[2],Number(parts[3]||1)-1);
+  }
+  if(h==='#/access-denied')return showAccessDenied('lesson');
   if(h==='#/creators')return show('creators');
   if(h==='#/mypage')return show('mypage');
   if(h==='#/account')return show('account');

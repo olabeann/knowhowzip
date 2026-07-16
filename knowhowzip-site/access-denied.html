@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>접근할 수 없는 페이지 · 노하우집</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="./index.html" aria-label="노하우집 홈"><img class="brand-logo" src="./assets/images/knowhowzip-logo.png" alt="노하우집"></a>
+    <nav class="gnb-menu">
+      <button type="button" onclick="location.href='./index.html'">홈</button>
+      <button type="button" onclick="location.href='./index.html#/creators'">크리에이터</button>
+      <button type="button" onclick="location.href='./index.html#/mypage'">내 학습</button>
+      <button type="button" onclick="location.href='./index.html#/faq'">고객센터</button>
+    </nav>
+    <div class="nav-right">
+      <button class="nav-cta" type="button" onclick="location.href='./index.html#/mypage'">바로 시작하기</button>
+    </div>
+  </div>
+</header>
+
+<main class="access-denied-page">
+  <div class="wrap">
+    <section class="access-denied-card access-denied-plain">
+      <div class="access-denied-icon"><img class="my-empty-logo" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="노하우집"></div>
+      <h1 id="accessTitle">접근 할 수 없습니다.</h1>
+      <p id="accessMessage">주소가 잘못되었거나 권한이 없는 페이지입니다.<br>홈으로 이동하거나 관리자에게 문의해주세요.</p>
+      <div class="access-denied-actions">
+        <a class="btn-red" id="accessPrimary" href="./index.html">홈으로 이동</a>
+        <a class="btn-soft" id="accessSecondary" href="http://pf.kakao.com/_xksSwX/chat">관리자 문의</a>
+      </div>
+    </section>
+  </div>
+</main>
+</body>
+</html>
