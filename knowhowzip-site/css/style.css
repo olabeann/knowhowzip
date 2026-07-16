@@ -663,10 +663,10 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
 /* Zoom schedule */
 .zoom-schedule{border:1px solid var(--line);border-radius:12px;background:#fff;margin:14px 0;overflow:hidden}
 .zoom-schedule-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:var(--bg)}
-.zoom-schedule-head b{font-size:12px}.zoom-schedule-head span{font-size:10px;color:var(--ink-mute)}
-.zoom-schedule-row{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;padding:12px 15px;border-top:1px solid var(--line)}
+.zoom-schedule-head b{font-size:12px}
+.zoom-schedule-row{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:10px;padding:12px 15px;border-top:1px solid var(--line)}
 .zoom-order{width:26px;height:26px;border-radius:7px;background:#eef1ff;color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:850}
-.zoom-schedule-row div b,.zoom-schedule-row div small{display:block}.zoom-schedule-row div b{font-size:11.5px;margin-bottom:3px}.zoom-schedule-row div small{font-size:10px;color:var(--ink-mute)}.zoom-schedule-row em{font-style:normal;font-size:10px;font-weight:800;color:var(--brand);background:var(--brand-soft);padding:4px 7px;border-radius:6px}
+.zoom-schedule-row div b,.zoom-schedule-row div small{display:block}.zoom-schedule-row div b{font-size:11.5px;margin-bottom:3px}.zoom-schedule-row div small{font-size:10px;color:var(--ink-mute)}
 @media(max-width:900px){.payment-item{grid-template-columns:110px 1fr 110px}.payment-status{grid-column:3}}
 @media(max-width:640px){.payment-history-head{align-items:stretch;flex-direction:column}.payment-item{grid-template-columns:1fr 1fr;gap:13px}.payment-product{grid-column:1/-1}.payment-status{grid-column:2;justify-content:flex-end}.zoom-schedule-head{align-items:flex-start;flex-direction:column}}
 
@@ -724,10 +724,8 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .global-learning-faq-item>p{font-size:12px}
   .learning-faq-search input{font-size:14px}
   .learning-faq-result{font-size:12px}
-  .zoom-schedule-head span{font-size:11px}
   .zoom-schedule-row div b{font-size:12.5px}
   .zoom-schedule-row div small{font-size:11px;line-height:1.4}
-  .zoom-schedule-row em{font-size:11px}
 }
 
 

@@ -203,7 +203,7 @@ const zoomSchedules={
 };
 function renderZoomSchedules(productId){
   const schedules=zoomSchedules[productId]||[{date:'일정',day:'',time:'추후 안내',title:'라이브 일정은 공지로 안내됩니다'}];
-  return `<div class="zoom-schedule"><div class="zoom-schedule-head"><b>줌 라이브 일정</b><span>일정 변경 시 공지로 안내됩니다.</span></div>${schedules.map((schedule,index)=>`<div class="zoom-schedule-row"><span class="zoom-order">${index+1}</span><div><b>${schedule.title}</b><small>${schedule.date}${schedule.day?'('+schedule.day+')':''} · ${schedule.time}</small></div><em>예정</em></div>`).join('')}</div>`;
+  return `<div class="zoom-schedule"><div class="zoom-schedule-head"><b>줌 라이브 일정</b></div>${schedules.map((schedule,index)=>`<div class="zoom-schedule-row"><span class="zoom-order">${index+1}</span><div><b>${schedule.title}</b><small>${schedule.date}${schedule.day?'('+schedule.day+')':''} · ${schedule.time}</small></div></div>`).join('')}</div>`;
 }
 function productProgress(id){return learningProgress[id]??20;}
 function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
