@@ -343,8 +343,7 @@ const commonFaqs=[
 ];
 function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
 function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';}
-// 실제 노하우집 카카오 채널을 개설한 뒤 이 주소만 채널 URL로 교체하면 됩니다.
-const KAKAO_CHANNEL_URL='https://pf.kakao.com/';
+const KAKAO_CHANNEL_URL='http://pf.kakao.com/_xksSwX/chat';
 function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,noreferrer');}
 
 /* ---------- view switch ---------- */
