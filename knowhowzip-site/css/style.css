@@ -79,11 +79,7 @@ main{min-height:50vh}
 .badge-pill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-xs);color:var(--brand-dk);font-weight:800;font-size:13.5px;padding:7px 15px;border-radius:30px;margin-bottom:22px}
 .hero h1{font-size:clamp(34px,4.6vw,56px);line-height:1.12;margin:0 0 18px;font-weight:900;letter-spacing:-1.2px}
 .hero-sub{font-size:18px;color:var(--ink-soft);margin:0 0 28px;max-width:460px;line-height:1.6}
-.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.hero-search{position:relative;max-width:440px}
-.hero-search input{width:100%;height:54px;border:1px solid var(--line);border-radius:14px;padding:0 56px 0 20px;font-size:15px;font-family:inherit;background:#fff;box-shadow:var(--shadow-sm)}
-.hero-search input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
-.hero-search button{position:absolute;right:7px;top:7px;width:40px;height:40px;border:0;border-radius:10px;background:var(--grad);color:#fff;font-size:17px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
 
 /* hero mock */
 .hero-art{position:relative;display:flex;justify-content:center}
@@ -634,7 +630,6 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .grid{grid-template-columns:1fr}
   .pay-methods{grid-template-columns:1fr}
   .hero h1{font-size:30px}
-  .hero-search input{padding-left:15px;font-size:14px}
   .creator-directory-hero h1{font-size:30px}
   .my-learning-tabs button{font-size:14px}
   .foot-cols{display:grid;grid-template-columns:1fr 1fr;gap:26px 40px}
