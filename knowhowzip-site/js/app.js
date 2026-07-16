@@ -126,12 +126,31 @@ function purchaseRequirement(product){
   const ok=state.purchased.has(req.productId);
   return {ok,label:req.label,message:ok?'신청 조건을 충족했습니다.':req.message};
 }
+function productContentSources(product){
+  const ids=product.includedProductIds&&product.includedProductIds.length?product.includedProductIds:[product.id];
+  return ids.map(id=>productMap[id]).filter(Boolean);
+}
+function productClassNames(product){
+  return productContentSources(product).map(item=>item.title.split(' · ')[0]);
+}
+function productVideoItems(product){
+  const sources=productContentSources(product),multi=sources.length>1;
+  return sources.flatMap(item=>item.content.videos.map(title=>({title,display:multi?`${item.title.split(' · ')[0]} · ${title}`:title})));
+}
+function productFileItems(product){
+  const sources=productContentSources(product),multi=sources.length>1;
+  return sources.flatMap(item=>item.content.files.map(title=>({title,display:multi?`${item.title.split(' · ')[0]} · ${title}`:title})));
+}
+function productVideoTitles(product){return productVideoItems(product).map(item=>item.display);}
+function productFileTitles(product){return productFileItems(product).map(item=>item.display);}
 function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];
   if(!p||!c)return showAccessDenied('product');
   activeDetail=pid;
   const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
   const hasRequirement=(p.requirement||{}).type&&p.requirement.type!=='none';
+  const includedClasses=productClassNames(p);
+  const videos=productVideoTitles(p),files=productFileTitles(p);
   document.getElementById('view-detail').innerHTML=`
     <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
     <div class="detail-hero"><div class="wrap detail-hero-in">
@@ -150,6 +169,10 @@ function openDetail(pid){
             <div class="ch-row"><span>수강 기간</span><b>${ch.period}</b></div>
             <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
           </div>
+          ${includedClasses.length>1?`<div class="cohort-box included-class-box">
+            <div class="ch-row"><span>포함 클래스</span><b>${includedClasses.length}개</b></div>
+            <div class="included-class-list">${includedClasses.map(name=>`<em>${name}</em>`).join('')}</div>
+          </div>`:''}
           ${hasRequirement?`<div class="cohort-box access-box">
             <div class="ch-row"><span>신청 조건</span><b>${req.label}</b></div>
             <p>${req.message}</p>
@@ -175,9 +198,9 @@ function openDetail(pid){
       <div class="d-section" id="sec-intro"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p></div>
       <div class="d-section" id="sec-content"><h3><span class="dot"></span>콘텐츠 <span class="sub">영상 · 자료</span></h3>
         <div class="sub-h">📹 영상 커리큘럼</div>
-        <ul class="curr">${p.content.videos.map((s,i)=>`<li><span class="wk">${i+1}주차</span><span>${s}</span><span class="pl">▶</span></li>`).join('')}</ul>
+        <ul class="curr">${videos.map((s,i)=>`<li><span class="wk">${i+1}강</span><span>${s}</span><span class="pl">▶</span></li>`).join('')}</ul>
         <div class="sub-h">📄 제공 자료</div>
-        <ul class="mat-list">${p.content.files.map(m=>`<li><span class="mi">📄</span><span>${m}</span><span class="lock">${owned?'다운로드 가능':'🔒 수강 후 제공'}</span></li>`).join('')}</ul>
+        <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span><span class="lock">${owned?'다운로드 가능':'🔒 수강 후 제공'}</span></li>`).join('')}</ul>
       </div>
       <div class="d-section" id="sec-op"><h3><span class="dot"></span>운영 안내 <span class="sub">단톡방 · 줌</span></h3>
         <p style="margin-bottom:14px">${p.operation.guide}</p>
@@ -214,13 +237,13 @@ function playLesson(productId,index,title){
   openLessonPlayer(productId,index);
 }
 function continueLearning(productId,index){
-  const videos=productMap[productId].content.videos,next=Math.min(index,videos.length-1);
+  const videos=productVideoTitles(productMap[productId]),next=Math.min(index,videos.length-1);
   playLesson(productId,next,videos[next]);
 }
 function openLessonPlayer(productId,index=0){
   const product=productMap[productId],creator=creatorOf[productId];
   if(!product||!creator)return showAccessDenied('lesson');
-  const videos=product.content.videos,requested=Number.isFinite(Number(index))?Number(index):0,next=Math.min(Math.max(requested,0),videos.length-1);
+  const videos=productVideoTitles(product),requested=Number.isFinite(Number(index))?Number(index):0,next=Math.min(Math.max(requested,0),videos.length-1);
   if(!state.user){
     state.pendingLesson={productId,index:next};
     return showAccessDenied('login',productId);
@@ -235,11 +258,11 @@ function openLessonPlayer(productId,index=0){
 }
 function moveLesson(delta){
   if(!state.activeLesson)return;
-  const product=productMap[state.activeLesson.productId],next=Math.min(Math.max(state.activeLesson.index+delta,0),product.content.videos.length-1);
+  const product=productMap[state.activeLesson.productId],videos=productVideoTitles(product),next=Math.min(Math.max(state.activeLesson.index+delta,0),videos.length-1);
   openLessonPlayer(state.activeLesson.productId,next);
 }
 function renderLessonPlayer(product,creator,index){
-  const videos=product.content.videos,current=videos[index];
+  const videos=productVideoTitles(product),files=productFileTitles(product),current=videos[index];
   const watched=Math.min(index+1,videos.length);
   document.getElementById('view-player').innerHTML=`
     <div class="lesson-player-page">
@@ -255,7 +278,7 @@ function renderLessonPlayer(product,creator,index){
             <h2>${current}</h2>
             <p>${product.lead}</p>
             <div class="lesson-slide-grid">
-              <article><b>${index+1}강 핵심</b><span>${product.content.files[0]||'강의 노트'}</span></article>
+              <article><b>${index+1}강 핵심</b><span>${files[0]||'강의 노트'}</span></article>
               <article><b>오늘의 목표</b><span>${product.tags.slice(0,2).join(' · ')}</span></article>
             </div>
             <div class="lesson-instructor">${creator.logoType==='house'?houseSVG(54,{ink:product.deep,text:false}):creatorLogo(creator,54)}</div>
@@ -322,7 +345,7 @@ function renderMy(){
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const progress=productProgress(p.id),videos=p.content.videos,doneCount=Math.floor(videos.length*progress/100);if(endedCourses.has(p.id))return `
+      ${g.items.map(p=>{const progress=productProgress(p.id),videos=productVideoTitles(p),files=productFileTitles(p),doneCount=Math.floor(videos.length*progress/100);if(endedCourses.has(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
@@ -342,8 +365,8 @@ function renderMy(){
               <div class="learning-acc-body"><div class="learning-acc-inner"><div class="learning-player" id="player-${p.id}"><div class="learning-player-screen"><span>▶</span></div><div><b class="learning-player-title">강의를 선택해 주세요</b><small class="learning-player-meta">카드 안에서 바로 재생됩니다</small></div></div>${videos.map((video,idx)=>{const done=idx<doneCount;return `<button class="lesson-row" data-product="${p.id}" data-lesson="${idx}" onclick="playLesson('${p.id}',${idx},'${video}')"><span class="lesson-state ${done?'done':''}">${done?'✓':'▶'}</span><span class="lesson-title">${video}<small>${done?'시청 완료':'미완료 · 재생하기'}</small></span><span class="lesson-duration">${lessonDurations[idx%lessonDurations.length]}</span><strong>${done?'완료':'미완료'}</strong></button>`;}).join('')}</div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-files">
-              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-files')"><span><i class="file">▤</i>콘텐츠 · 자료 <small>${p.content.files.length}개</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner">${p.content.files.map(file=>`<button class="learning-resource" onclick="toast('&quot;${file}&quot; 다운로드를 시작합니다')"><i>📄</i><span>${file}<small>강의 자료</small></span><b>다운로드</b></button>`).join('')}</div></div>
+              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-files')"><span><i class="file">▤</i>콘텐츠 · 자료 <small>${files.length}개</small></span><b>＋</b></button>
+              <div class="learning-acc-body"><div class="learning-acc-inner">${files.map(file=>`<button class="learning-resource" onclick="toast('&quot;${file}&quot; 다운로드를 시작합니다')"><i>📄</i><span>${file}<small>강의 자료</small></span><b>다운로드</b></button>`).join('')}</div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-operation">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>

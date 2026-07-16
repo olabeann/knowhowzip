@@ -369,6 +369,7 @@ body.preview-open{overflow:hidden}
 .included-lecture-list label,.condition-class-list label{align-items:flex-start}
 .included-lecture-list input,.condition-class-list input{flex:0 0 auto;margin-top:2px}
 .included-lecture-list span,.condition-class-list span{min-width:0}
+.product-class-choice select{margin-left:auto;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 8px;font-size:10px;font-weight:900;color:var(--brand)}
 .product-warning b{white-space:normal;min-width:135px}
 .product-warning p{margin:0}
 .product-summary h3,.product-summary p{overflow-wrap:anywhere}

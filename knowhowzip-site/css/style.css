@@ -287,6 +287,9 @@ main{min-height:50vh}
 .cohort-box .ch-row b{font-weight:700;color:var(--ink)}
 .access-box{background:#fff;border-color:var(--line)}
 .access-box p{margin:8px 0 0;color:var(--ink-soft);font-size:12.5px;line-height:1.5}
+.included-class-box{background:#fff;border-color:var(--line)}
+.included-class-list{display:grid;gap:7px;margin-top:10px}
+.included-class-list em{font-style:normal;background:var(--bg-alt);border:1px solid var(--line2);border-radius:9px;padding:9px 10px;color:var(--ink);font-size:12px;font-weight:800}
 .bc-price{margin-bottom:6px}
 .bc-price .disc{color:var(--red);font-weight:900;font-size:20px;margin-right:8px}
 .bc-price .final{font-weight:900;font-size:28px;letter-spacing:-.5px}

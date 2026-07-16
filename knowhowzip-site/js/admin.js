@@ -10,9 +10,10 @@ const publicProducts=publicCreator?publicCreator.products:[
   {id:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',tag:'심화',price:390000,lead:'등기부와 매각물건명세서를 직접 읽고 위험 물건을 걸러내는 눈을 기릅니다.',intro:'낙찰의 성패는 권리분석에서 갈립니다.',grad:'linear-gradient(135deg,#F3C7C2,#D9332A)',tags:['심화','권리분석','사례 스터디'],cohort:{no:2,status:'모집중',period:'2026.07.12 ~ 08.09',deadline:'2026.07.07',seats:25,enrolled:18},requirement:{label:'경매 낙찰 기초반 수강 이력 필요'},content:{videos:['등기부등본 정밀 분석','말소기준권리와 인수/소멸','대항력·우선변제 임차인','위험 물건 사례 스터디'],files:['권리분석 워크북(PDF)','사례 50선 자료집']}},
   {id:'mmoh-field',title:'현장 임장 마스터 · 발품 전략',tag:'현장',price:450000,lead:'임장 동선 설계부터 명도 협상까지, 발로 뛰는 노하우를 담았습니다.',intro:'좋은 물건은 현장에서 확인됩니다.',grad:'linear-gradient(135deg,#CFE3D2,#5B9E72)',tags:['현장','임장','명도 협상'],cohort:{no:1,status:'모집중',period:'2026.07.19 ~ 08.16',deadline:'2026.07.14',seats:20,enrolled:9},requirement:{label:'권리분석 실전반 수강 이력 필요'},content:{videos:['임장 준비와 동선 설계','현장 체크포인트','명도 시나리오 작성','협상 롤플레잉 + 현장 동행'],files:['임장 체크리스트(PDF)','명도 합의서 양식']}}
 ];
+const publicClassProducts=publicProducts.filter(product=>!product.includedProductIds);
 function classShortTitle(title){return (title||'').split(' · ')[0];}
 function shortPeriod(period){return (period||'').replace(/^2026\./,'');}
-const classes=publicProducts.map(product=>({
+const classes=publicClassProducts.map(product=>({
   id:product.id,
   title:product.title,
   cohort:`${product.cohort?.no||1}기`,
@@ -430,7 +431,7 @@ const saleProducts=publicProducts.map(product=>({
   period:product.cohort?.period||'',
   periodType:'지정 수강 기간 기준',
   periodDays:'',
-  courses:[classShortTitle(product.title)],
+  courses:product.includedProductIds?product.includedProductIds.map(id=>classShortTitle(productMap[id]?.title||id)):[classShortTitle(product.title)],
   extraAccess:[],
   status:product.cohort?.status||'판매중',
   paymentCount:product.cohort?.enrolled||0,
@@ -446,7 +447,10 @@ function courseChecked(product,course){return product.courses.includes(course)?'
 function requirementChecked(product,course){return product.requirement.includes(course)?'checked':'';}
 function noRequirementChecked(product){return product.requirement==='조건 없음'?'checked':'';}
 function classChoiceList(product,lockAttr){
-  return classes.map(course=>{const name=classShortTitle(course.title);return `<label><input type="checkbox" ${courseChecked(product,name)} ${lockAttr}><span><b>${name}</b><small>${course.title.split(' · ').slice(1).join(' · ')||course.status}</small></span></label>`;}).join('');
+  return classes.map(course=>{
+    const name=classShortTitle(course.title),checked=courseChecked(product,name),order=product.courses.indexOf(name)+1;
+    return `<label class="product-class-choice"><input type="checkbox" ${checked?'checked':''} ${lockAttr}><span><b>${name}</b><small>${course.title.split(' · ').slice(1).join(' · ')||course.status}</small></span><select ${lockAttr} aria-label="${name} 수강 순서"><option ${order===1?'selected':''}>1</option><option ${order===2?'selected':''}>2</option><option ${order===3?'selected':''}>3</option></select></label>`;
+  }).join('');
 }
 function requirementChoiceList(product,lockAttr){
   return `<label><input type="checkbox" ${noRequirementChecked(product)} ${lockAttr}><span><b>수강 조건 없음</b><small>누구나 바로 신청할 수 있습니다.</small></span></label>${classes.map(course=>{const name=classShortTitle(course.title);return `<label><input type="checkbox" ${requirementChecked(product,name)} ${lockAttr}><span><b>${name}</b><small>이 클래스를 들은 수강생만 신청 가능</small></span></label>`;}).join('')}`;
