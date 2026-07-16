@@ -14,7 +14,7 @@ var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{in
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
-let state={user:null,purchased:new Set(),cart:new Set(),authMode:'kakao',pending:null,pendingLesson:null,cat:'전체',creatorCat:'전체',creatorSearch:'',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
+let state={user:null,purchased:new Set(),cart:new Set(),authMode:'kakao',pending:null,pendingLesson:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
@@ -61,8 +61,7 @@ function renderCreatorsPage(){
   const showCategoryFilters=cats.length>2;
   catBox.closest('.creator-category-nav').hidden=!showCategoryFilters;
   catBox.innerHTML=showCategoryFilters?cats.map(ct=>`<button class="creator-category ${state.creatorCat===ct?'active':''}" onclick="setCreatorDirectoryCat('${ct}')"><span>${categoryIcons[ct]||'●'}</span>${ct}</button>`).join(''):'';
-  const query=state.creatorSearch.trim().toLowerCase();
-  const list=creators.filter(c=>(state.creatorCat==='전체'||c.cat===state.creatorCat)&&(!query||`${c.name} ${c.handle} ${c.cat} ${c.tagline}`.toLowerCase().includes(query)));
+  const list=creators.filter(c=>state.creatorCat==='전체'||c.cat===state.creatorCat);
   document.getElementById('creatorResultCount').textContent=list.length;
   document.getElementById('creatorPageGrid').innerHTML=list.map(c=>`
     <article class="creator-directory-card" onclick="openCreator('${c.id}')" tabindex="0" onkeydown="if(event.key==='Enter')openCreator('${c.id}')">
@@ -79,7 +78,6 @@ function renderCreatorsPage(){
   document.getElementById('creatorEmpty').hidden=list.length!==0;
 }
 function setCreatorDirectoryCat(cat){state.creatorCat=cat;renderCreatorsPage();}
-function setCreatorSearch(value){state.creatorSearch=value;renderCreatorsPage();}
 /* ---------- CREATOR storefront ---------- */
 
 function creatorCommerce(c){
@@ -132,7 +130,7 @@ function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];
   if(!p||!c)return showAccessDenied('product');
   activeDetail=pid;
-  const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,seat=Math.round(ch.enrolled/ch.seats*100),req=purchaseRequirement(p);
+  const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
   document.getElementById('view-detail').innerHTML=`
     <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
     <div class="detail-hero"><div class="wrap detail-hero-in">
@@ -145,14 +143,11 @@ function openDetail(pid){
         <div class="d-visual" style="background:${p.grad}">${c.logoType==='house'?houseSVG(110,{ink:p.deep,text:false}):''}</div>
       </div>
       <aside><div class="buycard">
-        <div class="bc-vis" style="background:${p.grad}">${c.logoType==='house'?houseSVG(66,{ink:p.deep,text:false}):''}</div>
         <div class="bc-body">
           <div class="cohort-box">
             <div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">${ch.status}</span></div>
             <div class="ch-row"><span>수강 기간</span><b>${ch.period}</b></div>
             <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
-            <div class="ch-row"><span>신청 현황</span><b>${ch.enrolled} / ${ch.seats}명</b></div>
-            <div class="seat-bar"><i style="width:${seat}%"></i></div>
           </div>
           <div class="cohort-box access-box">
             <div class="ch-row"><span>신청 조건</span><b>${req.label}</b></div>
