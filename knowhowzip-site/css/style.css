@@ -42,7 +42,6 @@ ul{margin:0;padding:0;list-style:none}
 .nav-right{display:flex;align-items:center;gap:14px;margin-left:auto;flex-shrink:0}
 .icon-btn{position:relative;border:0;background:none;font-size:20px;color:var(--ink-soft);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center}
 .icon-btn:hover{background:var(--line2);color:var(--ink)}
-.cart-count{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .nav-cta{background:var(--brand);color:#fff;border:0;padding:11px 20px;border-radius:10px;font-weight:800;font-size:14.5px;white-space:nowrap;transition:.15s;box-shadow:var(--shadow-sm)}
 .nav-cta:hover{background:var(--brand-dk)}
 .user-chip{display:none;align-items:center;gap:8px;font-weight:800;font-size:14px}
@@ -294,15 +293,9 @@ main{min-height:50vh}
 .bc-price .disc{color:var(--red);font-weight:900;font-size:20px;margin-right:8px}
 .bc-price .final{font-weight:900;font-size:28px;letter-spacing:-.5px}
 .bc-price .orig{display:block;color:var(--ink-mute);text-decoration:line-through;font-size:15px;margin-top:2px}
-.bc-actions{display:flex;flex-direction:column;gap:9px;margin:16px 0}
+.bc-actions{display:flex;flex-direction:column;gap:9px;margin:16px 0 0}
 .bc-actions .btn-red{width:100%}
-.bc-cart{width:100%;background:#fff;color:var(--ink);border:1px solid var(--line);padding:13px;border-radius:11px;font-weight:800;font-size:15px}
-.bc-cart:hover{border-color:var(--ink)}
 .bc-owned{display:none;text-align:center;background:#E7F8EF;color:var(--ok);font-weight:800;padding:13px;border-radius:11px;margin:16px 0}
-.bc-incl{border-top:1px solid var(--line);padding-top:16px}
-.bc-incl li{display:flex;gap:9px;font-size:14px;color:var(--ink-soft);padding:5px 0}
-.bc-incl li::before{content:"✓";color:var(--ok);font-weight:900}
-
 .detail-body{padding:30px 0 80px}
 .d-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px;position:sticky;top:var(--gnb-h);background:rgba(255,255,255,.92);backdrop-filter:blur(8px);z-index:20;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 .d-tabs::-webkit-scrollbar{display:none}
@@ -571,7 +564,7 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .brand-logo{width:132px}
   .gnb-menu{display:none}
   .nav-right{gap:4px}
-  .nav-cta,.user-chip,.cart-count{display:none!important}
+  .nav-cta,.user-chip{display:none!important}
   .hamburger{display:flex}
   .mnav{padding:14px 18px calc(18px + env(safe-area-inset-bottom))}
   .mnav button.mlink{min-height:52px}

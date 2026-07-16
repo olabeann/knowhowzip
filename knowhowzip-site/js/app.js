@@ -14,7 +14,7 @@ var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{in
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
-let state={user:null,purchased:new Set(),cart:new Set(),authMode:'kakao',pending:null,pendingLesson:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
+let state={user:null,purchased:new Set(),authMode:'kakao',pending:null,pendingLesson:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
@@ -180,10 +180,8 @@ function openDetail(pid){
           <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
           <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
             <button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>
-            <button class="bc-cart" onclick="addCart('${pid}')">장바구니 담기</button>
           </div>
           <div class="bc-owned" data-owned="${pid}" style="display:${owned?'block':'none'}">✓ 수강 중 · 내 학습에서 확인</div>
-          <ul class="bc-incl"><li>온라인 라이브 + 다시보기</li><li>콘텐츠 자료 제공</li><li>수강생 단톡방 · 줌 초대</li><li>라이브 1:1 질의응답</li></ul>
         </div>
       </div></aside>
     </div></div>
@@ -461,15 +459,13 @@ function submitAuth(){
   else if(state.pendingLesson){const lesson=state.pendingLesson;state.pendingLesson=null;openLessonPlayer(lesson.productId,lesson.index);}
   else if(document.getElementById('view-account').classList.contains('show'))show('account');
   else show('mypage');}
-function logout(){state.user=null;state.purchased.clear();state.cart.clear();updateCart();
+function logout(){state.user=null;state.purchased.clear();
   document.getElementById('signupBtn').style.display='';
   document.getElementById('userChip').style.display='none';
   document.getElementById('mAuth').style.display='flex';document.getElementById('mUser').style.display='none';
   refreshOwned();renderMy();toast('로그아웃되었습니다');show('home');}
 
-/* ---------- cart / purchase ---------- */
-function addCart(id){if(state.cart.has(id)){toast('이미 장바구니에 있습니다');return;}state.cart.add(id);updateCart();toast('장바구니에 담았습니다');}
-function updateCart(){const n=state.cart.size,el=document.getElementById('cartCount');el.textContent=n;el.style.display=n?'flex':'none';}
+/* ---------- purchase ---------- */
 function startPurchase(id){
   if(!state.user){state.pending=id;openAuth('login');toast('결제를 위해 먼저 로그인해 주세요');return;}
   const req=purchaseRequirement(productMap[id]);
@@ -491,7 +487,7 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
     <button class="btn-red" onclick="confirmPay('${id}')">${won(p.price)} 결제하기</button>`;
   document.getElementById('payModal').classList.add('show');}
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
-function confirmPay(id){const p=productMap[id],c=creatorOf[id];state.purchased.add(id);state.cart.delete(id);updateCart();
+function confirmPay(id){const p=productMap[id],c=creatorOf[id];state.purchased.add(id);
   document.getElementById('payTitle').textContent='결제 완료';
   document.getElementById('payBody').innerHTML=`<div class="pay-done"><div class="check">✓</div><h3>결제가 완료되었습니다</h3><p>${c.name}의 “${p.title}”을 내 학습에서 바로 볼 수 있습니다.</p><button class="btn-red" style="width:100%" onclick="goMy()">내 학습으로 가기</button></div>`;
   refreshOwned();}
