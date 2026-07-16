@@ -209,6 +209,7 @@ function openZoomSchedule(url,title){if(url)window.open(url,'_blank','noopener,n
 function productProgress(id){return learningProgress[id]??20;}
 function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
 function toggleLearningAcc(id){document.getElementById(id)?.classList.toggle('open');}
+function emptyLogo(){return '<img class="my-empty-logo" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="노하우집">';}
 function playLesson(productId,index,title){
   openLessonPlayer(productId,index);
 }
@@ -299,10 +300,10 @@ function renderLearningEntitlementSummary(owned){
 function renderMy(){
   const box=document.getElementById('myContent');
   const tabs=document.getElementById('myLearningTabs');
-  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
   const allOwned=allProducts().filter(x=>state.purchased.has(x.p.id));
   renderLearningTabs(allOwned);
-  if(!allOwned.length){box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>아직 수강 중인 클래스가 없습니다</h3><p>크리에이터의 클래스를 둘러보세요.</p><button class="btn-red" onclick="show('creators')">둘러보기</button></div>`;return;}
+  if(!allOwned.length){box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>아직 수강 중인 클래스가 없습니다</h3><p>크리에이터의 클래스를 둘러보세요.</p><button class="btn-red" onclick="show('creators')">둘러보기</button></div>`;return;}
   const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
@@ -351,7 +352,7 @@ function renderAccountTabs(){
 }
 function renderAccount(){
   const box=document.getElementById('accountContent'),tabs=document.getElementById('accountTabs');
-  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${platMark(50)}<h3>로그인이 필요합니다</h3><p>로그인 후 결제 내역과 내 정보를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 결제 내역과 내 정보를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
   renderAccountTabs();
   box.innerHTML=state.accountFilter==='profile'?renderUserProfile():renderPaymentHistory();
 }
