@@ -369,7 +369,12 @@ body.preview-open{overflow:hidden}
 .included-lecture-list label,.condition-class-list label{align-items:flex-start}
 .included-lecture-list input,.condition-class-list input{flex:0 0 auto;margin-top:2px}
 .included-lecture-list span,.condition-class-list span{min-width:0}
-.product-class-choice select{margin-left:auto;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 8px;font-size:10px;font-weight:900;color:var(--brand)}
+.product-class-choice.is-disabled{opacity:.52;background:#f8fafc}
+.product-class-choice.is-active{border-color:rgba(76,92,255,.25);box-shadow:0 0 0 3px var(--brand-soft)}
+.class-order-control{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.class-order-control small{font-size:9px;color:var(--ink-mute);font-weight:900;white-space:nowrap}
+.class-order-control select{border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 8px;font-size:10px;font-weight:900;color:var(--brand)}
+.class-order-control select:disabled{background:#f2f4f7;color:#a8b1c4}
 .product-warning b{white-space:normal;min-width:135px}
 .product-warning p{margin:0}
 .product-summary h3,.product-summary p{overflow-wrap:anywhere}
