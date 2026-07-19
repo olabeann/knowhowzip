@@ -143,13 +143,27 @@ function productFileItems(product){
 }
 function productVideoTitles(product){return productVideoItems(product).map(item=>item.display);}
 function productFileTitles(product){return productFileItems(product).map(item=>item.display);}
+function productOperation(product){return Object.assign({guide:'',hasKakao:false,hasZoom:false,kakaoTitle:'수강생 단톡방 입장',kakaoDesc:'공지 · 질문 · 다시보기 공유',kakaoUrl:'',zoomTitle:'줌(Zoom) 라이브 입장',zoomDesc:'매주 라이브 입장 링크',schedules:[]},product.operation||{});}
+function detailOperationCards(product,owned){
+  const op=productOperation(product),cards=[];
+  if(op.hasKakao)cards.push(`<div class="op-card"><span class="oi oi-kakao">💬</span><span><span class="ot">${op.kakaoTitle}</span><br><span class="od">${op.kakaoDesc}</span></span>${owned?`<button class="obtn" onclick="openOperationLink('${op.kakaoUrl||''}','${op.kakaoTitle}')">입장 →</button>`:'<span class="olock">🔒 수강 후 제공</span>'}</div>`);
+  if(op.hasZoom)cards.push(`<div class="op-card"><span class="oi oi-zoom">🎥</span><span><span class="ot">${op.zoomTitle}</span><br><span class="od">${op.zoomDesc}</span></span>${owned?'<span class="obtn">내 학습에서 입장 →</span>':'<span class="olock">🔒 수강 후 제공</span>'}</div>`);
+  return cards.join('');
+}
+function operationScheduleRows(product,owned=false){
+  const schedules=productOperation(product).schedules||[];
+  if(!schedules.length)return '';
+  return `<div class="zoom-schedule"><div class="zoom-schedule-head"><b>줌 라이브 일정</b></div>${schedules.map((schedule,index)=>`<div class="zoom-schedule-row"><span class="zoom-order">${index+1}</span><div><b>${schedule.title}</b><small>${formatScheduleDate(schedule.date)} · ${schedule.time||'시간 추후 안내'}</small></div>${owned?`<button type="button" onclick="openZoomSchedule('${schedule.url||''}','${schedule.title}')">입장 →</button>`:'<span class="olock">🔒 수강 후 제공</span>'}</div>`).join('')}</div>`;
+}
+function formatScheduleDate(date=''){const m=String(date).match(/(\d{4})-(\d{2})-(\d{2})/);return m?`${m[2]}.${m[3]}`:date;}
+function openOperationLink(url,title){if(url)window.open(url,'_blank','noopener,noreferrer');else toast(`${title} 링크는 추후 안내됩니다`);}
 function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];
   if(!p||!c)return showAccessDenied('product');
   activeDetail=pid;
   const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
   const hasRequirement=(p.requirement||{}).type&&p.requirement.type!=='none';
-  const includedClasses=productClassNames(p);
+  const includedClasses=productClassNames(p),op=productOperation(p);
   const videos=productVideoTitles(p),files=productFileTitles(p);
   document.getElementById('view-detail').innerHTML=`
     <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span></div></div>
@@ -201,9 +215,9 @@ function openDetail(pid){
         <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span><span class="lock">${owned?'다운로드 가능':'🔒 수강 후 제공'}</span></li>`).join('')}</ul>
       </div>
       <div class="d-section" id="sec-op"><h3><span class="dot"></span>운영 안내 <span class="sub">단톡방 · 줌</span></h3>
-        <p style="margin-bottom:14px">${p.operation.guide}</p>
-        <div class="op-card"><span class="oi oi-kakao">💬</span><span><span class="ot">수강생 단톡방</span><br><span class="od">공지·질문·다시보기 공유</span></span>${owned?'<span class="obtn">입장하기 →</span>':'<span class="olock">🔒 수강 후 제공</span>'}</div>
-        <div class="op-card"><span class="oi oi-zoom">🎥</span><span><span class="ot">줌(Zoom) 라이브</span><br><span class="od">매주 라이브 입장 링크</span></span>${owned?'<span class="obtn">링크 보기 →</span>':'<span class="olock">🔒 수강 후 제공</span>'}</div>
+        <p style="margin-bottom:14px">${op.guide}</p>
+        ${operationScheduleRows(p,false)}
+        ${detailOperationCards(p,owned)||'<p>등록된 운영 안내가 없습니다.</p>'}
       </div>
       <div class="d-section" id="sec-faq"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div>
       </div>
@@ -219,6 +233,7 @@ function updateDetailBuycardPosition(){
   const aside=grid?.querySelector('aside');
   const visual=grid?.querySelector('.d-visual');
   const card=grid?.querySelector('.buycard');
+  const stopTarget=grid?.querySelector('#sec-faq .faq-item')||grid?.querySelector('#sec-faq')||grid;
   if(!grid||!aside||!visual||!card)return;
   card.classList.remove('is-fixed','is-bottom');
   if(window.matchMedia('(max-width:980px)').matches){
@@ -235,16 +250,18 @@ function updateDetailBuycardPosition(){
   const visualRect=visual.getBoundingClientRect();
   const gridTop=gridRect.top+y;
   const visualBottom=visualRect.bottom+y;
+  const stopTop=stopTarget.getBoundingClientRect().top+y;
   const offset=Math.max(0,Math.round(visualBottom-gridTop-card.offsetHeight));
   const startY=gridTop+offset-topGap;
-  const endY=gridTop+grid.offsetHeight-card.offsetHeight-topGap;
+  const stopOffset=Math.max(offset,Math.round(stopTop-gridTop-card.offsetHeight-24));
+  const endY=gridTop+stopOffset-topGap;
   const fixedRight=Math.max(0,window.innerWidth-asideRect.right);
   const fixedWidth=asideRect.width;
   grid.style.setProperty('--buycard-start-offset',`${offset}px`);
   card.style.setProperty('--buycard-fixed-width',`${fixedWidth}px`);
   card.style.setProperty('--buycard-fixed-right',`${fixedRight}px`);
   if(y>=endY){
-    card.style.setProperty('--buycard-bottom-top',`${Math.max(0,grid.offsetHeight-card.offsetHeight)}px`);
+    card.style.setProperty('--buycard-bottom-top',`${stopOffset}px`);
     card.classList.add('is-bottom');
   }else if(y>=startY){
     card.classList.add('is-fixed');
@@ -257,13 +274,10 @@ window.addEventListener('scroll',()=>requestAnimationFrame(updateDetailBuycardPo
 const learningProgress={'mmoh-basic':50,'mmoh-right':25};
 const endedCourses=new Set();
 const lessonDurations=['88분','92분','76분','81분','68분','74분'];
-const zoomSchedules={
-  'mmoh-basic':[{date:'07.05',day:'일',time:'20:00',title:'오리엔테이션 · 경매 절차 이해',url:'https://zoom.us/j/1000000001'},{date:'07.12',day:'일',time:'20:00',title:'물건 검색과 시세 분석',url:'https://zoom.us/j/1000000002'},{date:'07.19',day:'일',time:'20:00',title:'입찰표 작성 실습',url:'https://zoom.us/j/1000000003'}],
-  'mmoh-right':[{date:'07.12',day:'일',time:'20:00',title:'권리분석 핵심 개념',url:'https://zoom.us/j/2000000001'},{date:'07.19',day:'일',time:'20:00',title:'위험 물건 사례 분석',url:'https://zoom.us/j/2000000002'}]
-};
 function renderZoomSchedules(productId){
-  const schedules=zoomSchedules[productId]||[{date:'일정',day:'',time:'추후 안내',title:'라이브 일정은 공지로 안내됩니다',url:''}];
-  return `<div class="zoom-schedule"><div class="zoom-schedule-head"><b>줌 라이브 일정</b></div>${schedules.map((schedule,index)=>`<div class="zoom-schedule-row"><span class="zoom-order">${index+1}</span><div><b>${schedule.title}</b><small>${schedule.date}${schedule.day?'('+schedule.day+')':''} · ${schedule.time}</small></div><button type="button" onclick="openZoomSchedule('${schedule.url||''}','${schedule.title}')">입장 →</button></div>`).join('')}</div>`;
+  const product=productMap[productId];
+  if(!product||!productOperation(product).hasZoom)return '';
+  return operationScheduleRows(product,true);
 }
 function openZoomSchedule(url,title){if(url)window.open(url,'_blank','noopener,noreferrer');else toast(`${title} 줌 링크는 추후 안내됩니다`);}
 function productProgress(id){return learningProgress[id]??20;}
@@ -407,7 +421,7 @@ function renderMy(){
             </div>
             <div class="learning-acc" id="learn-${p.id}-operation">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${p.operation.guide}</p>${renderZoomSchedules(p.id)}<button class="learning-resource" onclick="toast('수강생 단톡방으로 이동합니다')"><i class="kakao">💬</i><span>수강생 단톡방 입장<small>공지 · 질문 · 다시보기 공유</small></span><b>입장 →</b></button></div></div>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${productOperation(p).guide}</p>${renderZoomSchedules(p.id)}${productOperation(p).hasKakao?`<button class="learning-resource" onclick="openOperationLink('${productOperation(p).kakaoUrl||''}','${productOperation(p).kakaoTitle}')"><i class="kakao">💬</i><span>${productOperation(p).kakaoTitle}<small>${productOperation(p).kakaoDesc}</small></span><b>입장 →</b></button>`:''}</div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-faq">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-faq')"><span><i class="faq">?</i>수강 FAQ <small>${p.faq.length}개</small></span><b>＋</b></button>
