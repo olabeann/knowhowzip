@@ -69,7 +69,7 @@ function pageHeader(kicker,title,desc,actions=''){
 }
 
 function renderDashboard(){
-  return `${pageHeader('2026년 7월 9일 목요일','안녕하세요, 애매모홈님 👋','강의와 상품 운영 현황을 한눈에 확인하세요.','<button class="btn ghost" onclick="adminToast(\'미리보기 페이지를 엽니다 (예시)\')">내 페이지 보기 ↗</button>')}
+  return `${pageHeader('2026년 7월 9일 목요일','안녕하세요, 애매모홈님 👋','강의와 상품 운영 현황을 한눈에 확인하세요.','<button class="btn ghost" onclick="adminToast(\'미리보기 페이지를 엽니다\')">내 페이지 보기 ↗</button>')}
     <section class="metric-grid three">
       <article class="metric-card"><div class="metric-icon blue">💸</div><span>이번 달 매출</span><strong>₩18,420,000</strong><small class="up">↑ 18.6% <i>지난달 대비</i></small></article>
       <article class="metric-card"><div class="metric-icon violet">👥</div><span>전체 수강생</span><strong>48명</strong><small class="up">↑ 7명 <i>이번 주 신규</i></small></article>
@@ -102,7 +102,7 @@ function openClassPreview(classId=''){
   frame.src='./index.html#/p/'+id;
   modal.classList.add('show');
   document.body.classList.add('preview-open');
-  if(!classId)adminToast('새 클래스는 예시 상세 페이지로 미리봅니다');
+  if(!classId)adminToast('새 클래스 미리보기를 엽니다');
 }
 function closeClassPreview(){
   const modal=document.getElementById('classPreviewModal'),frame=document.getElementById('classPreviewFrame');
@@ -137,11 +137,11 @@ function renderClassEditor(mode='create',classId=''){
     <div class="editor-layout">
       <nav class="editor-steps"><button type="button" class="active" onclick="scrollEditorSection('editor-basic',this)"><i>1</i><span>클래스 정보<small>소개·난이도·태그</small></span></button><button type="button" onclick="scrollEditorSection('editor-content',this)"><i>2</i><span>콘텐츠<small>영상·자료</small></span></button><button type="button" onclick="scrollEditorSection('editor-faq',this)"><i>3</i><span>FAQ<small>자주 묻는 질문</small></span></button></nav>
       <div class="editor-sections">
-        <section class="panel editor-section" id="editor-basic"><div class="editor-section-head"><i>1</i><div><h2>판매 페이지</h2><p>수강생이 신청 전에 확인하는 핵심 정보를 구성합니다.</p></div><span>필수</span></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:${course.color||'linear-gradient(135deg,#DCE3FF,#AFC0FF)'}">${houseMark(72)}<button type="button" onclick="adminToast('커버 이미지 업로드 (예시)')">커버 변경</button></div><div class="editor-cover-guide"><b>대표 이미지</b><p>공개 클래스 상세 화면의 대표 이미지와 동일하게 노출됩니다.</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택 (예시)')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스 제목 <em>*</em><input required maxlength="60" value="${name}" placeholder="예: 경매 낙찰 기초반"><small>공개 페이지와 내 학습에 표시되는 클래스명입니다.</small></label><label class="wide">부제목<input maxlength="80" value="${subtitle}" placeholder="예: 4주 완성"></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option><option>디자인</option><option>개발</option></select></label><label>난이도 <em>*</em><select required><option ${course.tags?.includes('입문')?'selected':''}>입문</option><option>중급</option><option ${course.tags?.includes('심화')?'selected':''}>심화</option></select></label><label class="wide">한 줄 소개 <em>*</em><input required value="${editing?(course.lead||''):''}" placeholder="수강생에게 약속하는 핵심 변화를 한 문장으로 적어주세요"></label><label class="wide">상세 소개 <em>*</em><textarea required placeholder="클래스에서 무엇을, 어떻게 배우는지 자세히 소개해 주세요.">${editing?(course.intro||''):''}</textarea></label><label class="wide">태그<input maxlength="80" value="${editing?(course.tags||[]).join(', '):''}" placeholder="예: 입문, 입찰 실습, 직장인 추천"><small>공개 상세 상단 태그와 동일한 톤으로 노출됩니다.</small></label></div></section>
+        <section class="panel editor-section" id="editor-basic"><div class="editor-section-head"><i>1</i><div><h2>판매 페이지</h2><p>수강생이 신청 전에 확인하는 핵심 정보를 구성합니다.</p></div><span>필수</span></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:${course.color||'linear-gradient(135deg,#DCE3FF,#AFC0FF)'}">${houseMark(72)}<button type="button" onclick="adminToast('커버 이미지 업로드')">커버 변경</button></div><div class="editor-cover-guide"><b>대표 이미지</b><p>공개 클래스 상세 화면의 대표 이미지와 동일하게 노출됩니다.</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스 제목 <em>*</em><input required maxlength="60" value="${name}" placeholder="예: 경매 낙찰 기초반"><small>공개 페이지와 내 학습에 표시되는 클래스명입니다.</small></label><label class="wide">부제목<input maxlength="80" value="${subtitle}" placeholder="예: 4주 완성"></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option><option>디자인</option><option>개발</option></select></label><label>난이도 <em>*</em><select required><option ${course.tags?.includes('입문')?'selected':''}>입문</option><option>중급</option><option ${course.tags?.includes('심화')?'selected':''}>심화</option></select></label><label class="wide">한 줄 소개 <em>*</em><input required value="${editing?(course.lead||''):''}" placeholder="수강생에게 약속하는 핵심 변화를 한 문장으로 적어주세요"></label><label class="wide">상세 소개 <em>*</em><textarea required placeholder="클래스에서 무엇을, 어떻게 배우는지 자세히 소개해 주세요.">${editing?(course.intro||''):''}</textarea></label><label class="wide">태그<input maxlength="80" value="${editing?(course.tags||[]).join(', '):''}" placeholder="예: 입문, 입찰 실습, 직장인 추천"><small>공개 상세 상단 태그와 동일한 톤으로 노출됩니다.</small></label></div></section>
 
         <section class="panel editor-section" id="editor-content"><div class="editor-section-head"><i>2</i><div><h2>콘텐츠</h2><p>수강생에게 제공할 영상 커리큘럼과 다운로드 자료를 구성합니다.</p></div><span>필수</span></div><div class="content-import-bar"><div><b>기존 클래스에서 가져오기</b><small>선택한 클래스의 커리큘럼과 자료를 복사한 뒤 자유롭게 수정할 수 있습니다.</small></div><select id="contentImportClass"><option value="">클래스 선택</option><option value="mmoh-basic">경매 낙찰 기초반</option><option value="mmoh-right">권리분석 실전반</option><option value="mmoh-field">현장 임장 마스터</option></select><button type="button" class="btn ghost" onclick="importClassContent()">콘텐츠 불러오기</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>각 강의의 제목과 설명을 입력하고 영상 파일을 업로드하세요. 재생시간은 자동으로 입력됩니다.</p></div><span id="curriculumCount">${curriculum.length}강</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>자료 제목과 설명을 입력하고 수강생이 내려받을 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
 
-        <section class="panel editor-section" id="editor-faq"><div class="editor-section-head"><i>3</i><div><h2>FAQ</h2><p>수강생이 자주 묻는 질문과 답변을 관리합니다.</p></div></div><div class="faq-editor-block"><div class="content-editor-title"><div><h3>클래스 FAQ</h3><p>신청 전에 자주 묻는 내용을 등록하세요.</p></div></div><div class="faq-editor-row"><textarea class="faq-question" placeholder="질문을 입력하세요"></textarea><textarea placeholder="답변을 입력하세요"></textarea></div><button type="button" class="add-row-btn" onclick="adminToast('FAQ 항목을 추가했습니다 (예시)')">＋ FAQ 추가</button></div></section>
+        <section class="panel editor-section" id="editor-faq"><div class="editor-section-head"><i>3</i><div><h2>FAQ</h2><p>수강생이 자주 묻는 질문과 답변을 관리합니다.</p></div></div><div class="faq-editor-block"><div class="content-editor-title"><div><h3>클래스 FAQ</h3><p>신청 전에 자주 묻는 내용을 등록하세요.</p></div></div><div class="faq-editor-row"><textarea class="faq-question" placeholder="질문을 입력하세요"></textarea><textarea placeholder="답변을 입력하세요"></textarea></div><button type="button" class="add-row-btn" onclick="adminToast('FAQ 항목을 추가했습니다')">＋ FAQ 추가</button></div></section>
       </div>
     </div>
     <div class="editor-bottom-bar"><span><b>${editing?'클래스 콘텐츠':'새 클래스'}</b><small>필수 항목을 확인한 뒤 저장해 주세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">취소</button><button type="submit" class="btn primary">클래스 저장</button></div></div>
@@ -402,7 +402,7 @@ function alimtalkFilledExample(template){
   return '안녕하세요, 김노하우님.\n경매입문반 수강 기간이 곧 종료됩니다.\n종료일: 8/2(일)\n남은 강의와 자료를 확인해 주세요.';
 }
 function alimtalkExampleMarkup(template){
-  return '<div class="alimtalk-example-block"><b>입력값 적용 예시</b><p>'+alimtalkFilledExample(template).replace(/\n/g,'<br>')+'</p></div>';
+  return '<div class="alimtalk-example-block"><b>입력값 미리보기</b><p>'+alimtalkFilledExample(template).replace(/\n/g,'<br>')+'</p></div>';
 }
 
 function settingsPanelMarkup(panel){
@@ -472,7 +472,7 @@ function productAlimtalkSection(product){
       <div class="alimtalk-lock-note"><b>고정 문구는 수정할 수 없어요.</b><span>아래 입력값이 승인 템플릿의 변수 자리에 들어갑니다. 이모지는 사용할 수 없습니다.</span></div>
       <div class="alimtalk-template-structure"><b>템플릿 구조</b><p>${alimtalkTemplatePreview(template).replace(/\n/g,'<br>')}</p></div>
       <div class="alimtalk-setting-grid">${alimtalkEditableFields(template).join('')}</div>
-      <button type="button" class="alimtalk-example-toggle" onclick="toggleAlimtalkExample(this)">예시보기</button>
+      <button type="button" class="alimtalk-example-toggle" onclick="toggleAlimtalkExample(this)">미리보기</button>
       <div class="alimtalk-fixed-preview is-hidden">${alimtalkExampleMarkup(template)}</div>
       <p class="product-alimtalk-help">필요 없는 안내 항목은 비워둘 수 있습니다. 저장 후 새로 결제하는 수강생부터 이 설정으로 안내톡이 발송됩니다.</p>
     </div>
@@ -531,7 +531,7 @@ function toggleOperationOption(control,type){
   if(small)small.textContent=control.checked?(type==='kakao'?'단톡방 정보를 입력해 주세요.':'줌 링크와 라이브 일정을 입력해 주세요.'):(type==='kakao'?'현재 설정: 단톡방 없음':'현재 설정: 줌 없음');
 }
 function toggleProductAlimtalkDetails(control){const detail=document.getElementById('productAlimtalkDetail');if(detail)detail.classList.toggle('is-hidden',!control.checked);adminToast(control.checked?'결제 후 안내톡을 켰습니다':'결제 후 안내톡을 껐습니다');}
-function toggleAlimtalkExample(button){const preview=button.nextElementSibling;if(!preview)return;const open=preview.classList.toggle('is-hidden');button.textContent=open?'예시보기':'예시닫기';}
+function toggleAlimtalkExample(button){const preview=button.nextElementSibling;if(!preview)return;const open=preview.classList.toggle('is-hidden');button.textContent=open?'미리보기':'미리보기 닫기';}
 function toggleAlimtalkDirectLink(select){const field=select.closest('label')?.nextElementSibling;if(field)field.classList.toggle('is-hidden',select.value!=='direct');}
 function productCourseDates(product){
   const match=(product.period||'').match(/(\d{4})\.(\d{2})\.(\d{2})\s*~\s*(?:(\d{4})\.)?(\d{2})\.(\d{2})/);
@@ -578,7 +578,7 @@ function openAccessRequestModal(){
         <label>추가로 볼 수 있게 할 클래스<select id="accessRequestClass" required><option value="">클래스 선택</option>${classes.map(course=>`<option>${course.title.split(' · ')[0]}</option>`).join('')}</select></label>
         <div class="access-request-grid"><label>시작일<input id="accessRequestStart" type="date" value="2026-07-13"></label><label>종료일<input id="accessRequestEnd" type="date" value="2026-09-13"></label></div>
         <label>처리 사유<textarea id="accessRequestReason" required placeholder="예: 오프라인 결제 확인, 보상 지급, 기존 수강생 확인 등"></textarea></label>
-        <p class="access-request-note">처리하면 선택한 클래스가 바로 내 학습에 표시됩니다. 실제 서비스에서는 변경 이력을 남깁니다.</p>
+        <p class="access-request-note">처리하면 선택한 클래스가 바로 내 학습에 표시됩니다.</p>
       </div>
       <div class="access-request-actions"><button type="button" class="btn ghost" onclick="closeAccessRequestModal()">취소</button><button type="submit" class="btn primary">무료 수강 처리</button></div>
     </form>
