@@ -152,7 +152,7 @@ function openDetail(pid){
   const includedClasses=productClassNames(p);
   const videos=productVideoTitles(p),files=productFileTitles(p);
   document.getElementById('view-detail').innerHTML=`
-    <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span><button class="crumb-share" onclick="shareProduct('${pid}')">🔗 공유</button></div></div>
+    <div class="wrap"><div class="crumb"><a onclick="show('home')">홈</a><span class="sep">›</span><a onclick="openCreator('${c.id}')">${c.name}</a><span class="sep">›</span><span>${p.title.split(' · ')[0]}</span></div></div>
     <div class="detail-hero"><div class="wrap detail-hero-in">
       <div>
         <div class="d-creatorchip" onclick="openCreator('${c.id}')"><span class="mini">${creatorLogo(c,26)}</span>${c.name}</div>
@@ -180,6 +180,7 @@ function openDetail(pid){
           <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
           <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
             <button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>
+            <button class="bc-share" onclick="shareProduct('${pid}')">🔗 공유</button>
           </div>
           <div class="bc-owned" data-owned="${pid}" style="display:${owned?'block':'none'}">✓ 수강 중 · 내 학습에서 확인</div>
         </div>
