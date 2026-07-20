@@ -36,9 +36,11 @@ ul{margin:0;padding:0;list-style:none}
 .brand{display:flex;align-items:center;flex-shrink:0}
 .brand-logo{display:block;width:150px;height:auto}
 .gnb-menu{display:flex;gap:6px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-.gnb-menu button{background:none;border:0;padding:9px 16px;border-radius:9px;font-size:15px;font-weight:600;color:var(--ink-soft);transition:.15s}
-.gnb-menu button:hover{color:var(--ink)}
+.gnb-menu button,.gnb-menu a{background:none;border:0;padding:9px 16px;border-radius:9px;font-size:15px;font-weight:600;color:var(--ink-soft);transition:.15s;white-space:nowrap}
+.gnb-menu button:hover,.gnb-menu a:hover{color:var(--ink)}
 .gnb-menu button.active{color:var(--ink);font-weight:700}
+.gnb-menu a.gnb-admin-link{color:var(--ink-soft);font-weight:600}
+.gnb-menu a.gnb-admin-link:hover{color:var(--brand-dk)}
 .nav-right{display:flex;align-items:center;gap:14px;margin-left:auto;flex-shrink:0}
 .icon-btn{position:relative;border:0;background:none;font-size:20px;color:var(--ink-soft);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center}
 .icon-btn:hover{background:var(--line2);color:var(--ink)}
@@ -55,7 +57,9 @@ ul{margin:0;padding:0;list-style:none}
 
 .mnav{position:fixed;inset:var(--gnb-h) 0 0 0;background:#fff;z-index:55;transform:translateX(100%);transition:transform .25s;padding:18px 22px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
 .mnav.show{transform:translateX(0)}
-.mnav button.mlink{text-align:left;background:none;border:0;border-bottom:1px solid var(--line2);padding:16px 4px;font-size:17px;font-weight:800}
+.mnav button.mlink,.mnav a.mlink{text-align:left;background:none;border:0;border-bottom:1px solid var(--line2);padding:16px 4px;font-size:17px;font-weight:800}
+.mnav a.mlink{display:block;color:var(--ink)}
+.mnav a.admin-mobile-link{color:var(--ink)}
 .mnav .mauth{display:flex;gap:10px;margin-top:18px}
 .mnav .mauth button{flex:1;padding:14px;border-radius:11px;font-weight:800;font-size:15px}
   .mnav .mauth .s{background:var(--ink);color:#fff;border:0}
