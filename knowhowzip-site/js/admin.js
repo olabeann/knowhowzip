@@ -72,9 +72,9 @@ function pageHeader(kicker,title,desc,actions=''){
 function renderDashboard(){
   return `${pageHeader('2026년 7월 9일 목요일','안녕하세요, 애매모홈님 👋','강의와 상품 운영 현황을 한눈에 확인하세요.','<button class="btn ghost" onclick="adminToast(\'미리보기 페이지를 엽니다\')">내 페이지 보기 ↗</button>')}
     <section class="metric-grid three">
-      <article class="metric-card"><div class="metric-icon blue">💸</div><span>이번 달 매출</span><strong>₩18,420,000</strong><small class="up">↑ 18.6% <i>지난달 대비</i></small></article>
-      <article class="metric-card"><div class="metric-icon violet">👥</div><span>전체 수강생</span><strong>48명</strong><small class="up">↑ 7명 <i>이번 주 신규</i></small></article>
-      <article class="metric-card"><div class="metric-icon green">🏫</div><span>등록 클래스</span><strong>3개</strong><small><i>콘텐츠 관리 중</i></small></article>
+      <article class="metric-card"><div class="metric-icon blue">💸</div><span>이번 달 매출</span><strong>₩18,420,000</strong></article>
+      <article class="metric-card"><div class="metric-icon violet">👥</div><span>전체 수강생</span><strong>48명</strong></article>
+      <article class="metric-card"><div class="metric-icon green">🏫</div><span>등록 클래스</span><strong>3개</strong></article>
     </section>
 
     <section class="dashboard-grid single">
@@ -300,10 +300,10 @@ function openStudentDetail(email){
 
 let salesSelectedMonth='2026-06';
 const salesMonthlyData={
-  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일',refund:186000,refundCount:1,trend:'↑ 12.4%',rows:[{count:24,amount:6960000},{count:20,amount:7800000},{count:11,amount:4950000}]},
-  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일',refund:273600,refundCount:2,trend:'↑ 18.6%',rows:[{count:21,amount:6090000},{count:18,amount:7020000},{count:9,amount:4050000}]},
-  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일',refund:198000,refundCount:1,trend:'↑ 6.8%',rows:[{count:17,amount:4930000},{count:14,amount:5460000},{count:6,amount:2700000}]},
-  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,refundCount:0,trend:'-',rows:[{count:12,amount:3480000},{count:9,amount:3510000},{count:3,amount:1350000}]}
+  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일',refund:186000,rows:[{count:24,amount:6960000},{count:20,amount:7800000},{count:11,amount:4950000}]},
+  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일',refund:273600,rows:[{count:21,amount:6090000},{count:18,amount:7020000},{count:9,amount:4050000}]},
+  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일',refund:198000,rows:[{count:17,amount:4930000},{count:14,amount:5460000},{count:6,amount:2700000}]},
+  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,rows:[{count:12,amount:3480000},{count:9,amount:3510000},{count:3,amount:1350000}]}
 };
 function setSalesMonth(month){salesSelectedMonth=month;showAdminView('sales');}
 function salesClassStudents(classTitle){
@@ -340,7 +340,7 @@ function renderSales(){
   const monthSelect=`<select class="sales-month-select" aria-label="조회 월" onchange="setSalesMonth(this.value)">${Object.entries(salesMonthlyData).map(([value,item])=>`<option value="${value}" ${value===salesSelectedMonth?'selected':''}>${item.label}</option>`).join('')}</select>`;
   return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
   <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div></section>
-  <section class="metric-grid two"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong><small class="${data.trend==='-'?'':'up'}">${data.trend}</small></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong><small><i>${data.refundCount}건</i></small></article></section>
+  <section class="metric-grid two"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong></article></section>
   <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0},fee=Math.round(row.amount*.12);return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(row.amount-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
 }
 
