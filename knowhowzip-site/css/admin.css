@@ -96,7 +96,6 @@ tbody tr:last-child td{border-bottom:0}
 .table-state{display:inline-flex;align-items:center;justify-content:center;width:max-content;white-space:nowrap;font-style:normal;background:#E8F8F0;color:var(--green);padding:4px 7px;border-radius:5px;font-size:9px;font-weight:850}
 .table-state.waiting{background:#fff4df;color:#b76a00}
 .table-state.done{background:#eef2ff;color:#4f66f5}
-.table-state.expired{background:#eef2f7;color:#64748b}
 .table-state.active{background:#E8F8F0;color:var(--green)}
 .table-state.free{background:#eef2ff;color:#4f66f5}
 .todo-panel label{display:flex;align-items:flex-start;gap:9px;padding:11px 4px;border-bottom:1px solid var(--line2)}.todo-panel label:last-child{border:0}
