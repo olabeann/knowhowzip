@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FE Guide · 크리에이터 관리자 상태</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <style>
+    body{background:#f7f9fc}
+    .admin-main{max-width:1480px}
+    .guide-kicker{display:inline-flex;align-items:center;gap:7px;margin-bottom:8px;color:#4f66f5;font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}
+    .guide-kicker:before{content:"";width:9px;height:9px;border-radius:3px;background:#4f66f5}
+    .guide-quick{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 28px}
+    .guide-quick a{border:1px solid #e4e7ec;background:#fff;border-radius:999px;padding:9px 13px;color:#475467;font-size:12px;font-weight:850}
+    .guide-quick a:hover{border-color:#4f66f5;color:#4f66f5;background:#eef1ff}
+    .state-block{margin-top:34px;scroll-margin-top:86px}
+    .state-banner{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:14px}
+    .state-banner h2{display:flex;align-items:center;gap:10px;margin:0;font-size:22px;letter-spacing:-.4px}
+    .state-banner h2:before{content:"";width:10px;height:10px;border-radius:3px;background:#4f66f5}
+    .state-banner p{margin:5px 0 0;color:#667085;font-size:13px;line-height:1.6}
+    .state-chip{display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:999px;background:#eef1ff;color:#4f66f5;font-size:11px;font-weight:900;white-space:nowrap}
+    .guide-screen{border:1px solid #e4e7ec;border-radius:22px;background:#fff;padding:24px;box-shadow:0 12px 34px rgba(16,24,40,.05)}
+    .guide-screen+.guide-screen{margin-top:16px}
+    .guide-subhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px}
+    .guide-subhead h3{margin:0;font-size:18px}
+    .guide-subhead p{margin:4px 0 0;color:#667085;font-size:12px;line-height:1.55}
+    .guide-subhead em{font-style:normal;color:#4f66f5;font-size:11px;font-weight:900}
+    .guide-two-column{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+    .guide-demo-note{border:1px solid #dce2ff;background:#fbfcff;border-radius:14px;padding:13px 15px;color:#475467;font-size:12px;font-weight:750;line-height:1.6}
+    .guide-demo-note b{color:#101828}
+    .guide-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .guide-form-grid label{display:block;font-size:10.5px;font-weight:900;color:#344054}
+    .guide-form-grid label.wide{grid-column:1/-1}
+    .guide-form-grid input,.guide-form-grid textarea,.guide-form-grid select{display:block;width:100%;margin-top:6px;border:1px solid #e4e7ec;border-radius:10px;background:#fff;padding:11px 12px;font:inherit;font-size:11px;outline:0}
+    .guide-form-grid textarea{min-height:78px;resize:vertical}
+    .guide-preview-card{border:1px solid #e4e7ec;border-radius:16px;background:#fff;padding:18px}
+    .guide-preview-card h4{margin:0 0 12px;font-size:14px}
+    .guide-preview-card p{margin:0;color:#667085;font-size:11px;line-height:1.65}
+    .guide-mini-list{display:grid;gap:8px;margin-top:12px}
+    .guide-mini-list div{display:flex;justify-content:space-between;gap:12px;border:1px solid #eef1f5;background:#f8fafc;border-radius:10px;padding:10px 11px;font-size:11px;font-weight:850}
+    .guide-muted{opacity:.52}
+    .guide-locked-label{display:inline-flex;align-items:center;gap:5px;margin-left:auto;border:1px solid #f0d49b;background:#fff9ec;color:#9a5b00;border-radius:999px;padding:5px 8px;font-size:9px;font-weight:900}
+    .guide-inline-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;background:#eef1ff;color:#4f66f5;padding:5px 8px;font-size:10px;font-weight:900}
+    .guide-operation-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .guide-state-name{display:block;margin:0 0 10px;color:#4f66f5;font-size:11px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+    .guide-bottom-actions{position:sticky;bottom:0;z-index:10;margin:26px -24px -24px;padding:13px 24px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-top:1px solid #e4e7ec;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .guide-bottom-actions span{color:#667085;font-size:12px;font-weight:800}
+    .product-section.locked input,.product-section.locked textarea,.product-section.locked select{background:#f2f4f7;color:#98a2b3}
+    .operation-schedule-row{grid-template-columns:34px minmax(120px,1fr) 130px 105px minmax(140px,1fr) 28px}
+    .class-editor .editor-steps{position:sticky;top:84px}
+    @media(max-width:1180px){
+      .guide-two-column,.guide-operation-grid{grid-template-columns:1fr}
+      .class-admin-grid,.product-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:760px){
+      .guide-screen{padding:18px;border-radius:18px}
+      .state-banner{display:block}
+      .state-chip{margin-top:10px}
+      .guide-form-grid,.class-admin-grid,.product-admin-grid{grid-template-columns:1fr}
+      .guide-bottom-actions{margin:20px -18px -18px;padding:12px 18px;display:block}
+      .guide-bottom-actions .page-actions{margin-top:10px;justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="../creator-admin.html" aria-label="실제 크리에이터 관리자 화면으로 이동">
+        <img src="../assets/images/knowhowzip-logo.png" alt="노하우집">
+        <span>Creator</span>
+      </a>
+
+      <div class="creator-account">
+        <div class="creator-avatar">
+          <img src="../assets/images/Knowhowzip_logo_icon.png.png" alt="" width="28" height="28">
+        </div>
+        <div><b>애매모홈</b><small>@mmoh · 부동산·경매</small></div>
+      </div>
+
+      <nav class="admin-nav" aria-label="관리자 상태 가이드 메뉴">
+        <button class="active"><i>▦</i><span>상태 가이드</span></button>
+        <button><i>▶</i><span>클래스 관리</span></button>
+        <button><i>▣</i><span>상품 관리</span></button>
+        <button><i>💬</i><span>운영 안내</span></button>
+        <button><i>✓</i><span>안내톡</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="../creator-admin.html">실제 관리자 화면 <span>↗</span></a>
+        <a href="./product-detail-states.html">상품 상세 상태 <span>↗</span></a>
+        <a href="./my-learning-states.html">내 학습 상태 <span>↗</span></a>
+      </div>
+    </aside>
+
+    <div class="admin-workspace">
+      <header class="admin-topbar">
+        <div><span class="mobile-admin-title">크리에이터 관리자 · FE 상태 가이드</span></div>
+        <div class="topbar-actions">
+          <button class="notice" aria-label="상태 메모">♢<span>6</span></button>
+          <div class="admin-profile"><b>FE 전달용</b><small>실제 UI 기준</small></div>
+          <div class="profile-dot">FE</div>
+        </div>
+      </header>
+
+      <main class="admin-main">
+        <header class="admin-page-head">
+          <div>
+            <span class="guide-kicker">Creator Admin States</span>
+            <h1>크리에이터 관리자 상태 가이드</h1>
+            <p>추상 설명 대신 실제 관리자 UI와 최대한 같은 구조로 상태를 펼쳐 보여줍니다.</p>
+          </div>
+          <div class="page-actions">
+            <a class="btn ghost" href="../creator-admin.html">실제 관리자 보기</a>
+            <a class="btn primary" href="./product-detail-states.html">유저 상세 상태 보기</a>
+          </div>
+        </header>
+
+        <nav class="guide-quick" aria-label="상태 바로가기">
+          <a href="#class-list">클래스 목록</a>
+          <a href="#class-edit">클래스 수정</a>
+          <a href="#product-list">상품 목록</a>
+          <a href="#product-edit">상품 수정</a>
+          <a href="#locked">결제 발생 후 수정 제한</a>
+          <a href="#operation">운영 안내</a>
+          <a href="#alimtalk">결제 후 안내톡</a>
+        </nav>
+
+        <section class="state-block" id="class-list">
+          <div class="state-banner">
+            <div>
+              <h2>클래스 관리 · 목록 상태</h2>
+              <p>클래스는 콘텐츠 단위입니다. 상품에 연결되면 유저 상세의 콘텐츠와 내 학습에 표시됩니다.</p>
+            </div>
+            <span class="state-chip">creator-admin.html / 클래스 관리</span>
+          </div>
+
+          <div class="guide-screen">
+            <div class="guide-subhead">
+              <div>
+                <h3>등록된 클래스</h3>
+                <p>FE는 카드의 커버, 제목, 부제목, 상태, 수정 버튼 구조를 실제 관리자 목록과 동일하게 잡으면 됩니다.</p>
+              </div>
+              <button class="btn primary">새 클래스 만들기</button>
+            </div>
+
+            <div class="class-admin-grid">
+              <article class="admin-class-card">
+                <div class="class-cover" style="background:linear-gradient(135deg,#a7d5e7,#ef2e2a)">
+                  <span>공개중</span>
+                  <img src="../assets/images/Knowhowzip_logo_icon.png.png" alt="" width="54">
+                </div>
+                <div class="class-card-body">
+                  <p>4주 완성</p>
+                  <div class="class-card-top"><h2>경매 낙찰 기초반</h2><button>⋯</button></div>
+                  <button class="class-edit-btn">클래스 수정</button>
+                </div>
+              </article>
+
+              <article class="admin-class-card">
+                <div class="class-cover" style="background:linear-gradient(135deg,#f8b4b4,#ef4444)">
+                  <span>공개중</span>
+                  <img src="../assets/images/Knowhowzip_logo_icon.png.png" alt="" width="54">
+                </div>
+                <div class="class-card-body">
+                  <p>위험물건 거르기</p>
+                  <div class="class-card-top"><h2>권리분석 실전반</h2><button>⋯</button></div>
+                  <button class="class-edit-btn">클래스 수정</button>
+                </div>
+              </article>
+
+              <article class="admin-class-card">
+                <div class="class-cover" style="background:linear-gradient(135deg,#e0e7ff,#c7d2fe)">
+                  <span>비공개</span>
+                  <img src="../assets/images/Knowhowzip_logo_icon.png.png" alt="" width="54">
+                </div>
+                <div class="class-card-body">
+                  <p>실전 루틴</p>
+                  <div class="class-card-top"><h2>현장 임장 마스터</h2><button>⋯</button></div>
+                  <button class="class-edit-btn">클래스 수정</button>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="state-block" id="class-edit">
+          <div class="state-banner">
+            <div>
+              <h2>클래스 수정 · 입력 상태</h2>
+              <p>클래스 정보, 콘텐츠, 자료, FAQ는 상품에 포함될 때 유저 화면의 콘텐츠 섹션과 내 학습으로 이어집니다.</p>
+            </div>
+            <span class="state-chip">클래스 단위 콘텐츠</span>
+          </div>
+
+          <div class="guide-screen class-editor">
+            <div class="editor-head">
+              <button type="button" class="editor-back">← 클래스 관리</button>
+              <div>
+                <span>Class editing</span>
+                <h1>경매 낙찰 기초반 수정</h1>
+                <p>수강생에게 보이는 클래스 상세, 영상 커리큘럼, 자료, FAQ를 관리합니다.</p>
+              </div>
+              <div class="editor-actions"><button class="btn ghost">미리보기</button><button class="btn primary">변경사항 저장</button></div>
+            </div>
+
+            <div class="editor-layout">
+              <nav class="editor-steps" aria-label="클래스 수정 단계">
+                <button class="active"><i>1</i><span>판매 페이지</span></button>
+                <button><i>2</i><span>콘텐츠</span></button>
+                <button><i>3</i><span>FAQ</span></button>
+              </nav>
+
+              <div class="editor-sections">
+                <section class="panel editor-section">
+                  <div class="editor-section-head"><div><span>1</span><h2>판매 페이지 정보</h2><p>유저 상세 상단과 클래스 카드에 표시됩니다.</p></div></div>
+                  <div class="editor-cover-row">
+                    <div class="editor-cover-preview" style="background:linear-gradient(135deg,#a7d5e7,#ef2e2a)">
+                      <img src="../assets/images/Knowhowzip_logo_icon.png.png" alt="" width="54">
+                    </div>
+                    <div class="editor-cover-guide"><b>커버 이미지</b><small>상세 상단 대표 이미지로 사용됩니다. 상품 상세에서는 상품 이미지 1개만 표시합니다.</small><button class="btn ghost">이미지 변경</button></div>
+                  </div>
+                  <div class="editor-fields">
+                    <label>클래스 제목 <em>*</em><input value="경매 낙찰 기초반"></label>
+                    <label>부제목 <em>*</em><input value="4주 완성"></label>
+                    <label class="wide">한 줄 소개 <em>*</em><input value="경매가 처음인 직장인을 위한 입문 과정입니다."></label>
+                    <label class="wide">상세 소개 <em>*</em><textarea>한 달이면 혼자 입찰표를 쓸 수 있도록 경매 절차와 기본 권리분석을 순서대로 안내합니다.</textarea></label>
+                  </div>
+                </section>
+
+                <section class="panel editor-section">
+                  <div class="editor-section-head"><div><span>2</span><h2>콘텐츠</h2><p>내 학습과 플레이어에서 수강 순서대로 보여집니다.</p></div></div>
+                  <div class="repeat-list">
+                    <div class="repeat-row curriculum-row">
+                      <div class="curriculum-row-head"><em>1강</em><input class="curriculum-title" value="경매 절차와 권리의 이해"><label class="duration"><input value="32:10" readonly></label><button>×</button></div>
+                      <textarea class="curriculum-description">경매 절차의 흐름과 권리분석을 시작하기 전 꼭 알아야 하는 개념을 정리합니다.</textarea>
+                      <label class="video-upload"><span><b>영상 파일 등록됨</b><small>lesson-01.mp4</small></span><em class="video-file-status">재생 페이지 연결</em></label>
+                    </div>
+                    <div class="repeat-row curriculum-row">
+                      <div class="curriculum-row-head"><em>2강</em><input class="curriculum-title" value="물건 검색과 시세 분석"><label class="duration"><input value="41:20" readonly></label><button>×</button></div>
+                      <textarea class="curriculum-description">실제 물건을 고르고 시세를 비교하는 기준을 연습합니다.</textarea>
+                      <label class="video-upload"><span><b>영상 파일 등록됨</b><small>lesson-02.mp4</small></span><em class="video-file-status">재생 페이지 연결</em></label>
+                    </div>
+                  </div>
+                  <button class="add-row-btn">+ 강의 추가</button>
+
+                  <div class="repeat-list" style="margin-top:18px">
+                    <div class="repeat-row material material-card">
+                      <div class="material-row-head"><em>자료</em><input class="material-title" value="입찰표 작성 템플릿"><button>×</button></div>
+                      <textarea class="material-description">입찰 당일 바로 사용할 수 있는 PDF 템플릿입니다.</textarea>
+                      <label class="material-upload"><span><b>자료 파일 등록됨</b><small>bid-template.pdf</small></span><em class="material-file-status">수강 후 제공</em></label>
+                    </div>
+                  </div>
+                  <button class="add-row-btn">+ 자료 추가</button>
+                </section>
+
+                <section class="panel editor-section">
+                  <div class="editor-section-head"><div><span>3</span><h2>클래스 FAQ</h2><p>유저 상세의 클래스 FAQ 영역에 동일한 폭과 스타일로 표시됩니다.</p></div></div>
+                  <div class="faq-editor-list">
+                    <div class="faq-editor-row"><input value="기초 지식이 없어도 되나요?"><textarea>입문자 기준으로 설계되어 처음 시작해도 들을 수 있습니다.</textarea><button>×</button></div>
+                    <div class="faq-editor-row"><input value="두 클래스 자료를 모두 받을 수 있나요?"><textarea>패키지 상품 구매 시 포함 클래스의 자료를 모두 확인할 수 있습니다.</textarea><button>×</button></div>
+                  </div>
+                  <button class="add-row-btn">+ FAQ 추가</button>
+                </section>
+              </div>
+            </div>
+
+            <div class="guide-bottom-actions">
+              <span>클래스 수정 화면 하단 저장바 상태</span>
+              <div class="page-actions"><button class="btn ghost">취소</button><button class="btn primary">변경사항 저장</button></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="state-block" id="product-list">
+          <div class="state-banner">
+            <div>
+              <h2>상품 관리 · 목록 상태</h2>
+              <p>상품은 결제 단위입니다. 상품 카드에서 가격, 수강 조건, 포함 클래스가 한눈에 보여야 합니다.</p>
+            </div>
+            <span class="state-chip">상품 = 결제 단위</span>
+          </div>
+
+          <div class="guide-screen">
+            <div class="guide-subhead">
+              <div><h3>등록된 상품</h3><p>index.html의 상품 카드와 톤이 맞도록 이름/가격/포함 클래스 구성이 보입니다.</p></div>
+              <button class="btn primary">새 상품 만들기</button>
+            </div>
+
+            <div class="product-admin-grid">
+              <article class="sale-product-card">
+                <div class="sale-product-top"><span>패키지</span><em class="open">공개</em></div>
+                <h2>경매 기초+권리분석 패키지</h2>
+                <p>입문부터 권리분석까지 이어서 수강하는 패키지 상품입니다.</p>
+                <div class="product-card-price"><strong>₩590,000</strong><small>정가 ₩840,000 · 30% 할인</small></div>
+                <div class="product-card-summary">
+                  <div><b>수강 조건</b><span>조건 없음</span></div>
+                  <div><b>포함 클래스</b><span>경매 낙찰 기초반, 권리분석 실전반</span></div>
+                </div>
+                <button>상품 수정</button>
+              </article>
+
+              <article class="sale-product-card">
+                <div class="sale-product-top"><span>단일 클래스</span><em class="open">공개</em></div>
+                <h2>권리분석 실전반</h2>
+                <p>위험 물건을 거르는 눈을 기르는 실전 과정입니다.</p>
+                <div class="product-card-price"><strong>₩390,000</strong><small>정가 ₩450,000 · 13% 할인</small></div>
+                <div class="product-card-summary">
+                  <div><b>수강 조건</b><span>경매 낙찰 기초반 수강 이력 필요</span></div>
+                  <div><b>포함 클래스</b><span>권리분석 실전반</span></div>
+                </div>
+                <button>상품 수정</button>
+              </article>
+
+              <article class="sale-product-card">
+                <div class="sale-product-top"><span>단일 클래스</span><em class="soon">비공개</em></div>
+                <h2>현장 임장 마스터</h2>
+                <p>아직 공개 전인 상품입니다.</p>
+                <div class="product-card-price"><strong>₩290,000</strong><small>할인 없음</small></div>
+                <div class="product-card-summary">
+                  <div><b>수강 조건</b><span>조건 없음</span></div>
+                  <div><b>포함 클래스</b><span>현장 임장 마스터</span></div>
+                </div>
+                <button>상품 수정</button>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="state-block" id="product-edit">
+          <div class="state-banner">
+            <div>
+              <h2>상품 수정 · 전체 입력 상태</h2>
+              <p>FE에게 가장 중요한 화면입니다. 여기에서 입력한 값이 상품 상세, 결제 카드, 내 학습에 연결됩니다.</p>
+            </div>
+            <span class="state-chip">상품 상세와 직접 매칭</span>
+          </div>
+
+          <div class="guide-screen product-editor">
+            <div class="editor-head product-editor-head">
+              <button type="button" class="editor-back">← 상품 관리</button>
+              <div>
+                <span>Product editing</span>
+                <h1>상품 수정</h1>
+                <p>이미 결제가 없는 상품은 조건, 가격, 기간, 포함 클래스, 운영 안내를 모두 수정할 수 있습니다.</p>
+              </div>
+              <div class="editor-actions product-editor-actions">
+                <label>노출 상태<select><option selected>공개</option><option>비공개</option></select></label>
+                <button class="btn primary">변경사항 저장</button>
+              </div>
+            </div>
+
+            <div class="product-editor-grid">
+              <div class="product-editor-main">
+                <section class="panel product-section">
+                  <div class="product-section-head"><i>1</i><div><h2>상품 정보</h2><p>공개 페이지와 결제 화면에 보이는 이름과 설명입니다.</p></div></div>
+                  <div class="guide-form-grid">
+                    <label class="wide">상품명 <input value="경매 기초+권리분석 패키지"></label>
+                    <label class="wide">상품 소개 <textarea>경매 입문부터 권리분석까지 한 번에 이어서 수강하는 패키지 상품입니다.</textarea></label>
+                    <label>태그 1 <input value="패키지"></label>
+                    <label>태그 2 <input value="입문+심화"></label>
+                  </div>
+                </section>
+
+                <section class="panel product-section">
+                  <div class="product-section-head"><i>2</i><div><h2>결제 후 볼 수 있는 클래스</h2><p>체크하면 활성화되고, 체크하지 않으면 비활성화됩니다. 우측 select는 수강 순서입니다.</p></div><em>우측 숫자 = 수강 순서</em></div>
+                  <div class="included-lecture-list">
+                    <label class="product-class-choice is-active"><input type="checkbox" checked><span><b>경매 낙찰 기초반</b><small>4주 완성</small></span><div class="class-order-control"><small>수강 순서</small><select><option selected>1</option><option>2</option><option>3</option></select></div></label>
+                    <label class="product-class-choice is-active"><input type="checkbox" checked><span><b>권리분석 실전반</b><small>위험물건 거르기</small></span><div class="class-order-control"><small>수강 순서</small><select><option>1</option><option selected>2</option><option>3</option></select></div></label>
+                    <label class="product-class-choice is-disabled"><input type="checkbox"><span><b>현장 임장 마스터</b><small>미포함 클래스</small></span><div class="class-order-control"><small>수강 순서</small><select disabled><option>3</option></select></div></label>
+                  </div>
+                </section>
+
+                <section class="panel product-section">
+                  <div class="product-section-head"><i>3</i><div><h2>신청 조건</h2><p>조건 없음이면 유저 상품 상세의 신청 조건 박스는 숨깁니다.</p></div></div>
+                  <div class="condition-class-list">
+                    <label><input type="radio" name="requirement" checked><span><b>조건 없음</b><small>처음 참여 가능 · 상세 화면에서 신청 조건 박스 숨김</small></span></label>
+                    <label><input type="radio" name="requirement"><span><b>기존 클래스 수강 이력 필요</b><small>선택한 클래스를 수강한 사람만 신청 가능</small></span></label>
+                  </div>
+                </section>
+
+                <section class="panel product-section">
+                  <div class="product-section-head"><i>4</i><div><h2>가격 · 모집 기간</h2><p>상품 상세 신청 카드에 표시되는 가격과 모집 상태입니다.</p></div></div>
+                  <div class="guide-form-grid">
+                    <label>정가 <input value="840000"></label>
+                    <label>판매가 <input value="590000"></label>
+                    <label>수강 시작일 <input value="2026.07.05"></label>
+                    <label>수강 종료일 <input value="2026.08.09"></label>
+                    <label>모집 마감일 <input value="2026.06.30"></label>
+                    <label>상태 <select><option selected>모집중</option><option>모집마감</option></select></label>
+                  </div>
+                </section>
+              </div>
+
+              <aside class="product-editor-side">
+                <div class="panel product-summary">
+                  <span>상품 요약</span>
+                  <h3>경매 기초+권리분석 패키지</h3>
+                  <p>수강 조건 · 조건 없음</p>
+                  <strong>₩590,000</strong>
+                  <div><b>볼 수 있는 클래스</b><em>경매 낙찰 기초반</em><em>권리분석 실전반</em></div>
+                  <small>결제 완료 후 내 학습에 표시됩니다.</small>
+                </div>
+                <div class="panel product-side-guide">
+                  <b>유저 화면 매칭</b>
+                  <ol>
+                    <li>상품 상세 상단 정보</li>
+                    <li>신청 카드 가격/기간</li>
+                    <li>포함 클래스 목록</li>
+                    <li>내 학습 콘텐츠 순서</li>
+                  </ol>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="state-block" id="locked">
+          <div class="state-banner">
+            <div>
+              <h2>결제 발생 후 상품 수정 제한</h2>
+              <p>이미 결제한 수강생이 있으면 핵심 결제 조건은 잠기고, 운영 안내처럼 최신 안내가 필요한 항목만 수정 가능하게 보여줍니다.</p>
+            </div>
+            <span class="state-chip">paymentCount &gt; 0</span>
+          </div>
+
+          <div class="guide-screen product-editor">
+            <div class="product-lock-notice">
+              <b>결제 이력 18건</b>
+              <span>이미 결제가 발생한 상품이라 상품 정보만 수정할 수 있습니다. 수강 조건이나 가격을 바꾸려면 새 상품을 생성하세요.</span>
+            </div>
+            <div class="product-editor-grid">
+              <div class="product-editor-main">
+                <section class="panel product-section">
+                  <div class="product-section-head"><i>1</i><div><h2>상품 정보</h2><p>상품명과 소개는 수정할 수 있습니다.</p></div></div>
+                  <div class="guide-form-grid">
+                    <label class="wide">상품명 <input value="경매 낙찰 기초반"></label>
+                    <label class="wide">상품 소개 <textarea>경매 낙찰 기초반을 90일 동안 수강할 수 있는 상품</textarea></label>
+                  </div>
+                </section>
+
+                <section class="panel product-section locked">
+                  <div class="product-section-head"><i>2</i><div><h2>결제 후 볼 수 있는 클래스</h2><p>결제 이후에는 수강생 권한이 바뀌지 않도록 수정할 수 없습니다.</p></div><span class="guide-locked-label">수정 불가</span></div>
+                  <div class="included-lecture-list">
+                    <label class="product-class-choice is-active"><input type="checkbox" checked disabled><span><b>경매 낙찰 기초반</b><small>4주 완성</small></span><div class="class-order-control"><small>수강 순서</small><select disabled><option>1</option></select></div></label>
+                  </div>
+                </section>
+
+                <section class="panel product-section locked">
+                  <div class="product-section-head"><i>3</i><div><h2>수강 조건 / 가격 / 기간</h2><p>결제 조건에 영향을 주는 항목은 잠금 처리합니다.</p></div><span class="guide-locked-label">수정 불가</span></div>
+                  <div class="guide-form-grid">
+                    <label>수강 조건 <input value="조건 없음" disabled></label>
+                    <label>판매가 <input value="190000" disabled></label>
+                    <label>수강 기간 <input value="2026.07.12 ~ 08.09" disabled></label>
+                    <label>모집 마감 <input value="2026.07.07" disabled></label>
+                  </div>
+                </section>
+              </div>
+
+              <aside class="product-editor-side">
+                <div class="panel product-summary">
+                  <span>상품 요약</span>
+                  <h3>경매 낙찰 기초반</h3>
+                  <p>수강 조건 · 조건 없음</p>
+                  <strong>₩190,000</strong>
+                  <div><b>볼 수 있는 클래스</b><em>경매 낙찰 기초반</em></div>
+                  <small>이미 결제한 수강생이 있어도 운영 안내는 최신 정보로 관리할 수 있습니다.</small>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="state-block" id="operation">
+          <div class="state-banner">
+            <div>
+              <h2>운영 안내 · 없음 / 있음 상태</h2>
+              <p>단톡방과 줌은 기본값이 없음입니다. 체크했을 때만 관련 입력 필드가 펼쳐지고 유저 화면에도 카드가 표시됩니다.</p>
+            </div>
+            <span class="state-chip">기본값 없음</span>
+          </div>
+
+          <div class="guide-operation-grid">
+            <div class="guide-screen">
+              <span class="guide-state-name">Default · 단톡방 없음 / 줌 없음</span>
+              <section class="panel product-section">
+                <div class="product-section-head"><i>5</i><div><h2>운영 안내</h2><p>체크하지 않으면 유저 화면에는 해당 입장 카드가 표시되지 않습니다.</p></div></div>
+                <div class="guide-form-grid">
+                  <label class="wide">운영 안내 문구 <textarea>기초반과 권리분석 실전반을 순서대로 수강할 수 있습니다.</textarea></label>
+                </div>
+                <div class="operation-toggle-list">
+                  <label><input type="checkbox"><span><b>수강생 단톡방 없음</b><small>단톡방을 운영하지 않는 상품입니다.</small></span></label>
+                  <div class="operation-option-empty">단톡방 없음 · 유저 화면에 단톡방 입장 카드가 표시되지 않습니다.</div>
+                  <label><input type="checkbox"><span><b>줌 라이브 없음</b><small>줌 라이브를 운영하지 않는 상품입니다.</small></span></label>
+                  <div class="operation-option-empty">줌 없음 · 유저 화면에 줌 라이브 입장 카드가 표시되지 않습니다.</div>
+                </div>
+              </section>
+            </div>
+
+            <div class="guide-screen">
+              <span class="guide-state-name">Checked · 단톡방 있음 / 줌 있음</span>
+              <section class="panel product-section">
+                <div class="product-section-head"><i>5</i><div><h2>운영 안내</h2><p>체크하면 아래 입력 필드가 노출되고, 구매 후 유저가 입장할 수 있습니다.</p></div></div>
+                <div class="operation-toggle-list">
+                  <label><input type="checkbox" checked><span><b>수강생 단톡방 있음</b><small>공지·질문·다시보기 공유</small></span></label>
+                  <div class="operation-option-fields">
+                    <div class="operation-link-grid">
+                      <label><span>단톡방 버튼명</span><input value="수강생 단톡방 입장"><small>유저 화면 버튼 제목</small></label>
+                      <label><span>단톡방 링크</span><input value="https://open.kakao.com/o/example"><small>입장 클릭 시 이동</small></label>
+                    </div>
+                  </div>
+                  <label><input type="checkbox" checked><span><b>줌 라이브 있음</b><small>일정마다 링크를 다르게 설정합니다.</small></span></label>
+                  <div class="operation-option-fields">
+                    <div class="operation-link-grid">
+                      <label><span>줌 버튼명</span><input value="줌(Zoom) 라이브 입장"><small>유저 화면 버튼 제목</small></label>
+                      <label><span>공통 보조 문구</span><input value="매주 라이브 입장 링크"><small>버튼 아래 보조 문구</small></label>
+                    </div>
+                    <div class="operation-schedule-editor">
+                      <div class="operation-schedule-head"><b>줌 라이브 일정</b><small>각 회차별 링크 입력</small></div>
+                      <div class="operation-schedule-row"><em>1</em><input value="오리엔테이션 · 경매 절차 이해"><input value="2026.07.05"><input value="20:00"><input value="https://zoom.us/j/1000000001"><button class="remove-row">×</button></div>
+                      <div class="operation-schedule-row"><em>2</em><input value="물건 검색과 시세 분석"><input value="2026.07.12"><input value="20:00"><input value="https://zoom.us/j/1000000002"><button class="remove-row">×</button></div>
+                      <button class="operation-add-button">+ 일정 추가</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="state-block" id="alimtalk">
+          <div class="state-banner">
+            <div>
+              <h2>결제 후 안내톡 · OFF / ON 상태</h2>
+              <p>안내톡은 유저 화면에 직접 노출되는 카드가 아니라 결제 완료 후 발송되는 운영 메시지 설정입니다.</p>
+            </div>
+            <span class="state-chip">상품별 발송 설정</span>
+          </div>
+
+          <div class="guide-two-column">
+            <div class="guide-screen">
+              <span class="guide-state-name">OFF · 발송하지 않음</span>
+              <section class="panel product-alimtalk-section">
+                <div class="product-section-head"><i>6</i><div><h2>결제 후 안내톡</h2><p>체크하지 않으면 안내톡 설정 필드는 숨김 처리합니다.</p></div></div>
+                <label class="product-alimtalk-toggle"><input type="checkbox"><span><b>결제 후 안내톡 보내지 않기</b><small>상품 결제 후 별도 메시지를 발송하지 않습니다.</small></span></label>
+                <div class="guide-demo-note"><b>FE 표시 기준</b><br>OFF 상태에서는 하단 상세 설정 영역이 보이지 않습니다.</div>
+              </section>
+            </div>
+
+            <div class="guide-screen">
+              <span class="guide-state-name">ON · 템플릿 설정 표시</span>
+              <section class="panel product-alimtalk-section">
+                <div class="product-section-head"><i>6</i><div><h2>결제 후 안내톡</h2><p>결제 완료 후 수강 준비 안내를 자동 발송합니다.</p></div></div>
+                <label class="product-alimtalk-toggle"><input type="checkbox" checked><span><b>결제 후 안내톡 보내기</b><small>수강 준비 안내 · 결제 완료 후 5분 이내</small></span></label>
+                <div class="product-alimtalk-detail">
+                  <p class="alimtalk-lock-note">승인된 템플릿 구조를 유지하고, 상품별 변수만 입력합니다.</p>
+                  <div class="alimtalk-setting-grid">
+                    <label>템플릿명<input value="수강 준비 안내"></label>
+                    <label>발송 시점<select><option>결제 완료 후 5분 이내</option></select></label>
+                  </div>
+                  <div class="alimtalk-template-structure">
+                    <b>메시지 예시</b>
+                    <p>안녕하세요. {{상품명}} 수강 신청이 완료되었습니다. 아래 안내에 따라 수강을 시작해 주세요.</p>
+                  </div>
+                  <div class="alimtalk-variable-row"><span>{{상품명}}</span><input value="경매 기초+권리분석 패키지"></div>
+                  <div class="alimtalk-variable-row"><span>{{수강기간}}</span><input value="2026.07.05 ~ 08.09"></div>
+                  <p class="product-alimtalk-help">필요 없는 안내 항목은 비워둘 수 있습니다.</p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

@@ -26,7 +26,8 @@ const classes=publicClassProducts.map(product=>({
   lead:product.lead,
   intro:product.intro,
   tags:product.tags||[],
-  content:product.content||{videos:[],files:[]}
+  content:product.content||{videos:[],files:[]},
+  faq:product.faq||[]
 }));
 
 const students=[
@@ -132,6 +133,7 @@ function renderClassEditor(mode='create',classId=''){
   const title=course.title||'',parts=title.split(' · '),name=parts[0]||'',subtitle=parts.slice(1).join(' · ');
   const curriculum=editing&&course.content?.videos?.length?course.content.videos:[''];
   const materials=editing&&course.content?.files?.length?course.content.files:[''];
+  const faqs=editing&&course.faq?.length?course.faq:[{q:'',a:''}];
   return `<form class="class-editor" onsubmit="saveClassForm(event,'${mode}')">
     <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 클래스 관리</button><div><span>${editing?'Class editing':'New class'}</span><h1>${editing?'클래스 수정':'새 클래스 만들기'}</h1><p>${editing?'클래스 정보와 콘텐츠를 수정합니다.':'클래스 소개와 콘텐츠, FAQ를 순서대로 입력하세요.'}</p></div><div class="editor-actions"><button type="button" class="btn ghost" onclick="openClassPreview('${classId}')">미리보기 ↗</button><button type="submit" class="btn primary">클래스 저장</button></div></div>
     <div class="editor-layout">
@@ -141,7 +143,7 @@ function renderClassEditor(mode='create',classId=''){
 
         <section class="panel editor-section" id="editor-content"><div class="editor-section-head"><i>2</i><div><h2>콘텐츠</h2><p>수강생에게 제공할 영상 커리큘럼과 다운로드 자료를 구성합니다.</p></div><span>필수</span></div><div class="content-import-bar"><div><b>기존 클래스에서 가져오기</b><small>선택한 클래스의 커리큘럼과 자료를 복사한 뒤 자유롭게 수정할 수 있습니다.</small></div><select id="contentImportClass"><option value="">클래스 선택</option><option value="mmoh-basic">경매 낙찰 기초반</option><option value="mmoh-right">권리분석 실전반</option><option value="mmoh-field">현장 임장 마스터</option></select><button type="button" class="btn ghost" onclick="importClassContent()">콘텐츠 불러오기</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>각 강의의 제목과 설명을 입력하고 영상 파일을 업로드하세요. 재생시간은 자동으로 입력됩니다.</p></div><span id="curriculumCount">${curriculum.length}강</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>자료 제목과 설명을 입력하고 수강생이 내려받을 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
 
-        <section class="panel editor-section" id="editor-faq"><div class="editor-section-head"><i>3</i><div><h2>FAQ</h2><p>수강생이 자주 묻는 질문과 답변을 관리합니다.</p></div></div><div class="faq-editor-block"><div class="content-editor-title"><div><h3>클래스 FAQ</h3><p>신청 전에 자주 묻는 내용을 등록하세요.</p></div></div><div class="faq-editor-row"><textarea class="faq-question" placeholder="질문을 입력하세요"></textarea><textarea placeholder="답변을 입력하세요"></textarea></div><button type="button" class="add-row-btn" onclick="adminToast('FAQ 항목을 추가했습니다')">＋ FAQ 추가</button></div></section>
+        <section class="panel editor-section" id="editor-faq"><div class="editor-section-head"><i>3</i><div><h2>FAQ</h2><p>수강생이 자주 묻는 질문과 답변을 관리합니다.</p></div></div><div class="faq-editor-block"><div class="content-editor-title"><div><h3>클래스 FAQ</h3><p>신청 전에 자주 묻는 내용을 등록하세요.</p></div><span id="faqCount">${faqs.length}개</span></div><div class="repeat-list" id="faqRows">${faqs.map((faq,i)=>faqEditorRow(i+1,faq)).join('')}</div><button type="button" class="add-row-btn" onclick="addFaqRow()">＋ FAQ 추가</button></div></section>
       </div>
     </div>
     <div class="editor-bottom-bar"><span><b>${editing?'클래스 콘텐츠':'새 클래스'}</b><small>필수 항목을 확인한 뒤 저장해 주세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">취소</button><button type="submit" class="btn primary">클래스 저장</button></div></div>
@@ -175,6 +177,7 @@ function handleCurriculumVideo(input){
 }
 function formatFileSize(bytes){return bytes>=1024*1024*1024?(bytes/(1024*1024*1024)).toFixed(1)+'GB':Math.max(1,Math.round(bytes/(1024*1024)))+'MB';}
 function materialRow(index,value=''){return `<div class="repeat-row material material-card"><div class="material-row-head"><em>${index}</em><input class="material-title" value="${value}" placeholder="자료 제목을 적어주세요"><button type="button" class="remove-row" onclick="removeEditorRow(this,'materialRows','materialCount','개')">×</button></div><textarea class="material-description" placeholder="자료 설명을 적어주세요"></textarea><label class="material-upload"><input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.jpg,.jpeg,.png" onchange="handleMaterialFile(this)"><span><b>자료 파일 업로드</b><small>PDF, 문서, 이미지, ZIP · 자료당 최대 50MB</small></span><em class="material-file-status">파일을 선택해 주세요</em></label></div>`;}
+function faqEditorRow(index,faq={q:'',a:''}){return `<div class="repeat-row faq-editor-row"><em>${index}</em><textarea class="faq-question" placeholder="질문을 입력하세요">${faq.q||''}</textarea><textarea placeholder="답변을 입력하세요">${faq.a||''}</textarea><button type="button" class="remove-row" onclick="removeEditorRow(this,'faqRows','faqCount','개')">×</button></div>`;}
 function handleMaterialFile(input){
   const file=input.files&&input.files[0],row=input.closest('.material-card'),status=row.querySelector('.material-file-status');
   if(!file)return;
@@ -185,6 +188,7 @@ function handleMaterialFile(input){
 
 function addCurriculumRow(){const box=document.getElementById('curriculumRows'),count=box.children.length+1;box.insertAdjacentHTML('beforeend',curriculumRow(count));document.getElementById('curriculumCount').textContent=count+'강';}
 function addMaterialRow(){const box=document.getElementById('materialRows'),count=box.children.length+1;box.insertAdjacentHTML('beforeend',materialRow(count));document.getElementById('materialCount').textContent=count+'개';}
+function addFaqRow(){const box=document.getElementById('faqRows'),count=box.children.length+1;box.insertAdjacentHTML('beforeend',faqEditorRow(count));document.getElementById('faqCount').textContent=count+'개';}
 function removeEditorRow(button,listId,countId,suffix){const list=document.getElementById(listId);if(list.children.length===1){adminToast('최소 1개 항목이 필요합니다');return;}button.closest('.repeat-row').remove();[...list.children].forEach((row,i)=>row.querySelector('em').textContent=suffix==='강'?`${i+1}강`:i+1);document.getElementById(countId).textContent=list.children.length+suffix;}
 function scrollEditorSection(id,button){document.querySelectorAll('.editor-steps button').forEach(b=>b.classList.remove('active'));button.classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});}
 function saveClassForm(event,mode){event.preventDefault();adminToast('클래스를 저장했습니다');setTimeout(()=>showAdminView('classes'),700);}

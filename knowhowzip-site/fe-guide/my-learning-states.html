@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FE Guide · 내 학습 상태</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body{background:#F5F7FB;color:#101828}
+    .guide-shell{max-width:1180px;margin:0 auto;padding:42px 22px 80px}
+    .guide-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:28px}
+    .guide-head span{display:block;color:#4F66F5;font-weight:900;font-size:12px;letter-spacing:1.4px;text-transform:uppercase}
+    .guide-head h1{font-size:34px;letter-spacing:-.8px;margin:8px 0}
+    .guide-head p{color:#667085;margin:0;line-height:1.6}
+    .guide-nav{display:flex;gap:8px;flex-wrap:wrap}
+    .guide-nav a{border:1px solid #E4E7EC;background:#fff;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:800;color:#475467}
+    .state-section{margin-top:28px}
+    .state-title{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+    .state-title i{width:10px;height:10px;background:#4F66F5;border-radius:3px}
+    .state-title h2{font-size:22px;margin:0;letter-spacing:-.4px}
+    .state-note{margin:0 0 16px;color:#667085;font-size:14px}
+    .state-board{background:#fff;border:1px solid #E4E7EC;border-radius:22px;padding:24px;box-shadow:0 10px 30px rgba(16,24,40,.05)}
+    .learning-tabs-demo{display:flex;gap:4px;border-bottom:1px solid #E4E7EC;margin-bottom:22px}
+    .learning-tabs-demo button{border:0;background:none;padding:14px 18px;font-size:15px;font-weight:900;color:#667085;border-bottom:3px solid transparent;margin-bottom:-1px}
+    .learning-tabs-demo button.active{color:#4F66F5;border-color:#4F66F5}
+    .learning-card-demo{border:1px solid #E4E7EC;border-radius:20px;background:#fff;overflow:hidden;margin-bottom:16px}
+    .learning-row-demo{display:flex;align-items:center;gap:18px;padding:20px;border-bottom:1px solid #F2F4F7}
+    .thumb-demo{width:118px;height:78px;border-radius:16px;background:linear-gradient(135deg,#AFD6E7,#D9332A);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;flex-shrink:0;position:relative;overflow:hidden}
+    .thumb-demo.ended{background:#EEF2F7;color:#98A2B3}
+    .thumb-demo span{position:absolute;left:8px;top:8px;background:rgba(16,24,40,.76);color:#fff;border-radius:7px;padding:4px 7px;font-size:10px}
+    .learning-copy-demo{flex:1;min-width:0}
+    .learning-copy-demo h3{font-size:20px;margin:0 0 7px;font-weight:900}
+    .learning-copy-demo p{margin:0;color:#667085;font-size:13px}
+    .learning-copy-demo small{display:block;margin-top:6px;color:#98A2B3;font-weight:700}
+    .status-badge{border:0;border-radius:999px;padding:8px 12px;font-weight:900;font-size:12px;background:#E9EDFF;color:#4F66F5}
+    .status-badge.ended{background:#F2F4F7;color:#667085}
+    .continue-btn{border:0;border-radius:12px;background:#4F66F5;color:#fff;font-weight:900;padding:12px 16px}
+    .disabled-btn{border:1px solid #E4E7EC;border-radius:12px;background:#fff;color:#98A2B3;font-weight:900;padding:12px 16px}
+    .lesson-list-demo{padding:16px 20px 20px;display:grid;gap:10px}
+    .lesson-item-demo{display:flex;align-items:center;gap:10px;border:1px solid #E4E7EC;border-radius:13px;padding:12px 14px}
+    .lesson-item-demo b{flex:1}
+    .lesson-item-demo small{color:#98A2B3;font-weight:800}
+    .empty-demo{text-align:center;padding:86px 20px;border:1px solid #E4E7EC;border-radius:22px;background:#fff}
+    .empty-demo i{display:inline-flex;width:54px;height:54px;align-items:center;justify-content:center;border-radius:50%;background:#EEF2FF;color:#4F66F5;font-size:26px;font-style:normal}
+    .empty-demo h3{font-size:22px;margin:18px 0 8px}
+    .empty-demo p{margin:0;color:#667085}
+    .tab-state-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .tab-state-card{border:1px solid #E4E7EC;border-radius:16px;background:#fff;padding:15px}
+    .tab-state-card b{display:block;font-size:15px;margin-bottom:8px}
+    .tab-state-preview{border-radius:13px;background:#F8FAFC;border:1px solid #EEF2F7;padding:12px;margin-bottom:10px}
+    .tab-state-preview strong{display:block;font-size:13px}.tab-state-preview small{display:block;color:#98A2B3;margin-top:4px;font-weight:800}
+    .tab-state-preview.active{background:#EEF2FF;border-color:#DCE3FF}.tab-state-preview.ended{background:#F8FAFC;color:#667085}.tab-state-preview.waiting{background:#FFF7E8;border-color:#FEDF89}
+    .tab-state-card p{margin:0;color:#667085;font-size:12.5px;line-height:1.5}
+    .learning-acc-demo{border-top:1px solid #F2F4F7}
+    .learning-acc-head-demo{display:flex;justify-content:space-between;align-items:center;padding:17px 20px;font-weight:900}
+    .learning-acc-head-demo small{color:#98A2B3;margin-left:6px}
+    .learning-guide-demo{margin:0 0 12px;color:#667085;line-height:1.6}
+    .resource-demo{display:flex;align-items:center;gap:12px;border:1px solid #E4E7EC;border-radius:14px;padding:13px 14px;margin-top:9px}
+    .resource-demo i{width:40px;height:40px;border-radius:12px;background:#EEF2FF;color:#4F66F5;display:flex;align-items:center;justify-content:center;font-style:normal}
+    .resource-demo span{flex:1}.resource-demo b{display:block}.resource-demo small{display:block;color:#98A2B3;margin-top:3px}.resource-demo em{font-style:normal;color:#4F66F5;font-weight:900}
+    @media(max-width:760px){
+      .guide-head{display:block}.guide-head h1{font-size:28px}
+      .learning-row-demo{align-items:flex-start;flex-wrap:wrap}
+      .thumb-demo{width:82px;height:60px}
+      .continue-btn,.disabled-btn,.status-badge{width:100%;text-align:center}
+      .tab-state-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <main class="guide-shell">
+    <header class="guide-head">
+      <div>
+        <span>MY LEARNING STATES</span>
+        <h1>내 학습 상태 가이드</h1>
+        <p>수강 중, 수강 종료, 빈 상태, 콘텐츠 잠금/활성 상태를 FE가 한눈에 확인하는 퍼블리싱 기준입니다.</p>
+      </div>
+      <nav class="guide-nav">
+        <a href="./product-detail-states.html">상품 상세</a>
+        <a href="./creator-admin-states.html">관리자</a>
+      </nav>
+    </header>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>탭 카운트 상태</h2></div>
+      <p class="state-note">카운트는 구매 상품 단위입니다. 패키지 상품도 하나의 수강 상품으로 카운트합니다.</p>
+      <div class="state-board">
+        <div class="learning-tabs-demo">
+          <button class="active">수강 중 2</button>
+          <button>수강 종료 1</button>
+        </div>
+        <div class="tab-state-grid">
+          <article class="tab-state-card">
+            <b>수강 중</b>
+            <div class="tab-state-preview active"><strong>이어서 학습</strong><small>영상/자료/운영 안내 활성화</small></div>
+            <p>현재 날짜가 수강 시작일과 종료일 사이일 때 표시합니다.</p>
+          </article>
+          <article class="tab-state-card">
+            <b>수강 종료</b>
+            <div class="tab-state-preview ended"><strong>수강 종료</strong><small>콘텐츠 열람 불가</small></div>
+            <p>수강 종료일이 지난 상품은 종료 탭에 카드로 남깁니다.</p>
+          </article>
+          <article class="tab-state-card">
+            <b>수강 대기</b>
+            <div class="tab-state-preview waiting"><strong>시작 예정</strong><small>재생 비활성화</small></div>
+            <p>수강 시작일 전 상태가 필요할 때 선택적으로 사용합니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>수강 중 카드</h2></div>
+      <p class="state-note">수강 가능한 상품은 카드 확장 영역에서 영상, 자료, 운영 안내, FAQ를 제공합니다.</p>
+      <div class="state-board">
+        <article class="learning-card-demo">
+          <div class="learning-row-demo">
+            <div class="thumb-demo"><span>수강 중</span>▶</div>
+            <div class="learning-copy-demo">
+              <h3>경매 기초+권리분석 패키지</h3>
+              <p>시청 완료 3강 · 미완료 5강</p>
+              <small>수강 기간 2026.07.05 ~ 2026.08.09</small>
+            </div>
+            <button class="continue-btn">이어서 학습</button>
+          </div>
+          <div class="lesson-list-demo">
+            <div class="lesson-item-demo"><span>✓</span><b>경매 낙찰 기초반 · 경매 절차와 권리의 이해</b><small>완료</small></div>
+            <div class="lesson-item-demo"><span>▶</span><b>권리분석 실전반 · 등기부등본 정밀 분석</b><small>재생하기</small></div>
+            <div class="lesson-item-demo"><span>📄</span><b>권리분석 워크북(PDF)</b><small>다운로드</small></div>
+          </div>
+          <div class="learning-acc-demo">
+            <div class="learning-acc-head-demo">운영 안내 <small>단톡방 · 줌</small><b>＋</b></div>
+            <div class="lesson-list-demo">
+              <p class="learning-guide-demo">기초반과 권리분석 실전반을 순서대로 수강할 수 있습니다.</p>
+              <div class="resource-demo"><i>1</i><span><b>오리엔테이션 · 경매 절차 이해</b><small>07.05 · 20:00</small></span><em>입장 →</em></div>
+              <div class="resource-demo"><i>💬</i><span><b>패키지 수강생 단톡방 입장</b><small>공지 · 질문 · 다시보기 공유</small></span><em>입장 →</em></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>수강 종료 카드</h2></div>
+      <p class="state-note">종료된 상품은 사라지지 않고 수강 종료 탭에 남깁니다. 단, 영상 재생과 자료 다운로드 CTA는 제공하지 않습니다.</p>
+      <div class="state-board">
+        <article class="learning-card-demo">
+          <div class="learning-row-demo">
+            <div class="thumb-demo ended"><span>수강 종료</span>✓</div>
+            <div class="learning-copy-demo">
+              <h3>경매 낙찰 기초반 · 4주 완성</h3>
+              <p>수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</p>
+              <small>수강 기간 2026.05.05 ~ 2026.06.02</small>
+            </div>
+            <span class="status-badge ended">수강 종료</span>
+          </div>
+          <div class="lesson-list-demo">
+            <div class="lesson-item-demo"><span>🔒</span><b>영상 콘텐츠</b><small>열람 불가</small></div>
+            <div class="lesson-item-demo"><span>🔒</span><b>강의 자료</b><small>다운로드 불가</small></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>빈 상태</h2></div>
+      <div class="state-board">
+        <div class="empty-demo">
+          <i>✓</i>
+          <h3>수강 종료된 클래스가 없습니다</h3>
+          <p>수강 기간이 종료된 클래스가 이곳에 표시됩니다.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

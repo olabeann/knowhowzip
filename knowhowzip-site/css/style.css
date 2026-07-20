@@ -321,7 +321,7 @@ main{min-height:50vh}
 .op-card{display:flex;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff}
 .op-card .oi{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
 .op-card .ot{font-weight:800;font-size:15px}.op-card .od{font-size:13px;color:var(--ink-soft)}
-.op-card .obtn{margin-left:auto;font-weight:800;font-size:13px;color:var(--brand-dk)}
+.op-card .obtn{margin-left:auto;border:0;background:none;padding:0;font-weight:800;font-size:13px;color:var(--brand-dk)}
 .op-card .olock{margin-left:auto;color:var(--ink-mute);font-size:13px;font-weight:700}
 .oi-kakao{background:#FEE500}.oi-zoom{background:#E8F0FE;color:#2d6fe0}
 

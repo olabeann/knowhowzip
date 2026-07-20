@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FE Guide · 상품 상세 상태</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body{background:#F5F7FB;color:#101828}
+    .guide-shell{max-width:1180px;margin:0 auto;padding:42px 22px 80px}
+    .guide-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:28px}
+    .guide-head span{display:block;color:#4F66F5;font-weight:900;font-size:12px;letter-spacing:1.4px;text-transform:uppercase}
+    .guide-head h1{font-size:34px;letter-spacing:-.8px;margin:8px 0}
+    .guide-head p{color:#667085;margin:0;line-height:1.6}
+    .guide-nav{display:flex;gap:8px;flex-wrap:wrap}
+    .guide-nav a{border:1px solid #E4E7EC;background:#fff;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:800;color:#475467}
+    .state-section{margin-top:28px}
+    .state-title{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+    .state-title i{width:10px;height:10px;background:#4F66F5;border-radius:3px}
+    .state-title h2{font-size:22px;margin:0;letter-spacing:-.4px}
+    .state-note{margin:0 0 16px;color:#667085;font-size:14px}
+    .state-board{background:#fff;border:1px solid #E4E7EC;border-radius:22px;padding:24px;box-shadow:0 10px 30px rgba(16,24,40,.05)}
+    .detail-state-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(320px,.8fr);gap:28px;align-items:start}
+    .hero-demo h3{font-size:28px;letter-spacing:-.7px;margin:14px 0 10px}
+    .tags-demo{display:flex;gap:7px;flex-wrap:wrap}
+    .tags-demo span{background:#EEF2FF;color:#4F66F5;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:900}
+    .visual-demo{aspect-ratio:16/9;border-radius:18px;background:linear-gradient(135deg,#AFD6E7,#D9332A);margin-top:20px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
+    .buy-demo{border:1px solid #E4E7EC;border-radius:20px;background:#fff;padding:22px;box-shadow:0 12px 30px rgba(16,24,40,.08)}
+    .box-demo{border:1px solid #DCE3FF;background:#EEF2FF;border-radius:15px;padding:15px;margin-bottom:14px}
+    .box-demo.white{background:#fff;border-color:#E4E7EC}
+    .row-demo{display:flex;justify-content:space-between;gap:14px;font-size:13px;color:#667085;padding:3px 0}
+    .row-demo b{color:#101828}
+    .price-demo{font-size:28px;font-weight:900;margin:18px 0}
+    .price-demo span{color:#F04438;font-size:20px;margin-right:8px}
+    .cta-row{display:flex;gap:10px}
+    .cta-row button{border:0;border-radius:13px;padding:14px 16px;font-weight:900}
+    .cta-row .primary{flex:1;background:#4F66F5;color:#fff}
+    .cta-row .ghost{background:#fff;border:1px solid #E4E7EC;color:#475467}
+    .state-list{display:grid;gap:22px}
+    .scenario-card{border:1px solid #E4E7EC;border-radius:22px;padding:24px;background:#fff}
+    .scenario-card>strong{display:block;margin-bottom:16px;font-size:18px}
+    .scenario-layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:26px;align-items:start}
+    .scenario-preview{border:1px solid #E4E7EC;border-radius:18px;padding:20px;background:#FAFBFC}
+    .scenario-preview h3{font-size:24px;margin:12px 0 8px;letter-spacing:-.5px}
+    .scenario-preview p{color:#667085;line-height:1.6;margin:0 0 16px}
+    .scenario-preview .visual-demo{margin-top:16px}
+    .scenario-card .buycard{position:static;max-width:none;margin:0;box-shadow:0 12px 30px rgba(16,24,40,.08)}
+    .scenario-card .bc-actions .btn-red[disabled]{background:#EEF2F7;color:#98A2B3;cursor:not-allowed}
+    .scenario-toast{margin-top:12px;border-radius:13px;background:#101828;color:#fff;padding:13px 15px;font-size:13px;font-weight:800}
+    .scenario-card .bc-owned{display:block;margin:0}
+    .op-demo{display:grid;gap:10px}
+    .op-item{display:flex;align-items:center;gap:12px;border:1px solid #E4E7EC;border-radius:14px;padding:14px}
+    .op-item i{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#FEE500;font-style:normal}
+    .op-item .zoom{background:#E8F0FE}
+    .op-item b{display:block}.op-item small{color:#667085}.op-item em{margin-left:auto;color:#98A2B3;font-style:normal;font-weight:800}
+    @media(max-width:900px){.detail-state-grid,.scenario-layout{grid-template-columns:1fr}.guide-head{display:block}.guide-head h1{font-size:28px}}
+  </style>
+</head>
+<body>
+  <main class="guide-shell">
+    <header class="guide-head">
+      <div>
+        <span>PRODUCT DETAIL STATES</span>
+        <h1>상품 상세 상태 가이드</h1>
+        <p>상품 단위 상세 화면에서 신청 조건, 패키지, 운영 안내, 구매 여부 상태를 빠짐없이 확인합니다.</p>
+      </div>
+      <nav class="guide-nav">
+        <a href="./my-learning-states.html">내 학습</a>
+        <a href="./creator-admin-states.html">관리자</a>
+      </nav>
+    </header>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>기본 상세 + 신청 카드</h2></div>
+      <p class="state-note">상세 페이지는 상품 기준입니다. 포함 클래스가 1개여도 상품명/가격/수강 조건은 상품에서 표시합니다.</p>
+      <div class="state-board detail-state-grid">
+        <div class="hero-demo">
+          <div class="tags-demo"><span>입문</span><span>입찰 실습</span><span>직장인 추천</span></div>
+          <h3>경매 낙찰 기초반 · 4주 완성</h3>
+          <p>경매가 처음인 직장인을 위한 입문 과정. 한 달이면 혼자 입찰표를 쓸 수 있습니다.</p>
+          <div class="visual-demo">대표 이미지</div>
+        </div>
+        <aside class="buy-demo">
+          <div class="box-demo">
+            <div class="row-demo"><b>수강 신청</b><span>모집중</span></div>
+            <div class="row-demo"><span>수강 기간</span><b>2026.07.05 ~ 08.02</b></div>
+            <div class="row-demo"><span>모집 마감</span><b>2026.06.30</b></div>
+          </div>
+          <div class="price-demo"><span>26%</span>₩290,000</div>
+          <div class="cta-row"><button class="primary">수강신청</button><button class="ghost">🔗 공유</button></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>표시 상태 목록</h2></div>
+      <div class="state-board">
+        <div class="state-list">
+          <article class="scenario-card">
+            <strong>패키지 상품</strong>
+            <div class="scenario-layout">
+              <div class="scenario-preview">
+                <div class="tags-demo"><span>패키지</span><span>입문+심화</span><span>권리분석</span></div>
+                <h3>경매 기초+권리분석 패키지</h3>
+                <p>경매 입문부터 권리분석까지 한 번에 이어서 수강하는 패키지 상품입니다.</p>
+                <div class="visual-demo">패키지 대표 이미지</div>
+              </div>
+              <aside class="buycard"><div class="bc-body">
+                <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">모집중</span></div><div class="ch-row"><span>수강 기간</span><b>2026.07.05 ~ 08.09</b></div><div class="ch-row"><span>모집 마감</span><b>2026.06.30</b></div></div>
+                <div class="cohort-box included-class-box"><div class="ch-row"><span>포함 클래스</span><b>2개</b></div><div class="included-class-list"><em>경매 낙찰 기초반</em><em>권리분석 실전반</em></div></div>
+                <div class="bc-price"><span class="disc">30%</span><span class="final">₩590,000</span><span class="orig">정가 ₩840,000</span></div>
+                <div class="bc-actions"><button class="btn-red">수강신청</button><button class="bc-share">🔗 공유</button></div>
+              </div></aside>
+            </div>
+          </article>
+          <article class="scenario-card">
+            <strong>신청 조건 있음</strong>
+            <div class="scenario-layout">
+              <div class="scenario-preview">
+                <div class="tags-demo"><span>심화</span><span>권리분석</span><span>사례 스터디</span></div>
+                <h3>권리분석 실전반 · 위험물건 거르기</h3>
+                <p>등기부와 매각물건명세서를 직접 읽고 위험 물건을 걸러내는 눈을 기릅니다.</p>
+                <div class="visual-demo">대표 이미지</div>
+              </div>
+              <aside class="buycard"><div class="bc-body">
+                <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">모집중</span></div><div class="ch-row"><span>수강 기간</span><b>2026.07.12 ~ 08.09</b></div><div class="ch-row"><span>모집 마감</span><b>2026.07.07</b></div></div>
+                <div class="cohort-box access-box"><div class="ch-row"><span>신청 조건</span><b>경매 낙찰 기초반 수강 이력 필요</b></div><p>기초 과정을 수강한 뒤 신청할 수 있습니다.</p></div>
+                <div class="bc-price"><span class="disc">13%</span><span class="final">₩390,000</span><span class="orig">정가 ₩450,000</span></div>
+                <div class="bc-actions"><button class="btn-red">수강신청</button><button class="bc-share">🔗 공유</button></div>
+              </div></aside>
+            </div>
+          </article>
+          <article class="scenario-card">
+            <strong>조건 미충족</strong>
+            <div class="scenario-layout">
+              <div class="scenario-preview"><h3>CTA 클릭 후 안내</h3><p>조건을 충족하지 않은 사용자는 결제 모달로 이동하지 않고 조건 안내를 확인합니다.</p><div class="scenario-toast">기초 과정을 수강한 뒤 신청할 수 있습니다.</div></div>
+              <aside class="buycard"><div class="bc-body">
+                <div class="cohort-box access-box"><div class="ch-row"><span>신청 조건</span><b>경매 낙찰 기초반 수강 이력 필요</b></div><p>기초 과정을 수강한 뒤 신청할 수 있습니다.</p></div>
+                <div class="bc-price"><span class="disc">13%</span><span class="final">₩390,000</span><span class="orig">정가 ₩450,000</span></div>
+                <div class="bc-actions"><button class="btn-red">수강신청</button><button class="bc-share">🔗 공유</button></div>
+              </div></aside>
+            </div>
+          </article>
+          <article class="scenario-card">
+            <strong>이미 구매함</strong>
+            <div class="scenario-layout">
+              <div class="scenario-preview"><h3>구매 완료 상태</h3><p>수강신청 CTA 영역은 사라지고 내 학습에서 확인 가능한 상태 문구를 표시합니다.</p><div class="visual-demo">수강 중 상태</div></div>
+              <aside class="buycard"><div class="bc-body">
+                <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">모집중</span></div><div class="ch-row"><span>수강 기간</span><b>2026.07.12 ~ 08.09</b></div></div>
+                <div class="bc-price"><span class="final">₩390,000</span></div>
+                <div class="bc-owned">✓ 수강 중 · 내 학습에서 확인</div>
+              </div></aside>
+            </div>
+          </article>
+          <article class="scenario-card">
+            <strong>할인 없음</strong>
+            <div class="scenario-layout">
+              <div class="scenario-preview"><div class="tags-demo"><span>현장</span><span>임장</span></div><h3>현장 임장 마스터 · 발품 전략</h3><p>할인율과 정가 취소선 없이 최종 가격만 노출합니다.</p><div class="visual-demo">대표 이미지</div></div>
+              <aside class="buycard"><div class="bc-body">
+                <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">모집중</span></div><div class="ch-row"><span>수강 기간</span><b>2026.07.19 ~ 08.16</b></div></div>
+                <div class="bc-price"><span class="final">₩450,000</span></div>
+                <div class="bc-actions"><button class="btn-red">수강신청</button><button class="bc-share">🔗 공유</button></div>
+              </div></aside>
+            </div>
+          </article>
+          <article class="scenario-card">
+            <strong>모집 마감</strong>
+            <div class="scenario-layout">
+              <div class="scenario-preview"><h3>모집 마감 상품</h3><p>상태 배지는 모집마감으로 표시하고 수강신청 CTA는 비활성화합니다.</p><div class="visual-demo">마감 상태</div></div>
+              <aside class="buycard"><div class="bc-body">
+                <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st" style="background:#98A2B3">모집마감</span></div><div class="ch-row"><span>모집 마감</span><b>2026.06.30</b></div></div>
+                <div class="bc-price"><span class="disc">26%</span><span class="final">₩290,000</span><span class="orig">정가 ₩390,000</span></div>
+                <div class="bc-actions"><button class="btn-red" disabled>모집이 마감되었습니다</button><button class="bc-share">🔗 공유</button></div>
+              </div></aside>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>운영 안내 상태</h2></div>
+      <p class="state-note">관리자 상품 관리의 단톡방/줌 있음 여부에 따라 카드 자체가 노출됩니다. 링크는 구매 후 내 학습에서 활성화됩니다.</p>
+      <div class="state-board">
+        <div class="op-demo">
+          <div class="op-item"><i>💬</i><span><b>수강생 단톡방 입장</b><small>공지 · 질문 · 다시보기 공유</small></span><em>🔒 수강 후 제공</em></div>
+          <div class="op-item"><i class="zoom">🎥</i><span><b>줌(Zoom) 라이브 입장</b><small>매주 라이브 입장 링크</small></span><em>🔒 수강 후 제공</em></div>
+          <div class="op-item"><i class="zoom">1</i><span><b>권리분석 핵심 개념</b><small>07.12 · 20:00</small></span><em>🔒 수강 후 제공</em></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
