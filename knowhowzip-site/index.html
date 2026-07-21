@@ -215,6 +215,20 @@
       </div>
     </div></div>
   </section>
+
+  <section id="view-login" class="view login-page">
+    <div class="wrap login-shell">
+      <div class="login-card">
+        <button class="login-back" type="button" onclick="show('home')" aria-label="홈으로 돌아가기">←</button>
+        <div class="login-card-copy">
+          <h1>로그인</h1>
+          <p>좋아하는 크리에이터의 클래스를<br>한곳에서 편하게 관리하세요.</p>
+        </div>
+        <button type="button" class="login-kakao" id="authSubmit" onclick="submitAuth()"><span class="kakao-symbol">●</span>카카오로 3초 만에 시작하기</button>
+        <p class="login-terms">계속 진행하면 노하우집의 <a href="https://app.notion.com/p/39c1f6888e578018bd01c60799db7ec2?source=copy_link" target="_blank" rel="noopener noreferrer">이용약관</a> 및 <a href="https://app.notion.com/p/39c1f6888e57802fa2dad79ea1a9a4c7?source=copy_link" target="_blank" rel="noopener noreferrer">개인정보처리방침</a>에 동의하게 됩니다.</p>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -230,16 +244,6 @@
     <div class="foot-bottom">노하우집 · 크리에이터 클래스 마켓 · 본 페이지는 외주/검수용 시안입니다.</div>
   </div>
 </footer>
-
-<!-- AUTH MODAL -->
-<div class="modal-bg" id="authModal"><div class="modal" role="dialog" aria-modal="true">
-  <div class="modal-head"><div><h3 id="authTitle">카카오 간편 로그인</h3><p id="authDesc">노하우집을 함께 시작해보세요!</p></div><button class="modal-x" onclick="closeAuth()">&times;</button></div>
-  <div class="modal-body">
-    <div class="kakao-auth">
-      <button type="button" class="kakao-login-btn" id="authSubmit" onclick="submitAuth()">카카오로 3초 만에 시작하기</button>
-    </div>
-  </div>
-</div></div>
 
 <!-- PAY MODAL -->
 <div class="modal-bg" id="payModal"><div class="modal" role="dialog" aria-modal="true">

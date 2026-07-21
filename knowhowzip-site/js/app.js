@@ -27,7 +27,6 @@ function prodCard(p,c){
       <div class="c-creator"><span class="mini">${creatorLogo(c,18)}</span>${c.name}</div>
       <span class="c-cohort">${p.cohort.status}</span>
       <h3 class="c-title">${p.title}</h3>
-      <div class="c-rate"><span class="stars">${stars(p.rate)}</span><b>${p.rate}</b><span>(${p.reviews})</span></div>
       <div class="c-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">${won(p.orig)}</span>`:''}</div>
     </div></article>`;
 }
@@ -488,17 +487,15 @@ function show(view){
   if(view==='mypage')setHash('#/mypage');
   if(view==='account')setHash('#/account');
   if(view==='faq')setHash('#/faq');
+  if(view==='login')setHash('#/login');
   if(view!=='detail'&&view!=='creator')window.scrollTo({top:0});
 }
 function toggleMnav(){document.getElementById('mnav').classList.toggle('show');}
 
 /* ---------- auth ---------- */
-function openAuth(m){switchAuth(m);document.getElementById('authModal').classList.add('show');}
-function closeAuth(){document.getElementById('authModal').classList.remove('show');}
-function switchAuth(m){state.authMode='kakao';
-  document.getElementById('authTitle').textContent='카카오 간편 로그인';
-  document.getElementById('authDesc').textContent='노하우집을 함께 시작해보세요!';
-  document.getElementById('authSubmit').textContent='카카오로 3초 만에 시작하기';}
+function openAuth(m){switchAuth(m);show('login');}
+function closeAuth(){if(document.getElementById('view-login').classList.contains('show'))show('home');}
+function switchAuth(m){state.authMode='kakao';}
 const DEMO_PURCHASES=['mmoh-basic','mmoh-right'];
 function submitAuth(){
   state.user={name:'김노하우',phone:'010-1234-5678',provider:'kakao'};
@@ -602,6 +599,7 @@ function route(){
   if(h==='#/mypage')return show('mypage');
   if(h==='#/account')return show('account');
   if(h==='#/faq')return show('faq');
+  if(h==='#/login')return show('login');
   show('home');
 }
 window.addEventListener('hashchange',()=>{if(!suppressHash)route();});
