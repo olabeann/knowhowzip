@@ -96,11 +96,12 @@ main{min-height:50vh}
 .mock-row{display:flex;align-items:center;gap:12px;padding:11px;border:1px solid var(--line2);border-radius:13px;margin-bottom:9px}
 .mock-rt{flex:1;min-width:0}
 .mock-rt b{font-size:13.5px;font-weight:800;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mock-rt small{font-size:11.5px;color:var(--ink-mute)}
+.mock-tags{display:flex;gap:6px;margin-top:7px}
+.mock-tags em{font-style:normal;font-size:11px;line-height:1;background:#F5F6FF;color:#6578C9;border-radius:999px;padding:6px 8px;font-weight:700}
 .mock-price{font-weight:900;font-size:14px;flex-shrink:0}
 .mock-cta{width:100%;margin-top:6px;background:var(--grad);color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:14.5px}
 .float-chip{position:absolute;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-lg);border-radius:14px;padding:11px 15px;font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:7px;z-index:3}
-.chip-a{top:8%;left:-6%;color:var(--amber)}
+.chip-a{top:18px;left:-78px;color:var(--amber)}
 .chip-b{bottom:10%;right:-7%;color:var(--brand)}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 .chip-a{animation:floaty 4s ease-in-out infinite}
