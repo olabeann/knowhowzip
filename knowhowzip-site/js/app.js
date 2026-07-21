@@ -206,19 +206,21 @@ function openDetail(pid){
         <button onclick="goTab(this,'sec-op')">운영 안내</button>
         <button onclick="goTab(this,'sec-faq')">클래스 FAQ</button>
       </div>
-      <div class="d-section" id="sec-intro"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p></div>
-      <div class="d-section" id="sec-content"><h3><span class="dot"></span>콘텐츠 <span class="sub">영상 · 자료</span></h3>
-        <div class="sub-h">📹 영상 커리큘럼</div>
-        <ul class="curr">${videos.map((s,i)=>`<li><span class="wk">${i+1}강</span><span>${s}</span><span class="pl">▶</span></li>`).join('')}</ul>
-        <div class="sub-h">📄 제공 자료</div>
-        <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span><span class="lock">${owned?'다운로드 가능':'🔒 수강 후 제공'}</span></li>`).join('')}</ul>
+      <div class="d-tab-panels">
+        <div class="d-panel active" id="sec-intro"><div class="d-section"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p></div></div>
+        <div class="d-panel" id="sec-content"><div class="d-section"><h3><span class="dot"></span>콘텐츠 <span class="sub">영상 · 자료</span></h3>
+          <div class="sub-h">📹 영상 커리큘럼</div>
+          <ul class="curr">${videos.map((s,i)=>`<li><span class="wk">${i+1}강</span><span>${s}</span><span class="pl">▶</span></li>`).join('')}</ul>
+          <div class="sub-h">📄 제공 자료</div>
+          <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span><span class="lock">${owned?'다운로드 가능':'🔒 수강 후 제공'}</span></li>`).join('')}</ul>
+        </div></div>
+        <div class="d-panel" id="sec-op"><div class="d-section"><h3><span class="dot"></span>운영 안내 <span class="sub">단톡방 · 줌</span></h3>
+          <p style="margin-bottom:14px">${op.guide}</p>
+          ${operationScheduleRows(p,false)}
+          ${detailOperationCards(p,owned)||'<p>등록된 운영 안내가 없습니다.</p>'}
+        </div></div>
+        <div class="d-panel" id="sec-faq"><div class="d-section"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div></div>
       </div>
-      <div class="d-section" id="sec-op"><h3><span class="dot"></span>운영 안내 <span class="sub">단톡방 · 줌</span></h3>
-        <p style="margin-bottom:14px">${op.guide}</p>
-        ${operationScheduleRows(p,false)}
-        ${detailOperationCards(p,owned)||'<p>등록된 운영 안내가 없습니다.</p>'}
-      </div>
-      <div class="d-section" id="sec-faq"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div>
       </div>
     </div></div>
     <div class="buybar" id="buybar"></div>`;
@@ -226,13 +228,18 @@ function openDetail(pid){
   bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>`;
   show('detail');window.scrollTo({top:0});setHash('#/p/'+pid);requestAnimationFrame(updateDetailBuycardPosition);
 }
-function goTab(btn,id){document.querySelectorAll('.d-tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+function goTab(btn,id){
+  document.querySelectorAll('.d-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.d-panel').forEach(panel=>panel.classList.toggle('active',panel.id===id));
+  requestAnimationFrame(updateDetailBuycardPosition);
+}
 function updateDetailBuycardPosition(){
   const grid=document.querySelector('#view-detail.show .detail-hero-in');
   const aside=grid?.querySelector('aside');
   const visual=grid?.querySelector('.d-visual');
   const card=grid?.querySelector('.buycard');
-  const stopTarget=grid?.querySelector('#sec-faq .faq-item')||grid?.querySelector('#sec-faq')||grid;
+  const stopTarget=grid?.querySelector('.detail-body')||grid;
   if(!grid||!aside||!visual||!card)return;
   card.classList.remove('is-fixed','is-bottom');
   if(window.matchMedia('(max-width:980px)').matches){
@@ -467,7 +474,7 @@ const commonFaqs=[
   {q:'크리에이터로 입점하려면요?',a:'상단 입점 문의 또는 고객센터의 카카오 채널을 통해 신청할 수 있습니다.'}
 ];
 function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
-function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';}
+function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';requestAnimationFrame(updateDetailBuycardPosition);}
 const KAKAO_CHANNEL_URL='http://pf.kakao.com/_xksSwX/chat';
 function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,noreferrer');}
 

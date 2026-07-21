@@ -307,7 +307,10 @@ main{min-height:50vh}
 .d-tabs::-webkit-scrollbar{display:none}
 .d-tabs button{background:none;border:0;padding:15px 16px;font-weight:800;font-size:15px;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
 .d-tabs button.active{color:var(--brand);border-color:var(--brand)}
-.d-section{max-width:760px;scroll-margin-top:130px;margin-bottom:38px}
+.d-tab-panels{max-width:760px}
+.d-panel{display:none}
+.d-panel.active{display:block}
+.d-section{margin-bottom:38px}
 .d-section h3{font-size:19px;margin:0 0 14px;font-weight:900;display:flex;align-items:center;gap:9px;letter-spacing:-.3px}
 .d-section h3 .dot{width:10px;height:10px;background:var(--brand);border-radius:3px;flex-shrink:0}
 .d-section h3 .sub{font-size:13px;font-weight:700;color:var(--ink-mute)}
