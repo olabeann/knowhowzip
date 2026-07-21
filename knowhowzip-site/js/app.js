@@ -142,6 +142,20 @@ function productFileItems(product){
 }
 function productVideoTitles(product){return productVideoItems(product).map(item=>item.display);}
 function productFileTitles(product){return productFileItems(product).map(item=>item.display);}
+function detailIntroMedia(product,creator,videos){
+  const title=product.title.split(' · ')[0];
+  return `<div class="detail-intro-media">
+    <div class="intro-video-card">
+      <div class="intro-video-top"><span>${creator.name}</span><b>클래스 미리보기</b></div>
+      <div class="intro-play" aria-hidden="true">▶</div>
+      <div class="intro-video-copy">
+        <strong>${title}</strong>
+        <p>${product.lead}</p>
+      </div>
+    </div>
+    <img class="intro-detail-image" src="./assets/images/mmoh-detail-intro.png" alt="${title} 상세 소개 이미지">
+  </div>`;
+}
 function productOperation(product){return Object.assign({guide:'',hasKakao:false,hasZoom:false,kakaoTitle:'수강생 단톡방 입장',kakaoDesc:'공지 · 질문 · 다시보기 공유',kakaoUrl:'',zoomTitle:'줌(Zoom) 라이브 입장',zoomDesc:'매주 라이브 입장 링크',schedules:[]},product.operation||{});}
 function detailOperationCards(product,owned){
   const op=productOperation(product),cards=[];
@@ -172,7 +186,6 @@ function openDetail(pid){
         <div class="d-tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
         <h1>${p.title}</h1>
         <p class="d-lead">${p.lead}</p>
-        <div class="d-meta"><span><span class="stars">${stars(p.rate)}</span> <b>${p.rate}</b> (${p.reviews})</span><span>·</span><span>${ch.status}</span></div>
         <div class="d-visual" style="background:${p.grad}">${c.logoType==='house'?houseSVG(110,{ink:p.deep,text:false}):''}</div>
       </div>
       <aside><div class="buycard">
@@ -207,7 +220,7 @@ function openDetail(pid){
         <button onclick="goTab(this,'sec-faq')">클래스 FAQ</button>
       </div>
       <div class="d-tab-panels">
-        <div class="d-panel active" id="sec-intro"><div class="d-section"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p></div></div>
+        <div class="d-panel active" id="sec-intro"><div class="d-section"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p>${detailIntroMedia(p,c,videos)}</div></div>
         <div class="d-panel" id="sec-content"><div class="d-section"><h3><span class="dot"></span>콘텐츠 <span class="sub">영상 · 자료</span></h3>
           <div class="sub-h">📹 영상 커리큘럼</div>
           <ul class="curr">${videos.map((s,i)=>`<li><span class="wk">${i+1}강</span><span>${s}</span><span class="pl">▶</span></li>`).join('')}</ul>
@@ -379,15 +392,6 @@ function renderUserProfile(){
     </div>
   </section>`;
 }
-function renderLearningEntitlementSummary(owned){
-  const active=owned.filter(x=>!endedCourses.has(x.p.id)).length;
-  const creatorCount=new Set(owned.map(x=>x.c.id)).size;
-  return `<section class="entitlement-summary">
-    <article><span>수강 중 클래스</span><strong>${active}개</strong></article>
-    <article><span>크리에이터</span><strong>${creatorCount}명</strong></article>
-  </section>`;
-}
-
 function renderMy(){
   const box=document.getElementById('myContent');
   const tabs=document.getElementById('myLearningTabs');
@@ -398,7 +402,7 @@ function renderMy(){
   const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
-  box.innerHTML=renderLearningEntitlementSummary(allOwned)+Object.values(byCreator).map(g=>`
+  box.innerHTML=Object.values(byCreator).map(g=>`
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
