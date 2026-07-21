@@ -390,6 +390,7 @@ function renderUserProfile(){
       <div><small>이름</small><b>${user.name}</b></div>
       <div><small>전화번호</small><b>${user.phone}</b></div>
     </div>
+    <div class="user-profile-withdraw"><button type="button" onclick="openWithdraw()">탈퇴하기</button></div>
   </section>`;
 }
 function renderMy(){
@@ -525,6 +526,26 @@ function logout(){state.user=null;state.purchased.clear();
   document.getElementById('userChip').style.display='none';
   document.getElementById('mAuth').style.display='flex';document.getElementById('mUser').style.display='none';
   refreshOwned();renderMy();toast('로그아웃되었습니다');show('home');}
+function openWithdraw(){
+  document.getElementById('withdrawModal').classList.add('show');
+}
+function closeWithdraw(){
+  document.getElementById('withdrawModal').classList.remove('show');
+}
+function selectWithdrawReason(btn){
+  document.querySelectorAll('#withdrawReasons button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function confirmWithdraw(){
+  closeWithdraw();
+  state.user=null;state.purchased.clear();
+  document.getElementById('signupBtn').style.display='';
+  document.getElementById('userChip').style.display='none';
+  document.getElementById('mAuth').style.display='flex';document.getElementById('mUser').style.display='none';
+  refreshOwned();
+  renderAccount();
+  toast('탈퇴가 완료되었습니다');
+}
 
 /* ---------- purchase ---------- */
 function startPurchase(id){
@@ -569,18 +590,11 @@ function refreshOwned(){
 const SHARE_DOMAIN='https://knowhow.kr';
 function creatorUrl(c){return SHARE_DOMAIN+'/'+c.handle.replace('@','');}
 function productUrl(c,p){return SHARE_DOMAIN+'/'+c.handle.replace('@','')+'/class/'+p.id;}
-function openShare(title,desc,url,logoHTML,sub){
-  document.getElementById('shareTitle').textContent=title;
-  document.getElementById('shareDesc').textContent=desc;
-  document.getElementById('sharePreview').innerHTML=`<div class="sc-logo">${logoHTML}</div><div style="min-width:0"><div class="sc-name">${title}</div><div class="sc-sub">${sub}</div></div>`;
-  document.getElementById('shareUrl').value=url;
-  document.getElementById('shareModal').classList.add('show');
+function copyShareUrl(url){
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>toast('링크를 복사했어요')).catch(()=>fallbackCopy(url));}else fallbackCopy(url);
 }
-function shareCreator(id){const c=creators.find(x=>x.id===id);openShare(c.name,'링크를 복사해 공유할 수 있어요.',creatorUrl(c),creatorLogo(c,42),c.tagline);}
-function shareProduct(pid){const p=productMap[pid],c=creatorOf[pid];openShare(p.title.split(' · ')[0],'링크를 복사해 공유할 수 있어요.',productUrl(c,p),(c.logoType==='house'?houseSVG(34,{ink:p.deep,text:false}):creatorLogo(c,42)),c.name+' · '+won(p.price));}
-function closeShare(){document.getElementById('shareModal').classList.remove('show');}
-function copyShare(){const v=document.getElementById('shareUrl').value;
-  if(navigator.clipboard){navigator.clipboard.writeText(v).then(()=>toast('링크를 복사했어요')).catch(()=>fallbackCopy(v));}else fallbackCopy(v);}
+function shareCreator(id){const c=creators.find(x=>x.id===id);copyShareUrl(creatorUrl(c));}
+function shareProduct(pid){const p=productMap[pid],c=creatorOf[pid];copyShareUrl(productUrl(c,p));}
 function fallbackCopy(v){
   const area=document.createElement('textarea');
   area.value=v;

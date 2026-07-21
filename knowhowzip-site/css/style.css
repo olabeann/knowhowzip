@@ -383,6 +383,9 @@ main{min-height:50vh}
 .user-profile-grid>div{background:var(--bg-alt);border:1px solid var(--line2);border-radius:13px;padding:16px}
 .user-profile-grid small{display:block;color:var(--ink-mute);font-size:12px;font-weight:800;margin-bottom:6px}
 .user-profile-grid b{display:block;color:var(--ink);font-size:16px;font-weight:900}
+.user-profile-withdraw{margin-top:18px;text-align:right}
+.user-profile-withdraw button{border:0;background:transparent;color:var(--ink-mute);font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:6px 0}
+.user-profile-withdraw button:hover{color:var(--ink-soft)}
 .learning-group{margin-bottom:38px}
 .learning-group-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
 .learning-group-head .logo{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -548,13 +551,17 @@ main{min-height:50vh}
 .pay-done{text-align:center;padding:14px 0}
 .pay-done .check{width:66px;height:66px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:33px;margin:0 auto 16px}
 .pay-done h3{margin:0 0 6px;font-size:21px;font-weight:900}.pay-done p{color:var(--ink-soft);margin:0 0 22px}
-
-.share-card{display:flex;align-items:center;gap:12px;background:var(--bg-alt);border:1px solid var(--line);border-radius:13px;padding:14px 16px;margin-bottom:16px}
-.share-card .sc-logo{width:46px;height:46px;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;border:1px solid var(--line)}
-.share-card .sc-name{font-weight:900;font-size:16px}
-.share-card .sc-sub{font-size:13px;color:var(--ink-soft);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-.share-copy-only{width:100%;margin-bottom:14px}
-.share-note{font-size:12px;color:var(--ink-mute);margin:0;text-align:center}
+.withdraw-modal{max-width:460px}
+.withdraw-reasons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.withdraw-reasons button{border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:11px;padding:12px 10px;font-size:13px;font-weight:800;text-align:center}
+.withdraw-reasons button.active{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-dk)}
+.withdraw-field{display:block;margin-bottom:12px}
+.withdraw-field span{display:block;font-size:12px;font-weight:900;color:var(--ink-soft);margin-bottom:7px}
+.withdraw-field textarea{width:100%;min-height:84px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-family:inherit;font-size:14px;line-height:1.5}
+.withdraw-field textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+.withdraw-note{margin:0 0 14px;color:var(--ink-mute);font-size:12px;line-height:1.55}
+.withdraw-confirm{width:100%;border:1px solid #F2C6C6;background:#fff;color:#B42318;border-radius:12px;padding:13px;font-size:14px;font-weight:900}
+.withdraw-confirm:hover{background:#FFF5F5;border-color:#E7A7A7}
 
 /* mobile bottom buy bar */
 .buybar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(16,24,40,.10);z-index:52;display:none;align-items:center;gap:12px;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
@@ -664,6 +671,7 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .user-profile-card{padding:22px}
   .user-profile-head{align-items:flex-start}
   .user-profile-grid{grid-template-columns:1fr}
+  .withdraw-reasons{grid-template-columns:1fr}
   .learning-group-head>span:not(.logo){display:none}
   .learning-group-head>button{font-size:12px}
   .learning-summary{flex-wrap:wrap;gap:13px;padding:16px}

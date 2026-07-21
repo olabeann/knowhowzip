@@ -251,13 +251,19 @@
   <div class="modal-body" id="payBody"></div>
 </div></div>
 
-<!-- SHARE MODAL -->
-<div class="modal-bg" id="shareModal"><div class="modal" role="dialog" aria-modal="true">
-  <div class="modal-head"><div><h3 id="shareTitle">링크 복사</h3><p id="shareDesc">링크를 복사해 공유할 수 있어요.</p></div><button class="modal-x" onclick="closeShare()">&times;</button></div>
+<!-- WITHDRAW MODAL -->
+<div class="modal-bg" id="withdrawModal"><div class="modal withdraw-modal" role="dialog" aria-modal="true">
+  <div class="modal-head"><div><h3>탈퇴 전 확인</h3><p>더 나은 서비스를 위해 이유를 알려주세요.</p></div><button class="modal-x" onclick="closeWithdraw()">&times;</button></div>
   <div class="modal-body">
-    <div class="share-card" id="sharePreview"></div>
-    <input id="shareUrl" type="text" readonly hidden>
-    <button class="btn-red share-copy-only" onclick="copyShare()">링크 복사</button>
+    <div class="withdraw-reasons" id="withdrawReasons">
+      <button type="button" onclick="selectWithdrawReason(this)">원하는 클래스가 부족해요</button>
+      <button type="button" onclick="selectWithdrawReason(this)">자주 이용하지 않아요</button>
+      <button type="button" onclick="selectWithdrawReason(this)">가격이 부담돼요</button>
+      <button type="button" onclick="selectWithdrawReason(this)">다른 계정을 사용할게요</button>
+    </div>
+    <label class="withdraw-field"><span>기타 의견</span><textarea id="withdrawReasonText" placeholder="남기고 싶은 의견이 있다면 적어주세요."></textarea></label>
+    <p class="withdraw-note">탈퇴하면 로그인 정보와 수강 관리 화면 접근이 중단됩니다.</p>
+    <button type="button" class="withdraw-confirm" onclick="confirmWithdraw()">탈퇴하기</button>
   </div>
 </div></div>
 
