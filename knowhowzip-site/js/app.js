@@ -126,6 +126,10 @@ function purchaseRequirement(product){
   return {ok,label:req.label,message:ok?'신청 조건을 충족했습니다.':req.message};
 }
 function productContentSources(product){
+  if(product.contentIds&&product.contentIds.length){
+    const creator=creatorOf[product.id];
+    return product.contentIds.map(id=>creator?.lectureContents?.find(item=>item.id===id)).filter(Boolean);
+  }
   const ids=product.includedProductIds&&product.includedProductIds.length?product.includedProductIds:[product.id];
   return ids.map(id=>productMap[id]).filter(Boolean);
 }
@@ -196,8 +200,8 @@ function openDetail(pid){
             <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
           </div>
           ${includedClasses.length>1?`<div class="cohort-box included-class-box">
-            <div class="ch-row"><span>포함 클래스</span><b>${includedClasses.length}개</b></div>
-            <div class="included-class-list">${includedClasses.map(name=>`<em>${name}</em>`).join('')}</div>
+            <div class="ch-row"><span>강의 콘텐츠</span><b>${includedClasses.length}개</b></div>
+            <div class="included-class-list">${includedClasses.map((name,index)=>`<em>${index+1}. ${name}</em>`).join('')}</div>
           </div>`:''}
           ${hasRequirement?`<div class="cohort-box access-box">
             <div class="ch-row"><span>신청 조건</span><b>${req.label}</b></div>

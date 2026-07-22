@@ -53,7 +53,7 @@ const creators=[
 ];
 
 /* 강의 콘텐츠(학습 자산)와 클래스(노출·판매 단위)를 분리합니다.
-   contentId 참조를 사용하므로 하나의 콘텐츠를 여러 클래스에서 재사용할 수 있습니다. */
+   contentIds 참조를 사용하므로 콘텐츠와 클래스는 다대다로 연결할 수 있습니다. */
 creators.forEach(creator=>{
   creator.lectureContents=creator.products
     .filter(item=>!item.includedProductIds)
@@ -64,8 +64,8 @@ creators.forEach(creator=>{
       content:item.content
     }));
   creator.products.forEach(item=>{
-    const sourceId=item.includedProductIds?.[0]||item.id;
-    item.contentId=`content-${sourceId}`;
+    const sourceIds=item.includedProductIds?.length?item.includedProductIds:[item.id];
+    item.contentIds=sourceIds.map(sourceId=>`content-${sourceId}`);
   });
 });
 
