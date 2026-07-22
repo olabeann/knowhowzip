@@ -446,7 +446,7 @@ const saleProducts=publicProducts.map(product=>({
 function linkedClassCount(contentId){return saleProducts.filter(item=>item.contentId===contentId).length;}
 function renderProducts(){
   return `${pageHeader('Class management','클래스 관리','수강생에게 노출되고 판매되는 클래스의 소개, 기간, 가격, 운영 안내, FAQ와 공개 상태를 관리합니다.','<button class="btn primary" onclick="openProductEditor(\'create\')">+ 새 클래스 등록</button>')}
-  <div class="product-admin-grid">${saleProducts.map(product=>`<article class="sale-product-card"><div class="sale-product-top"><span>${classShortTitle(lectureContents.find(item=>item.id===product.contentId)?.title||'연결 콘텐츠')}</span><div class="sale-product-state"><em class="${product.status==='비공개'||product.status==='준비중'?'soon':'open'}">${product.status}</em><div class="class-card-menu"><button type="button" aria-label="${product.name} 더보기" onclick="toggleClassMenu(event,'sale-${product.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-sale-${product.id}" onclick="event.stopPropagation()"><button type="button" onclick="openProductEditor('edit','${product.id}')">수정</button><button type="button" onclick="duplicateManagedClass('${product.id}')">복제</button></div></div></div></div><h2>${product.name}</h2><p>${product.desc}</p><div class="product-card-price"><strong>${won(product.price)}</strong><small>${product.period}</small></div><div class="product-card-summary"><div><b>수강 조건</b><span>${product.requirement}</span></div><div><b>강의 콘텐츠</b><span>${classShortTitle(lectureContents.find(item=>item.id===product.contentId)?.title||'미연결')} 커리큘럼</span></div></div></article>`).join('')}</div>`;
+  <div class="product-admin-grid">${saleProducts.map(product=>`<article class="sale-product-card"><div class="sale-product-top"><span>${classShortTitle(lectureContents.find(item=>item.id===product.contentId)?.title||'연결 콘텐츠')}</span><div class="sale-product-state"><em class="${product.status==='비공개'||product.status==='준비중'?'soon':'open'}">${product.status}</em><div class="class-card-menu"><button type="button" aria-label="${product.name} 더보기" onclick="toggleClassMenu(event,'sale-${product.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-sale-${product.id}" onclick="event.stopPropagation()"><button type="button" onclick="openProductEditor('edit','${product.id}')">수정</button><button type="button" onclick="duplicateManagedClass('${product.id}')">복제</button><button type="button" class="danger" onclick="deleteManagedClass('${product.id}')">삭제</button></div></div></div></div><h2>${product.name}</h2><p>${product.desc}</p><div class="product-card-price"><strong>${won(product.price)}</strong><small>${product.period}</small></div><div class="product-card-summary"><div><b>수강 조건</b><span>${product.requirement}</span></div><div><b>강의 콘텐츠</b><span>${classShortTitle(lectureContents.find(item=>item.id===product.contentId)?.title||'미연결')} 커리큘럼</span></div></div></article>`).join('')}</div>`;
 }
 function duplicateManagedClass(classId){
   const index=saleProducts.findIndex(item=>item.id===classId);
@@ -455,6 +455,14 @@ function duplicateManagedClass(classId){
   saleProducts.splice(index+1,0,{...source,id:`${source.id}-copy-${Date.now()}`,name:`${source.name} 복제본`,status:'비공개',paymentCount:0,operation:{...source.operation}});
   showAdminView('products');
   adminToast('클래스 복제본을 비공개 상태로 추가했습니다');
+}
+function deleteManagedClass(classId){
+  const index=saleProducts.findIndex(item=>item.id===classId);
+  if(index<0)return;
+  if(!window.confirm(`“${saleProducts[index].name}” 클래스를 삭제할까요?`))return;
+  saleProducts.splice(index,1);
+  showAdminView('products');
+  adminToast('클래스를 삭제했습니다');
 }
 
 function selectedOption(value,current){return value===current?'selected':'';}
