@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>노하우집 · 개발 정책 보기 데모</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--brand:#4f66f5;--brand-dark:#3a4fd6;--brand-soft:#eef1ff;--ink:#101828;--ink-soft:#475467;--muted:#98a2b3;--line:#e4e7ec;--bg:#f7f9fc;--green:#12b76a;--amber:#f79009;--red:#f04438;--shadow:0 16px 40px rgba(16,24,40,.14);--font:'Noto Sans KR',sans-serif}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.5}
+    button,input{font:inherit;color:inherit}
+    button{cursor:pointer}
+    .demo-topbar{position:sticky;top:0;z-index:50;min-height:66px;padding:12px 28px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .demo-brand{display:flex;align-items:center;gap:11px}.demo-brand b{font-size:15px}.demo-brand span{font-size:11px;color:var(--muted)}
+    .policy-toggle{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px 8px 9px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:850;box-shadow:0 4px 14px rgba(16,24,40,.05)}
+    .policy-toggle i{width:29px;height:17px;border-radius:999px;background:#d0d5dd;position:relative;transition:.2s}.policy-toggle i:after{content:"";position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;left:2px;top:2px;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:.2s}
+    body.policy-mode .policy-toggle{border-color:#c7d0ff;background:#f8f9ff;color:var(--brand-dark)}body.policy-mode .policy-toggle i{background:var(--brand)}body.policy-mode .policy-toggle i:after{transform:translateX(12px)}
+    .demo-shell{max-width:1180px;margin:0 auto;padding:32px 26px 80px}
+    .demo-notice{border:1px solid #cfd7ff;background:linear-gradient(135deg,#f8f9ff,#fff);border-radius:16px;padding:17px 20px;margin-bottom:24px;display:flex;justify-content:space-between;gap:24px;align-items:center}
+    .demo-notice b{display:block;font-size:13px;margin-bottom:4px}.demo-notice p{font-size:11px;color:var(--ink-soft);margin:0}.demo-notice code{font-size:10px;color:var(--brand-dark);background:#fff;border:1px solid #dce2ff;border-radius:8px;padding:6px 8px;white-space:nowrap}
+    .editor-head{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;margin-bottom:22px}.editor-head span{font-size:10px;font-weight:900;color:var(--brand);letter-spacing:.1em;text-transform:uppercase}.editor-head h1{font-size:28px;margin:5px 0 7px;letter-spacing:-.04em}.editor-head p{margin:0;color:var(--ink-soft);font-size:12px}.save-btn{border:0;border-radius:11px;background:var(--brand);color:#fff;padding:12px 18px;font-weight:900;white-space:nowrap}
+    .steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:20px}.steps button{border:1px solid transparent;background:#fff;border-radius:11px;padding:10px;text-align:left;display:flex;align-items:center;gap:10px}.steps button.active{border-color:#cbd3ff;background:#f5f7ff}.steps i{width:28px;height:28px;border-radius:9px;background:#eef1f7;color:#667085;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:900}.steps button.active i{background:var(--brand);color:#fff}.steps b,.steps small{display:block}.steps b{font-size:11px}.steps small{font-size:9px;color:var(--muted);margin-top:2px}
+    .panel{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;margin-bottom:18px}
+    .section-head{display:flex;align-items:flex-start;gap:13px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px}.section-head>i{width:35px;height:35px;border-radius:11px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;font-weight:900;flex:0 0 auto}.section-head>div{min-width:0}.section-head h2{font-size:18px;margin:0 0 4px}.section-head p{font-size:10.5px;color:var(--muted);margin:0}.requirement-chip{margin-left:auto;border:1px solid #f0d49b;background:#fff7e8;color:#8a5a00;border-radius:999px;padding:5px 8px;font-size:9px;font-weight:900;white-space:nowrap}
+    .choice-list{display:grid;gap:10px}.choice{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px}.choice.selected{border-color:#b7c2ff;background:#fbfcff;box-shadow:0 0 0 3px #eef1ff}.choice input{width:18px;height:18px;accent-color:var(--brand)}.choice b,.choice small{display:block}.choice b{font-size:12px}.choice small{font-size:10px;color:var(--muted);margin-top:3px}.priority{margin-left:auto;display:flex;align-items:center;gap:7px;color:var(--ink-soft);font-size:9px}.priority select{border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px;font-size:10px}
+    .condition-none{border:1px solid #b7c2ff;background:#f7f8ff;border-radius:14px;padding:15px;display:flex;gap:12px;align-items:center}.condition-none input,.condition-class input{width:18px;height:18px;accent-color:var(--brand)}.condition-none b,.condition-none small,.condition-class b,.condition-class small{display:block}.condition-none b,.condition-class b{font-size:12px}.condition-none small,.condition-class small{font-size:9.5px;color:var(--muted);margin-top:3px}.condition-none em{font-style:normal;margin-left:auto;color:var(--brand);font-size:9px;font-weight:900}.divider{display:flex;align-items:center;gap:10px;margin:13px 0;color:var(--muted);font-size:9px}.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}.condition-classes{display:grid;grid-template-columns:1fr 1fr;gap:9px}.condition-class{border:1px solid var(--line);border-radius:13px;padding:14px;display:flex;gap:11px;align-items:center}
+    .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:block;font-size:10px;font-weight:850}.field em{font-style:normal;color:var(--red)}.field small{display:block;color:var(--muted);font-size:9px;font-weight:500;margin-top:5px}.money{display:flex;align-items:center;border:1px solid var(--line);border-radius:11px;margin-top:7px;overflow:hidden}.money input{width:100%;border:0;outline:0;padding:11px 13px;font-size:12px;font-weight:800}.money span{padding-right:12px;color:var(--muted);font-size:10px}.price-preview{margin-top:13px;border-radius:13px;background:#f8fafc;padding:13px 15px;display:flex;align-items:center;justify-content:space-between}.price-preview span{font-size:10px;color:var(--ink-soft)}.price-preview strong{font-size:20px}.price-preview em{font-style:normal;font-size:9px;color:var(--green);font-weight:900}
+    .policy-marker{display:none;position:absolute;right:14px;top:14px;width:27px;height:27px;border:1px solid #aebaff;border-radius:50%;background:#fff;color:var(--brand);align-items:center;justify-content:center;font-size:10px;font-weight:950;box-shadow:0 5px 14px rgba(79,102,245,.18);z-index:5}.policy-marker:after{content:"정책";position:absolute;right:32px;white-space:nowrap;background:var(--brand);color:#fff;border-radius:999px;padding:4px 7px;font-size:8px;opacity:0;transform:translateX(4px);pointer-events:none;transition:.15s}.policy-marker:hover:after,.policy-marker:focus-visible:after{opacity:1;transform:none}.policy-marker:focus-visible{outline:3px solid #dce2ff;outline-offset:2px}
+    body.policy-mode .policy-marker{display:flex}.policy-target{transition:.18s}body.policy-mode .policy-target{box-shadow:0 0 0 1px rgba(79,102,245,.12)}body.policy-mode .policy-target:hover{box-shadow:0 0 0 2px rgba(79,102,245,.26)}
+    .policy-popover{position:fixed;z-index:100;width:min(360px,calc(100vw - 28px));border:1px solid #c7d0ff;background:#fff;border-radius:15px;box-shadow:var(--shadow);padding:15px;display:none}.policy-popover.open{display:block}.policy-popover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}.policy-popover-head span{display:inline-flex;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark);padding:4px 7px;font-size:8px;font-weight:900}.policy-popover h3{font-size:14px;margin:5px 0 0}.policy-popover button{border:0;background:none;color:var(--muted);font-size:18px;line-height:1}.policy-popover p{font-size:10.5px;color:var(--ink-soft);margin:0 0 9px;line-height:1.6}.policy-popover ul{margin:0;padding-left:17px;font-size:10px;color:var(--ink);line-height:1.8}.policy-spec{border-top:1px solid var(--line);margin-top:11px;padding-top:9px;font-size:9px;color:var(--muted);font-weight:800}.policy-hint{position:fixed;right:18px;bottom:18px;background:#101828;color:#fff;border-radius:12px;padding:10px 13px;font-size:9px;box-shadow:var(--shadow);display:none;z-index:40}body.policy-mode .policy-hint{display:block}
+    @media(max-width:760px){.demo-topbar{padding:10px 14px}.demo-brand span{display:none}.demo-shell{padding:22px 14px 70px}.demo-notice{display:block}.demo-notice code{display:inline-block;margin-top:10px}.editor-head{display:block}.save-btn{margin-top:14px;width:100%}.steps{grid-template-columns:repeat(2,1fr)}.panel{padding:20px 17px}.section-head{padding-right:26px}.condition-classes,.price-grid{grid-template-columns:1fr}.priority span{display:none}.policy-popover{left:14px!important;right:14px!important;bottom:14px!important;top:auto!important;width:auto}.policy-hint{display:none!important}}
+  </style>
+</head>
+<body>
+  <header class="demo-topbar">
+    <div class="demo-brand"><b>노하우집 정책 표시 데모</b><span>원본과 분리된 개발자 인계용 예시</span></div>
+    <button class="policy-toggle" id="policyToggle" type="button" aria-pressed="false"><i aria-hidden="true"></i><span>정책 보기</span></button>
+  </header>
+
+  <main class="demo-shell">
+    <aside class="demo-notice">
+      <div><b>이 페이지는 별도 데모입니다.</b><p>정책 보기를 껐을 때는 실제 화면처럼 보이고, 켜면 정책이 있는 영역에만 마커가 나타납니다.</p></div>
+      <code>?policy=1 또는 Alt + P</code>
+    </aside>
+
+    <div class="editor-head">
+      <div><span>Class setup example</span><h1>새 클래스 등록</h1><p>실제 UI를 방해하지 않으면서 개발 정책을 화면 위치와 함께 확인합니다.</p></div>
+      <button class="save-btn" type="button">클래스 등록</button>
+    </div>
+
+    <nav class="steps" aria-label="클래스 등록 단계">
+      <button type="button"><i>1</i><span><b>클래스 정보</b><small>전체 필수</small></span></button>
+      <button type="button" class="active"><i>2</i><span><b>강의 콘텐츠</b><small>1개 이상 필수</small></span></button>
+      <button type="button"><i>3</i><span><b>수강 조건</b><small>1개 이상 필수</small></span></button>
+      <button type="button"><i>4</i><span><b>기간·가격</b><small>할인 가격만 선택</small></span></button>
+    </nav>
+
+    <section class="panel policy-target" data-policy="class.content-link">
+      <div class="section-head"><i>2</i><div><h2>강의 콘텐츠 연결</h2><p>클래스에서 제공할 강의 콘텐츠를 선택하고 표시 순서를 정합니다.</p></div><span class="requirement-chip">1개 이상 필수</span></div>
+      <div class="choice-list">
+        <label class="choice selected"><input type="checkbox" checked><span><b>경매 낙찰 기초반 커리큘럼</b><small>영상 4강 · 자료 3개 · 2개 클래스에서 사용</small></span><span class="priority"><span>표시 순서</span><select><option>1순위</option><option>2순위</option></select></span></label>
+        <label class="choice selected"><input type="checkbox" checked><span><b>권리분석 실전반 커리큘럼</b><small>영상 4강 · 자료 2개 · 2개 클래스에서 사용</small></span><span class="priority"><span>표시 순서</span><select><option>2순위</option><option>1순위</option></select></span></label>
+        <label class="choice"><input type="checkbox"><span><b>현장 임장 마스터 커리큘럼</b><small>영상 4강 · 자료 2개 · 1개 클래스에서 사용</small></span></label>
+      </div>
+    </section>
+
+    <section class="panel policy-target" data-policy="class.requirement">
+      <div class="section-head"><i>3</i><div><h2>수강 조건</h2><p>신청 가능한 수강생의 선수 클래스 이력을 설정합니다.</p></div><span class="requirement-chip">1개 이상 필수</span></div>
+      <label class="condition-none"><input type="checkbox" checked><span><b>수강 조건 없음</b><small>선수 클래스 없이 누구나 바로 신청할 수 있습니다.</small></span><em>기본 옵션</em></label>
+      <div class="divider">또는 선수 클래스 선택</div>
+      <div class="condition-classes">
+        <label class="condition-class"><input type="checkbox"><span><b>경매 낙찰 기초반</b><small>이 클래스 이력이 있는 수강생만 신청</small></span></label>
+        <label class="condition-class"><input type="checkbox"><span><b>권리분석 실전반</b><small>이 클래스 이력이 있는 수강생만 신청</small></span></label>
+      </div>
+    </section>
+
+    <section class="panel policy-target" data-policy="class.price">
+      <div class="section-head"><i>4</i><div><h2>가격 설정</h2><p>판매 가격과 선택 할인 가격을 입력합니다.</p></div></div>
+      <div class="price-grid">
+        <label class="field">판매 가격 <em>*</em><span class="money"><input type="number" value="390000"><span>원</span></span><small>할인 전 기준 가격 · 필수</small></label>
+        <label class="field">할인 가격 <span class="money"><input type="number" value="290000"><span>원</span></span><small>판매 가격보다 낮은 경우에만 적용 · 선택</small></label>
+      </div>
+      <div class="price-preview"><span>최종 결제 금액</span><strong>₩290,000</strong><em>26% 할인</em></div>
+    </section>
+  </main>
+
+  <div class="policy-popover" id="policyPopover" role="dialog" aria-live="polite">
+    <div class="policy-popover-head"><div><span id="policyType"></span><h3 id="policyTitle"></h3></div><button type="button" id="policyClose" aria-label="정책 설명 닫기">×</button></div>
+    <p id="policySummary"></p>
+    <ul id="policyRules"></ul>
+    <div class="policy-spec" id="policySpec"></div>
+  </div>
+  <div class="policy-hint">정책 마커에 마우스를 올리거나 클릭해 보세요 · Alt + P로 종료</div>
+
+  <script>
+    "use strict";
+
+    const POLICIES={
+      "class.content-link":{
+        type:"필수 · 데이터 관계",
+        title:"강의 콘텐츠 연결 정책",
+        summary:"클래스를 등록하려면 강의 콘텐츠를 1개 이상 연결해야 합니다.",
+        rules:["한 클래스에 여러 콘텐츠를 연결할 수 있습니다.","같은 콘텐츠를 여러 클래스에서 재사용할 수 있습니다.","선택한 우선순서대로 수강생 화면에 표시합니다.","결제 이력이 생긴 뒤 연결 구성을 바꾸려면 새 클래스를 만듭니다."],
+        spec:"PRODUCT_SPEC §6.4 · 2단계 / §14.3"
+      },
+      "class.requirement":{
+        type:"필수 · 상호배타",
+        title:"수강 조건 선택 정책",
+        summary:"수강 조건은 1개 이상 필요하며 기본값은 수강 조건 없음입니다.",
+        rules:["수강 조건 없음과 선수 클래스는 동시에 선택할 수 없습니다.","선수 클래스는 여러 개 선택할 수 있습니다.","선택 조건 중 하나 이상의 결제 또는 수강 완료 이력이 있으면 신청할 수 있습니다.","조건 미충족 시 상세는 볼 수 있지만 결제는 차단합니다."],
+        spec:"PRODUCT_SPEC §6.4 · 3단계 / §14.4"
+      },
+      "class.price":{
+        type:"필수 · 검증",
+        title:"판매·할인 가격 정책",
+        summary:"판매 가격은 필수이고 할인 가격만 선택 사항입니다.",
+        rules:["결제 방식은 하나로 고정되어 선택 필드를 제공하지 않습니다.","할인 가격은 판매 가격보다 낮아야 합니다.","할인 가격이 없으면 판매 가격으로 결제합니다.","입력 즉시 최종 결제 금액과 할인율을 계산해 표시합니다."],
+        spec:"PRODUCT_SPEC §6.4 · 4단계 / §10"
+      }
+    };
+
+    const body=document.body;
+    const toggle=document.getElementById("policyToggle");
+    const popover=document.getElementById("policyPopover");
+    let pinned=false;
+
+    document.querySelectorAll("[data-policy]").forEach(target=>{
+      const marker=document.createElement("button");
+      marker.type="button";
+      marker.className="policy-marker";
+      marker.textContent="P";
+      marker.setAttribute("aria-label",`${POLICIES[target.dataset.policy].title} 보기`);
+      marker.addEventListener("mouseenter",()=>{if(!pinned)openPolicy(marker,target.dataset.policy);});
+      marker.addEventListener("mouseleave",()=>{if(!pinned)closePolicy();});
+      marker.addEventListener("focus",()=>{if(!pinned)openPolicy(marker,target.dataset.policy);});
+      marker.addEventListener("blur",()=>{if(!pinned)closePolicy();});
+      marker.addEventListener("click",event=>{event.stopPropagation();pinned=true;openPolicy(marker,target.dataset.policy);});
+      target.appendChild(marker);
+    });
+
+    function setPolicyMode(enabled){
+      body.classList.toggle("policy-mode",enabled);
+      toggle.setAttribute("aria-pressed",String(enabled));
+      if(!enabled){pinned=false;closePolicy();}
+      const url=new URL(location.href);
+      enabled?url.searchParams.set("policy","1"):url.searchParams.delete("policy");
+      history.replaceState(null,"",url);
+    }
+
+    function openPolicy(anchor,key){
+      const policy=POLICIES[key];
+      document.getElementById("policyType").textContent=policy.type;
+      document.getElementById("policyTitle").textContent=policy.title;
+      document.getElementById("policySummary").textContent=policy.summary;
+      document.getElementById("policyRules").innerHTML=policy.rules.map(rule=>`<li>${rule}</li>`).join("");
+      document.getElementById("policySpec").textContent=policy.spec;
+      popover.classList.add("open");
+      const rect=anchor.getBoundingClientRect();
+      const width=Math.min(360,innerWidth-28);
+      const left=Math.max(14,Math.min(innerWidth-width-14,rect.right-width));
+      const estimatedHeight=290;
+      const top=rect.bottom+9+estimatedHeight>innerHeight?Math.max(12,rect.top-estimatedHeight-9):rect.bottom+9;
+      popover.style.left=`${left}px`;
+      popover.style.top=`${top}px`;
+    }
+
+    function closePolicy(){popover.classList.remove("open");}
+
+    toggle.addEventListener("click",()=>setPolicyMode(!body.classList.contains("policy-mode")));
+    document.getElementById("policyClose").addEventListener("click",()=>{pinned=false;closePolicy();});
+    document.addEventListener("click",event=>{if(pinned&&!popover.contains(event.target)){pinned=false;closePolicy();}});
+    document.addEventListener("keydown",event=>{
+      if(event.altKey&&event.key.toLowerCase()==="p"){event.preventDefault();setPolicyMode(!body.classList.contains("policy-mode"));}
+      if(event.key==="Escape"){pinned=false;closePolicy();}
+    });
+    setPolicyMode(new URLSearchParams(location.search).get("policy")==="1");
+  </script>
+</body>
+</html>

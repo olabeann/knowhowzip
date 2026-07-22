@@ -10,6 +10,7 @@
     @media(max-width:1000px){.shell{grid-template-columns:1fr}.side{position:static;height:auto}.nav{grid-template-columns:repeat(4,1fr)}.links{display:none}.metrics{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.detail-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:650px){.side{padding:20px 14px}.nav{grid-template-columns:repeat(2,1fr)}.main{padding:22px 15px}.top{padding:0 18px}.head{display:block}.head .btn{margin-top:16px;width:100%}.metrics,.cards,.detail-grid{grid-template-columns:1fr}.head h1{font-size:29px}}
   </style>
+  <link rel="stylesheet" href="./css/policy-guide.css">
 </head>
 <body>
 <div class="shell">
@@ -51,5 +52,6 @@ const renderers={dashboard,creators,classes:()=>listPage('classes',['강의','�
 function show(page){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));document.querySelector('#main').innerHTML=renderers[page]();history.replaceState(null,'','#'+page)}
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));const initial=location.hash.slice(1);if(initial==='creator-detail'){show('creators');creatorDetail('애매모홈')}else{show(renderers[initial]?initial:'dashboard')}
 </script>
+<script src="./js/policy-guide.js"></script>
 </body>
 </html>
