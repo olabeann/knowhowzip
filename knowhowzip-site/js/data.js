@@ -52,6 +52,23 @@ const creators=[
    ]},
 ];
 
+/* 강의 콘텐츠(학습 자산)와 클래스(노출·판매 단위)를 분리합니다.
+   contentId 참조를 사용하므로 하나의 콘텐츠를 여러 클래스에서 재사용할 수 있습니다. */
+creators.forEach(creator=>{
+  creator.lectureContents=creator.products
+    .filter(item=>!item.includedProductIds)
+    .map(item=>({
+      id:`content-${item.id}`,
+      title:item.title.split(' · ')[0],
+      description:item.intro,
+      content:item.content
+    }));
+  creator.products.forEach(item=>{
+    const sourceId=item.includedProductIds?.[0]||item.id;
+    item.contentId=`content-${sourceId}`;
+  });
+});
+
 /* indexes */
 const productMap={},creatorOf={};
 creators.forEach(c=>c.products.forEach(p=>{productMap[p.id]=p;creatorOf[p.id]=c;}));
