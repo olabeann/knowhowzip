@@ -241,12 +241,14 @@ tbody tr:last-child td{border-bottom:0}
 .benefit-options span{display:block;border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-size:13px;font-weight:750;color:var(--ink-soft);background:#fff}
 .benefit-options input:checked+span{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
 .faq-editor-block{padding:22px;border:1px solid var(--line);border-radius:14px;background:#fafbff;margin-bottom:22px}
-.faq-editor-row{display:grid;grid-template-columns:1fr 1.5fr;gap:12px;margin:16px 0 12px}
+.faq-editor-row{display:grid;grid-template-columns:32px minmax(0,1fr) minmax(0,1.25fr) 32px;gap:10px;align-items:start;margin:16px 0 12px;padding:12px;background:#f7f9fd;border:1px solid var(--line);border-radius:12px}
+.faq-editor-row>em{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--brand-soft);color:var(--brand);font-size:10px;font-weight:900}
+.faq-editor-row>.remove-row{margin-top:4px}
 .faq-editor-row textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:10px;padding:12px 13px;font:inherit;line-height:1.5;background:#fff;outline:none;resize:vertical}
 .faq-editor-row .faq-question{resize:none}
 .faq-editor-row textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(76,92,255,.08)}
 .policy-fields{margin-bottom:22px}
-@media(max-width:760px){.format-options{grid-template-columns:1fr}.faq-editor-row{grid-template-columns:1fr}}
+@media(max-width:760px){.format-options{grid-template-columns:1fr}.faq-editor-row{grid-template-columns:28px minmax(0,1fr) 28px}.faq-editor-row textarea{grid-column:2}.faq-editor-row>.remove-row{grid-column:3;grid-row:1}}
 
 
 /* Full-width class editor flow */
