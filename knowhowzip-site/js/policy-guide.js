@@ -85,7 +85,7 @@
       dock=document.createElement("aside");
       dock.className="policy-guide-dock";
       dock.setAttribute("aria-label","현재 화면 개발 정책");
-      dock.innerHTML='<div class="policy-guide-dock-head"><i>P</i><div><b>개발 정책 보기</b><small>현재 화면의 기능·검증 기준</small></div><button class="policy-guide-dock-close" type="button">종료</button></div><div class="policy-guide-list"></div><div class="policy-guide-shortcut">마커 Hover/Focus · 클릭 고정 · Alt + P 종료</div>';
+      dock.innerHTML='<div class="policy-guide-dock-head"><i>P</i><div><b>개발 정책 보기</b><small>현재 화면의 기능·검증 기준</small></div><button class="policy-guide-dock-close" type="button">종료</button></div><div class="policy-guide-list"></div><div class="policy-guide-shortcut">마커 Hover/Focus · 클릭 고정 · ⌘ + P 종료</div>';
       dock.querySelector(".policy-guide-dock-close").addEventListener("click",()=>setMode(false));
       document.body.appendChild(dock);
     }
@@ -241,7 +241,7 @@
     closePopover();
   });
   document.addEventListener("keydown",event=>{
-    if(event.altKey&&event.key.toLowerCase()==="p"){
+    if(event.metaKey&&event.key.toLowerCase()==="p"){
       event.preventDefault();
       setMode(!enabled);
     }
