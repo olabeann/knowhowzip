@@ -403,11 +403,6 @@ main{min-height:50vh}
 .learning-title{flex:1;min-width:0}
 .learning-title em{display:inline-flex;background:var(--brand-soft);color:var(--brand-dk);font-size:11px;font-style:normal;font-weight:800;padding:3px 9px;border-radius:6px}
 .learning-title h3{font-size:17px;font-weight:850;margin:5px 0 8px;letter-spacing:-.3px}
-.learning-status-count{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.learning-status-count span{font-size:12px;font-weight:800;color:var(--ink-soft);background:var(--line2);padding:4px 9px;border-radius:7px}
-.learning-status-count span.done{color:var(--ok);background:#E7F8EF}
-.learning-status-count span.in-progress{color:var(--brand);background:var(--brand-soft)}
-.learning-status-count span.before{color:var(--ink-soft);background:var(--line2)}
 .learning-title>small{display:block;color:var(--ink-mute);font-size:12px;font-weight:650;margin-top:3px}
 .learning-continue{margin-left:auto;white-space:nowrap}
 .learning-card.ended{background:#FAFBFC}

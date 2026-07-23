@@ -442,7 +442,7 @@ function renderMy(){
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),lessonStates=productLessonStates(p.id,videos.length),beforeCount=lessonStates.filter(status=>status==='before').length,inProgressCount=lessonStates.filter(status=>status==='in-progress').length,completedCount=lessonStates.filter(status=>status==='completed').length;if(endedCourses.has(p.id))return `
+      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),lessonStates=productLessonStates(p.id,videos.length);if(endedCourses.has(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
@@ -453,7 +453,7 @@ function renderMy(){
         <article class="learning-card">
           <div class="learning-summary">
             <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><div class="learning-status-count"><span class="before">수강 전 ${beforeCount}강</span><span class="in-progress">▶ 수강 중 ${inProgressCount}강</span><span class="done">✓ 수강 완료 ${completedCount}강</span></div><small>전체 ${videos.length}강</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><small>전체 ${videos.length}강</small></div>
             <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
           </div>
           <div class="learning-details">
