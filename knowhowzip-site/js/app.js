@@ -294,7 +294,10 @@ window.addEventListener('resize',()=>requestAnimationFrame(updateDetailBuycardPo
 window.addEventListener('scroll',()=>requestAnimationFrame(updateDetailBuycardPosition),{passive:true});
 
 /* ---------- MYPAGE (grouped by creator) ---------- */
-const learningProgress={'mmoh-basic':50,'mmoh-right':25};
+const lessonLearningStates={
+  'mmoh-basic':['completed','completed','in-progress','before'],
+  'mmoh-right':['completed','before','before','before']
+};
 const endedCourses=new Set();
 const lessonDurations=['88분','92분','76분','81분','68분','74분'];
 function renderZoomSchedules(productId){
@@ -303,15 +306,39 @@ function renderZoomSchedules(productId){
   return operationScheduleRows(product,true);
 }
 function openZoomSchedule(url,title){if(url)window.open(url,'_blank','noopener,noreferrer');else toast(`${title} 줌 링크는 추후 안내됩니다`);}
-function productProgress(id){return learningProgress[id]??20;}
+function productLessonStates(productId,count){
+  const saved=lessonLearningStates[productId]||[];
+  return Array.from({length:count},(_,index)=>saved[index]||'before');
+}
+function lessonStateMeta(status){
+  if(status==='completed')return {label:'수강 완료',icon:'✓',className:'done'};
+  if(status==='in-progress')return {label:'수강 중',icon:'▶',className:'in-progress'};
+  return {label:'수강 전',icon:'▶',className:'before'};
+}
+function setLessonLearningState(productId,index,status){
+  const videos=productVideoTitles(productMap[productId]);
+  const states=productLessonStates(productId,videos.length);
+  states[index]=status;
+  lessonLearningStates[productId]=states;
+}
 function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
 function toggleLearningAcc(id){document.getElementById(id)?.classList.toggle('open');}
 function emptyLogo(){return '<img class="my-empty-logo" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="노하우집">';}
 function playLesson(productId,index,title){
   openLessonPlayer(productId,index);
 }
+function updateLessonPlaybackProgress(productId,index,currentTime,duration){
+  if(!Number.isFinite(currentTime)||!Number.isFinite(duration)||duration<=0)return;
+  const current=productLessonStates(productId,productVideoTitles(productMap[productId]).length)[index];
+  if(current==='completed')return;
+  if(currentTime>0&&currentTime<duration)setLessonLearningState(productId,index,'in-progress');
+  if(currentTime>=duration-1)setLessonLearningState(productId,index,'completed');
+}
 function continueLearning(productId,index){
-  const videos=productVideoTitles(productMap[productId]),next=Math.min(index,videos.length-1);
+  const videos=productVideoTitles(productMap[productId]);
+  const states=productLessonStates(productId,videos.length);
+  const inProgress=states.indexOf('in-progress'),before=states.indexOf('before');
+  const next=inProgress>=0?inProgress:before>=0?before:Math.min(index,videos.length-1);
   playLesson(productId,next,videos[next]);
 }
 function openLessonPlayer(productId,index=0){
@@ -325,6 +352,8 @@ function openLessonPlayer(productId,index=0){
   if(!state.purchased.has(productId)){
     return showAccessDenied('purchase',productId);
   }
+  const currentStatus=productLessonStates(productId,videos.length)[next];
+  if(currentStatus!=='completed')setLessonLearningState(productId,next,'in-progress');
   state.activeLesson={productId,index:next};
   renderLessonPlayer(product,creator,next);
   show('player');
@@ -411,7 +440,7 @@ function renderMy(){
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const progress=productProgress(p.id),videos=productVideoTitles(p),files=productFileTitles(p),doneCount=Math.floor(videos.length*progress/100);if(endedCourses.has(p.id))return `
+      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),lessonStates=productLessonStates(p.id,videos.length),beforeCount=lessonStates.filter(status=>status==='before').length,inProgressCount=lessonStates.filter(status=>status==='in-progress').length,completedCount=lessonStates.filter(status=>status==='completed').length;if(endedCourses.has(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
@@ -422,13 +451,13 @@ function renderMy(){
         <article class="learning-card">
           <div class="learning-summary">
             <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><div class="learning-status-count"><span class="done">✓ 시청 완료 ${doneCount}강</span><span>미완료 ${videos.length-doneCount}강</span></div><small>전체 ${videos.length}강</small></div>
-            <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',${doneCount})">이어서 학습</button>
+            <div class="learning-title"><h3>${p.title}</h3><div class="learning-status-count"><span class="before">수강 전 ${beforeCount}강</span><span class="in-progress">▶ 수강 중 ${inProgressCount}강</span><span class="done">✓ 수강 완료 ${completedCount}강</span></div><small>전체 ${videos.length}강</small></div>
+            <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
           </div>
           <div class="learning-details">
             <div class="learning-acc open" id="learn-${p.id}-video">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-video')"><span><i class="video">▶</i>콘텐츠 · 영상 <small>${videos.length}강</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><div class="learning-player" id="player-${p.id}"><div class="learning-player-screen"><span>▶</span></div><div><b class="learning-player-title">강의를 선택해 주세요</b><small class="learning-player-meta">카드 안에서 바로 재생됩니다</small></div></div>${videos.map((video,idx)=>{const done=idx<doneCount;return `<button class="lesson-row" data-product="${p.id}" data-lesson="${idx}" onclick="playLesson('${p.id}',${idx},'${video}')"><span class="lesson-state ${done?'done':''}">${done?'✓':'▶'}</span><span class="lesson-title">${video}<small>${done?'시청 완료':'미완료 · 재생하기'}</small></span><span class="lesson-duration">${lessonDurations[idx%lessonDurations.length]}</span><strong>${done?'완료':'미완료'}</strong></button>`;}).join('')}</div></div>
+              <div class="learning-acc-body"><div class="learning-acc-inner"><div class="learning-player" id="player-${p.id}"><div class="learning-player-screen"><span>▶</span></div><div><b class="learning-player-title">강의를 선택해 주세요</b><small class="learning-player-meta">카드 안에서 바로 재생됩니다</small></div></div>${videos.map((video,idx)=>{const status=lessonStates[idx],meta=lessonStateMeta(status);return `<button class="lesson-row ${meta.className}" data-product="${p.id}" data-lesson="${idx}" onclick="playLesson('${p.id}',${idx},'${video}')"><span class="lesson-state ${meta.className}">${meta.icon}</span><span class="lesson-title">${video}</span><span class="lesson-duration">${lessonDurations[idx%lessonDurations.length]}</span><strong>${meta.label}</strong></button>`;}).join('')}</div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-files">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-files')"><span><i class="file">▤</i>콘텐츠 · 자료 <small>${files.length}개</small></span><b>＋</b></button>
