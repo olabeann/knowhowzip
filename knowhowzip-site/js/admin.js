@@ -412,6 +412,7 @@ const saleProducts=publicProducts.map(product=>({
   periodDays:'',
   accessMode:'fixed',
   courses:product.includedProductIds?product.includedProductIds.map(id=>classShortTitle(productMap[id]?.title||id)):[classShortTitle(product.title)],
+  tags:[...(product.tags||[])],
   extraAccess:[],
   status:product.id==='mmoh-field'||product.isPublic===false?'비공개':'공개',
   paymentCount:product.cohort?.enrolled||0,
@@ -429,7 +430,7 @@ function duplicateManagedClass(classId){
   const index=saleProducts.findIndex(item=>item.id===classId);
   if(index<0)return;
   const source=saleProducts[index];
-  saleProducts.splice(index+1,0,{...source,contentIds:[...(source.contentIds||[])],id:`${source.id}-copy-${Date.now()}`,name:`${source.name} 복제본`,status:'비공개',paymentCount:0,operation:{...source.operation}});
+  saleProducts.splice(index+1,0,{...source,contentIds:[...(source.contentIds||[])],tags:[...(source.tags||[])],id:`${source.id}-copy-${Date.now()}`,name:`${source.name} 복제본`,status:'비공개',paymentCount:0,operation:{...source.operation}});
   showAdminView('products');
   adminToast('클래스 복제본을 비공개 상태로 추가했습니다');
 }
@@ -485,6 +486,52 @@ function toggleRequirementChoice(input){
   if(!none)return;
   if(input===none){if(input.checked)requirements.forEach(item=>{item.checked=false;});else if(!requirements.some(item=>item.checked))input.checked=true;return;}
   if(input.checked)none.checked=false;else if(!requirements.some(item=>item.checked))none.checked=true;
+}
+function escapeAdminText(value=''){
+  return String(value).replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+}
+function classKeywordTagMarkup(tag){
+  return `<span class="class-keyword-tag">${escapeAdminText(tag)}<button type="button" onclick="removeClassKeywordTag(this)" aria-label="${escapeAdminText(tag)} 태그 삭제">×</button></span>`;
+}
+function syncClassKeywordValue(){
+  const hidden=document.getElementById('classKeywords');
+  if(hidden)hidden.value=[...document.querySelectorAll('#classKeywordTags .class-keyword-tag')].map(tag=>tag.firstChild?.textContent?.trim()).filter(Boolean).join(',');
+}
+function addClassKeywordTag(){
+  const input=document.getElementById('classKeywordInput'),list=document.getElementById('classKeywordTags');
+  if(!input||!list)return;
+  const existing=[...list.querySelectorAll('.class-keyword-tag')].map(tag=>tag.firstChild?.textContent?.trim().toLowerCase());
+  input.value.split(',').map(tag=>tag.trim().replace(/^#/,'')).filter(Boolean).forEach(tag=>{
+    if(existing.includes(tag.toLowerCase()))return;
+    list.insertAdjacentHTML('beforeend',classKeywordTagMarkup(tag));
+    existing.push(tag.toLowerCase());
+  });
+  input.value='';
+  syncClassKeywordValue();
+}
+function handleClassKeywordInput(event){
+  if(event.key==='Enter'||event.key===','){event.preventDefault();addClassKeywordTag();}
+}
+function removeClassKeywordTag(button){
+  button.closest('.class-keyword-tag')?.remove();
+  syncClassKeywordValue();
+}
+function syncClassDescription(editor){
+  const field=document.getElementById('classDescriptionValue');
+  if(field)field.value=editor.innerHTML;
+}
+function formatClassDescription(command,value=''){
+  const editor=document.getElementById('classDescriptionEditor');
+  if(!editor)return;
+  editor.focus();
+  if(command==='createLink'){
+    const link=window.prompt('연결할 URL을 입력해 주세요.');
+    if(!link)return;
+    value=link;
+  }
+  if(command==='insertImage'){adminToast('스마트 에디터의 이미지 업로드 기능이 연결될 영역입니다.');return;}
+  document.execCommand(command,false,value||null);
+  syncClassDescription(editor);
 }
 function productOperationDefaults(product){
   return Object.assign({
@@ -557,7 +604,7 @@ function toggleCourseAccessMode(input){
 }
 function renderProductEditor(mode='create',productId=''){
   const editing=mode==='edit',product=editing?saleProducts.find(item=>item.id===productId):null,locked=!!(product&&product.paymentCount>0),lockAttr=locked?'disabled':'',lockClass=locked?' locked':'';
-  const current=product||{id:'',contentIds:lectureContents[0]?.id?[lectureContents[0].id]:[],requirement:'조건 없음',name:'새 클래스',desc:'수강생에게 클래스의 특징과 학습 목표를 소개해 주세요.',price:290000,originalPrice:390000,discountPrice:290000,period:'2026.07.05 ~ 08.02',periodType:'지정 수강 기간 기준',periodDays:'30',accessMode:'fixed',courses:[],extraAccess:[],status:'준비중',paymentCount:0};
+  const current=product||{id:'',contentIds:lectureContents[0]?.id?[lectureContents[0].id]:[],requirement:'조건 없음',name:'새 클래스',desc:'수강생에게 클래스의 특징과 학습 목표를 소개해 주세요.',price:290000,originalPrice:390000,discountPrice:290000,period:'2026.07.05 ~ 08.02',periodType:'지정 수강 기간 기준',periodDays:'30',accessMode:'fixed',courses:[],tags:[],extraAccess:[],status:'준비중',paymentCount:0};
   const courseDates=productCourseDates(current);
   const currentFaqs=current.faq||[];
   return `<form class="product-editor" data-product-id="${current.id}" onsubmit="if(!validateProductPeriodSettings(this)){event.preventDefault();return false;}saveProductForm(event,'${mode}')">
@@ -566,7 +613,7 @@ function renderProductEditor(mode='create',productId=''){
     ${locked?`<section class="product-lock-notice"><b>결제 이력 ${current.paymentCount}건</b><span>이미 결제가 발생한 클래스라 가격과 기간은 수정할 수 없습니다. 판매 조건을 바꾸려면 새 클래스를 등록하세요.</span></section>`:''}
     <nav class="editor-steps product-editor-steps" aria-label="클래스 등록 단계"><button type="button" class="active" onclick="scrollEditorSection('product-class-info',this)"><i>1</i><span>클래스 정보<small>전체 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-content',this)"><i>2</i><span>강의 콘텐츠<small>1개 이상 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-requirement',this)"><i>3</i><span>수강 조건<small>1개 이상 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-period',this)"><i>4</i><span>기간·가격<small>할인 가격만 선택</small></span></button><button type="button" onclick="scrollEditorSection('product-operation',this)"><i>5</i><span>운영 안내<small>선택</small></span></button><button type="button" onclick="scrollEditorSection('product-faq',this)"><i>6</i><span>FAQ<small>선택</small></span></button><button type="button" onclick="scrollEditorSection('product-refund',this)"><i>7</i><span>플랫폼 정책<small>자동 적용 예정</small></span></button></nav>
     <div class="product-editor-grid"><div class="product-editor-main">
-      <section class="panel product-section editable" id="product-class-info"><div class="product-section-head"><i>1</i><div><h2>클래스 정보</h2><p>수강생이 신청 전에 확인하는 클래스명, 소개와 대표 이미지를 구성합니다.</p></div><em>전체 필수</em></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:linear-gradient(135deg,#DCE3FF,#AFC0FF)">${houseMark(72)}<button type="button" onclick="adminToast('대표 이미지 업로드')">이미지 변경</button></div><div class="editor-cover-guide"><b>대표 이미지 <em>*</em></b><p>필수 항목이며 클래스 목록과 상세 화면에 노출됩니다.</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스명 <em>*</em><input required value="${current.name}" placeholder="예: 경매 낙찰 기초반 14기"></label><label class="wide">한 줄 소개 <em>*</em><textarea required placeholder="수강생에게 클래스의 핵심 가치를 소개해 주세요.">${current.desc}</textarea></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option></select></label><label>난이도 <em>*</em><select required><option>입문</option><option>중급</option><option>심화</option></select></label><label class="wide">상세 소개 <em>*</em><textarea required placeholder="클래스의 진행 방식과 기대 효과를 자세히 적어주세요.">${current.desc}</textarea></label></div></section>
+      <section class="panel product-section editable" id="product-class-info"><div class="product-section-head"><i>1</i><div><h2>클래스 정보</h2><p>수강생이 신청 전에 확인하는 클래스명, 소개와 대표 이미지를 구성합니다.</p></div><em>전체 필수</em></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:linear-gradient(135deg,#DCE3FF,#AFC0FF)">${houseMark(72)}<button type="button" onclick="adminToast('대표 이미지 업로드')">이미지 변경</button></div><div class="editor-cover-guide"><b>대표 이미지 <em>*</em></b><p>필수 항목이며 클래스 목록과 상세 화면에 노출됩니다.</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스명 <em>*</em><input required value="${current.name}" placeholder="예: 경매 낙찰 기초반 14기"></label><label class="wide">한 줄 소개 <em>*</em><textarea required placeholder="수강생에게 클래스의 핵심 가치를 소개해 주세요.">${current.desc}</textarea></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option></select></label><label>난이도 <em>*</em><select required><option>입문</option><option>중급</option><option>심화</option></select></label><div class="wide class-keyword-field"><div class="field-label">키워드 태그 <em>*</em></div><div class="class-keyword-editor"><div class="class-keyword-tags" id="classKeywordTags">${(current.tags||[]).map(classKeywordTagMarkup).join('')}</div><div class="class-keyword-input-row"><input id="classKeywordInput" type="text" placeholder="키워드를 입력하고 Enter를 눌러주세요" onkeydown="handleClassKeywordInput(event)"><button type="button" onclick="addClassKeywordTag()">추가</button></div></div><input type="hidden" id="classKeywords" name="classKeywords" value="${escapeAdminText((current.tags||[]).join(','))}"><small>클래스를 설명하는 검색·노출 키워드를 태그로 등록합니다. 쉼표로 여러 개를 한 번에 추가할 수 있습니다.</small></div><div class="wide class-description-field"><div class="field-label">상세 소개 <em>*</em></div><div class="class-smart-editor"><div class="class-smart-toolbar" role="toolbar" aria-label="상세 소개 서식"><select aria-label="문단 형식" onchange="formatClassDescription('formatBlock',this.value)"><option value="p">본문</option><option value="h2">제목 1</option><option value="h3">제목 2</option></select><span></span><button type="button" onclick="formatClassDescription('bold')" aria-label="굵게"><b>B</b></button><button type="button" onclick="formatClassDescription('italic')" aria-label="기울임"><i>I</i></button><button type="button" onclick="formatClassDescription('underline')" aria-label="밑줄"><u>U</u></button><span></span><button type="button" onclick="formatClassDescription('insertUnorderedList')" aria-label="글머리 기호">• 목록</button><button type="button" onclick="formatClassDescription('insertOrderedList')" aria-label="번호 목록">1. 목록</button><span></span><button type="button" onclick="formatClassDescription('createLink')" aria-label="링크">링크</button><button type="button" onclick="formatClassDescription('insertImage')" aria-label="이미지">이미지</button></div><div class="class-smart-body" id="classDescriptionEditor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="클래스의 진행 방식, 학습 목표와 기대 효과를 자세히 작성해 주세요." oninput="syncClassDescription(this)"><p>${escapeAdminText(current.desc)}</p></div><textarea hidden id="classDescriptionValue" name="classDescription">${escapeAdminText(current.desc)}</textarea><div class="class-smart-footer"><span>스마트 에디터 연동 영역</span><small>텍스트 서식 · 목록 · 링크 · 이미지 업로드</small></div></div></div></div></section>
       <section class="panel product-section${lockClass}" id="product-content"><div class="product-section-head"><i>2</i><div><h2>강의 콘텐츠 연결</h2><p>한 개 이상의 강의 콘텐츠를 선택하세요. 같은 콘텐츠를 여러 클래스에 연결할 수 있고, 한 클래스에도 여러 콘텐츠를 연결할 수 있습니다.</p></div>${locked?'<em>수정 불가</em>':'<em>1개 이상 필수</em>'}</div><div class="included-lecture-list">${classChoiceList(current,lockAttr)}</div></section>
       <section class="panel product-section${lockClass}" id="product-requirement"><div class="product-section-head"><i>3</i><div><h2>수강 조건</h2><p>1개 이상 선택해야 하며 기본값은 수강 조건 없음입니다.</p></div>${locked?'<em>수정 불가</em>':'<em>1개 이상 필수</em>'}</div><div class="condition-class-list">${requirementChoiceList(current,lockAttr)}</div></section>
       <section class="panel product-section${lockClass}" id="product-period"><div class="product-section-head"><i>4</i><div><h2>모집·수강 기간과 가격</h2><p>클래스의 모집 기간, 수강 시작 방식과 실제 결제 가격을 설정합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="period-setting-block"><div class="period-setting-head"><h3>가격 설정</h3><p>할인 가격을 비워두면 판매 가격으로 결제됩니다.</p></div><div class="editor-fields price-setting-fields"><label>판매 가격 <em>*</em><div class="input-suffix"><input required name="originalPrice" type="number" min="0" step="1000" value="${current.originalPrice||current.price}" ${lockAttr} oninput="updateProductPricePreview(this)"><span>원</span></div><small>할인 전 기준 가격</small></label><label>할인 가격 <em class="optional">선택</em><div class="input-suffix"><input name="discountPrice" type="number" min="0" step="1000" value="${current.discountPrice||''}" ${lockAttr} placeholder="할인할 경우 입력" oninput="updateProductPricePreview(this)"><span>원</span></div><small>판매 가격보다 낮게 입력해 주세요.</small></label></div><div class="price-result"><span>최종 결제 금액</span><strong id="finalPricePreview">${won(current.discountPrice||current.originalPrice||current.price)}</strong><em id="discountRatePreview">${discountRate(current.originalPrice||current.price,current.discountPrice)?`${discountRate(current.originalPrice||current.price,current.discountPrice)}% 할인`:'할인 없음'}</em></div></div><div class="period-setting-block"><div class="period-setting-head"><h3>모집 기간</h3><p>수강생이 클래스를 결제할 수 있는 기간입니다.</p></div><div class="editor-fields"><label>모집 시작일<input type="date" value="2026-07-01" ${lockAttr}></label><label>모집 종료일<input type="date" value="2026-07-31" ${lockAttr}></label></div></div><div class="period-setting-block"><div class="period-setting-head"><h3>수강 시작 방식</h3><p>기수제 클래스는 지정 기간, 상시 판매 클래스는 결제 즉시 시작이 적합합니다.</p></div><div class="course-access-mode"><label><input type="radio" name="accessMode" value="fixed" ${current.accessMode!=='immediate'?'checked':''} ${lockAttr} onchange="toggleCourseAccessMode(this)"><span><b>지정 기간 수강</b><small>모든 수강생이 같은 날짜에 시작하고 종료합니다.</small></span></label><label><input type="radio" name="accessMode" value="immediate" ${current.accessMode==='immediate'?'checked':''} ${lockAttr} onchange="toggleCourseAccessMode(this)"><span><b>결제 즉시 수강</b><small>수강생마다 결제한 시점부터 수강이 시작됩니다.</small></span></label></div><div class="editor-fields access-mode-fields${current.accessMode==='immediate'?' is-hidden':''}" data-access-mode="fixed"><label>수강 시작일<input type="date" value="${courseDates.start}" ${lockAttr}></label><label>수강 종료일<input type="date" value="${courseDates.end}" ${lockAttr}></label></div><div class="editor-fields access-mode-fields${current.accessMode==='immediate'?'':' is-hidden'}" data-access-mode="immediate"><label class="wide">수강 가능 기간 <em>*</em><div class="input-suffix"><input type="number" min="1" value="${current.periodDays||30}" ${lockAttr}><span>일</span></div><small>결제일부터 입력한 일수만큼 수강할 수 있습니다.</small></label></div></div></section>
@@ -590,7 +637,54 @@ function validateProductPeriodSettings(form){
   if(recruitmentDates.some(input=>!input.value)||modeValues.some(input=>!input.value)){adminToast('모집 기간과 수강 시작 방식의 필수값을 입력해 주세요');section.scrollIntoView({behavior:'smooth',block:'start'});return false;}
   return true;
 }
-function saveProductForm(event,mode){event.preventDefault();const form=event.currentTarget,selected=[...form.querySelectorAll('input[name="linkedContents[]"]:checked')];if(!selected.length){adminToast('강의 콘텐츠를 1개 이상 선택해 주세요');document.getElementById('product-content')?.scrollIntoView({behavior:'smooth',block:'start'});return;}const product=saleProducts.find(item=>item.id===form.dataset.productId),priceLocked=!!form.elements.originalPrice?.disabled,originalPrice=priceLocked?(product?.originalPrice||product?.price||0):(Number(form.elements.originalPrice?.value)||0),discountPrice=priceLocked?(product?.discountPrice||''):(Number(form.elements.discountPrice?.value)||0);if(discountPrice&&discountPrice>=originalPrice){adminToast('할인 가격은 판매 가격보다 낮게 입력해 주세요');document.getElementById('product-period')?.scrollIntoView({behavior:'smooth',block:'start'});return;}if(product){product.contentIds=selected.map(item=>item.value);product.status=form.elements.visibilityStatus?.value||product.status;const requirements=[...form.querySelectorAll('input[name="requirements[]"]:checked')].map(item=>item.value);product.requirement=form.querySelector('input[name="requirementNone"]:checked')?'조건 없음':requirements.join(' · ');product.originalPrice=originalPrice;product.discountPrice=discountPrice||'';product.price=discountPrice||originalPrice;if(!priceLocked){product.accessMode=form.elements.accessMode?.value||'fixed';product.periodDays=form.querySelector('[data-access-mode="immediate"] input')?.value||'';}}adminToast(mode==='edit'?'클래스 정보를 저장했습니다':'클래스를 등록했습니다');setTimeout(()=>showAdminView('products'),700);}
+function saveProductForm(event,mode){
+  event.preventDefault();
+  const form=event.currentTarget;
+  const selected=[...form.querySelectorAll('input[name="linkedContents[]"]:checked')];
+  const keywordTags=(form.elements.classKeywords?.value||'').split(',').map(tag=>tag.trim()).filter(Boolean);
+  const descriptionHtml=form.elements.classDescription?.value.trim()||'';
+  if(!keywordTags.length){
+    adminToast('키워드 태그를 1개 이상 등록해 주세요');
+    document.getElementById('product-class-info')?.scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  if(!descriptionHtml||!document.getElementById('classDescriptionEditor')?.textContent.trim()){
+    adminToast('상세 소개를 입력해 주세요');
+    document.getElementById('product-class-info')?.scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  if(!selected.length){
+    adminToast('강의 콘텐츠를 1개 이상 선택해 주세요');
+    document.getElementById('product-content')?.scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  const product=saleProducts.find(item=>item.id===form.dataset.productId);
+  const priceLocked=!!form.elements.originalPrice?.disabled;
+  const originalPrice=priceLocked?(product?.originalPrice||product?.price||0):(Number(form.elements.originalPrice?.value)||0);
+  const discountPrice=priceLocked?(product?.discountPrice||''):(Number(form.elements.discountPrice?.value)||0);
+  if(discountPrice&&discountPrice>=originalPrice){
+    adminToast('할인 가격은 판매 가격보다 낮게 입력해 주세요');
+    document.getElementById('product-period')?.scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  if(product){
+    product.contentIds=selected.map(item=>item.value);
+    product.tags=keywordTags;
+    product.descriptionHtml=descriptionHtml;
+    product.status=form.elements.visibilityStatus?.value||product.status;
+    const requirements=[...form.querySelectorAll('input[name="requirements[]"]:checked')].map(item=>item.value);
+    product.requirement=form.querySelector('input[name="requirementNone"]:checked')?'조건 없음':requirements.join(' · ');
+    product.originalPrice=originalPrice;
+    product.discountPrice=discountPrice||'';
+    product.price=discountPrice||originalPrice;
+    if(!priceLocked){
+      product.accessMode=form.elements.accessMode?.value||'fixed';
+      product.periodDays=form.querySelector('[data-access-mode="immediate"] input')?.value||'';
+    }
+  }
+  adminToast(mode==='edit'?'클래스 정보를 저장했습니다':'클래스를 등록했습니다');
+  setTimeout(()=>showAdminView('products'),700);
+}
 
 function closeStudentDetailModal(){
   const modal=document.getElementById('studentDetailModal');
