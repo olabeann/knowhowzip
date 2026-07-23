@@ -131,14 +131,15 @@ function renderClassEditor(mode='create',classId=''){
   const contentName=editing?`${classShortTitle(course.title)} 커리큘럼`:'';
   const curriculum=editing&&course.content?.videos?.length?course.content.videos:[''];
   const materials=editing&&course.content?.files?.length?course.content.files:[];
-  return `<form class="class-editor" onsubmit="saveClassForm(event,'${mode}')">
+  return `<form class="class-editor" data-active-class-step="0" novalidate onsubmit="if(!validateClassEditorForm(this)){event.preventDefault();return false;}saveClassForm(event,'${mode}')">
     <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 강의 콘텐츠</button><div><span>${editing?'Lecture content editing':'New lecture content'}</span><h1>${editing?'강의 콘텐츠 수정':'새 강의 콘텐츠'}</h1><p>영상·자료와 강의 순서를 관리합니다. 이 콘텐츠를 연결한 모든 클래스에서 동일하게 사용됩니다.</p></div><div class="editor-actions"><button type="submit" class="btn primary">강의 콘텐츠 저장</button></div></div>
     <div class="editor-layout">
-      <nav class="editor-steps"><button type="button" class="active" onclick="scrollEditorSection('editor-content-info',this)"><i>1</i><span>기본 정보<small>제목·설명</small></span></button><button type="button" onclick="scrollEditorSection('editor-content',this)"><i>2</i><span>영상·자료<small>순서·업로드</small></span></button></nav>
+      <nav class="editor-steps class-editor-steps" aria-label="강의 콘텐츠 등록 단계"><button type="button" class="active" data-class-step="0" data-step-title="기본 정보" aria-current="step" aria-controls="editor-content-info" onclick="showClassEditorStep(0)"><i>1</i><span>기본 정보<small>제목·설명</small></span></button><button type="button" data-class-step="1" data-step-title="영상·자료" aria-controls="editor-content" onclick="showClassEditorStep(1)"><i>2</i><span>영상·자료<small>순서·업로드</small></span></button></nav>
       <div class="editor-sections">
-        <section class="panel editor-section" id="editor-content-info"><div class="editor-section-head"><i>1</i><div><h2>강의 콘텐츠 정보</h2><p>관리자에서 콘텐츠를 구분할 제목과 설명을 입력합니다.</p></div><span>제목 필수</span></div><div class="editor-fields"><label class="wide">콘텐츠 제목 <em>*</em><input required maxlength="80" value="${contentName}" placeholder="예: 경매 기초 커리큘럼"><small>수강생 판매 화면에는 클래스명이 표시되며, 이 제목은 관리자용입니다. 클래스명은 클래스 관리에서 클래스를 선택하면 확인할 수 있습니다.</small></label><label class="wide">콘텐츠 설명 <em class="optional">선택</em><textarea placeholder="이 커리큘럼의 학습 목표와 구성 특징을 적어주세요.">${editing?(course.intro||''):''}</textarea></label></div></section>
+        <section class="panel editor-section class-step-panel active" id="editor-content-info" data-class-step-panel="0"><div class="editor-section-head"><i>1</i><div><h2>강의 콘텐츠 정보</h2><p>관리자에서 콘텐츠를 구분할 제목과 설명을 입력합니다.</p></div><span>제목 필수</span></div><div class="editor-fields"><label class="wide">콘텐츠 제목 <em>*</em><input required maxlength="80" value="${contentName}" placeholder="예: 경매 기초 커리큘럼"><small>수강생 판매 화면에는 클래스명이 표시되며, 이 제목은 관리자용입니다. 클래스명은 클래스 관리에서 클래스를 선택하면 확인할 수 있습니다.</small></label><label class="wide">콘텐츠 설명 <em class="optional">선택</em><textarea placeholder="이 커리큘럼의 학습 목표와 구성 특징을 적어주세요.">${editing?(course.intro||''):''}</textarea></label></div></section>
 
-        <section class="panel editor-section" id="editor-content"><div class="editor-section-head"><i>2</i><div><h2>영상·자료</h2><p>수강생에게 제공할 영상 순서와 다운로드 자료를 구성합니다.</p></div><span>영상 필수 · 자료 선택</span></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>1개 이상의 영상이 필요합니다. 제목과 설명을 입력하고 영상 파일을 업로드하세요.</p></div><span id="curriculumCount">${curriculum.length}강 · 필수</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>선택 항목입니다. 필요한 경우 자료 제목과 설명을 입력하고 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개 · 선택</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
+        <section class="panel editor-section class-step-panel" id="editor-content" data-class-step-panel="1" hidden><div class="editor-section-head"><i>2</i><div><h2>영상·자료</h2><p>수강생에게 제공할 영상 순서와 다운로드 자료를 구성합니다.</p></div><span>영상 필수 · 자료 선택</span></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>1개 이상의 영상이 필요합니다. 제목과 설명을 입력하고 영상 파일을 업로드하세요.</p></div><span id="curriculumCount">${curriculum.length}강 · 필수</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>선택 항목입니다. 필요한 경우 자료 제목과 설명을 입력하고 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개 · 선택</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
+        <div class="editor-step-actions"><button type="button" class="btn ghost" id="classStepPrevious" onclick="goClassEditorStep(-1)" disabled>← 이전 단계</button><span id="classStepCurrent">1 / 2 · 기본 정보</span><button type="button" class="btn primary" id="classStepNext" onclick="goClassEditorStep(1)">다음 단계 →</button></div>
       </div>
     </div>
     <div class="editor-bottom-bar"><span><b>${editing?contentName:'새 강의 콘텐츠'}</b><small>영상 순서와 자료를 확인한 뒤 저장해 주세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">취소</button><button type="submit" class="btn primary">강의 콘텐츠 저장</button></div></div>
@@ -185,7 +186,32 @@ function addCurriculumRow(){const box=document.getElementById('curriculumRows'),
 function addMaterialRow(){const box=document.getElementById('materialRows'),count=box.children.length+1;box.insertAdjacentHTML('beforeend',materialRow(count));document.getElementById('materialCount').textContent=count+'개 · 선택';}
 function addFaqRow(){const box=document.getElementById('faqRows'),count=box.children.length+1;box.insertAdjacentHTML('beforeend',faqEditorRow(count));document.getElementById('faqCount').textContent=count+'개 · 선택';}
 function removeEditorRow(button,listId,countId,suffix){const list=document.getElementById(listId);if(list.children.length===1&&!['materialRows','faqRows'].includes(listId)){adminToast('최소 1개 항목이 필요합니다');return;}const row=button.closest('.repeat-row');if(listId==='curriculumRows')clearCurriculumVideoPreview(row);row.remove();[...list.children].forEach((item,i)=>item.querySelector('em').textContent=suffix==='강'?`${i+1}강`:i+1);const qualifier=listId==='curriculumRows'?' · 필수':['materialRows','faqRows'].includes(listId)?' · 선택':'';document.getElementById(countId).textContent=list.children.length+suffix+qualifier;}
-function scrollEditorSection(id,button){document.querySelectorAll('.editor-steps button').forEach(b=>b.classList.remove('active'));button.classList.add('active');document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});}
+function showClassEditorStep(index,scrollToTop=false){
+  const form=document.querySelector('.class-editor');
+  if(!form)return;
+  const panels=[...form.querySelectorAll('.class-step-panel')],buttons=[...form.querySelectorAll('.class-editor-steps button[data-class-step]')],nextIndex=Math.max(0,Math.min(Number(index)||0,panels.length-1));
+  panels.forEach((panel,panelIndex)=>{const active=panelIndex===nextIndex;panel.hidden=!active;panel.classList.toggle('active',active);});
+  buttons.forEach((button,buttonIndex)=>{const active=buttonIndex===nextIndex;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');});
+  form.dataset.activeClassStep=String(nextIndex);
+  const current=form.querySelector('#classStepCurrent'),previous=form.querySelector('#classStepPrevious'),next=form.querySelector('#classStepNext');
+  if(current)current.textContent=`${nextIndex+1} / ${panels.length} · ${buttons[nextIndex]?.dataset.stepTitle||''}`;
+  if(previous)previous.disabled=nextIndex===0;
+  if(next){next.disabled=nextIndex===panels.length-1;next.textContent=nextIndex===panels.length-1?'마지막 단계':'다음 단계 →';}
+  if(scrollToTop)form.querySelector('.class-editor-steps')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function goClassEditorStep(offset){
+  const form=document.querySelector('.class-editor');
+  if(form)showClassEditorStep((Number(form.dataset.activeClassStep)||0)+offset,true);
+}
+function validateClassEditorForm(form){
+  const invalid=[...form.querySelectorAll(':invalid')].find(field=>!field.disabled);
+  if(!invalid)return true;
+  const panels=[...form.querySelectorAll('.class-step-panel')],panel=invalid.closest('.class-step-panel');
+  showClassEditorStep(Math.max(0,panels.indexOf(panel)),true);
+  adminToast('필수 입력 항목을 확인해 주세요');
+  requestAnimationFrame(()=>{invalid.focus();invalid.reportValidity();});
+  return false;
+}
 
 let activeEditorSession=null;
 let pendingUnsavedNavigation=null;
@@ -755,7 +781,7 @@ function renderProductEditor(mode='create',productId=''){
       ${productOperationSection(current)}
       <section class="panel product-section product-step-panel" id="product-faq" data-product-step-panel="5" hidden><div class="product-section-head"><i>6</i><div><h2>FAQ</h2><p>필요한 경우 클래스 신청 전에 자주 묻는 질문과 답변을 등록합니다.</p></div><em>선택</em></div><div class="faq-editor-block"><div class="content-editor-title"><div><h3>클래스 FAQ</h3></div><span id="faqCount">${currentFaqs.length}개 · 선택</span></div><div class="repeat-list" id="faqRows">${currentFaqs.map((faq,index)=>faqEditorRow(index+1,faq)).join('')}</div><button type="button" class="add-row-btn" onclick="addFaqRow()">＋ FAQ 추가</button></div></section>
       <section class="panel product-section product-step-panel platform-policy-section" id="product-refund" data-product-step-panel="6" hidden><div class="product-section-head"><i>7</i><div><h2>환불 규정</h2></div></div>${refundPolicyMarkup()}</section>
-      <div class="product-step-actions"><button type="button" class="btn ghost" id="productStepPrevious" onclick="goProductEditorStep(-1)" disabled>← 이전 단계</button><span id="productStepCurrent">1 / 7 · 클래스 정보</span><button type="button" class="btn primary" id="productStepNext" onclick="goProductEditorStep(1)">다음 단계 →</button></div>
+      <div class="editor-step-actions"><button type="button" class="btn ghost" id="productStepPrevious" onclick="goProductEditorStep(-1)" disabled>← 이전 단계</button><span id="productStepCurrent">1 / 7 · 클래스 정보</span><button type="button" class="btn primary" id="productStepNext" onclick="goProductEditorStep(1)">다음 단계 →</button></div>
     </div><aside class="product-editor-side"><div class="panel product-summary"><span>클래스 요약</span><h3>${current.name}</h3><p>수강 조건 · ${current.requirement}</p><strong id="productSummaryPrice">${won(current.discountPrice||current.originalPrice||current.price)}</strong><div><b>연결 강의 콘텐츠</b><span id="linkedContentSummary">${linkedContentNames(current).length?linkedContentNames(current).map((name,index)=>`<em>${index+1}. ${name}</em>`).join(''):'<em>선택 필요</em>'}</span></div><small>${locked?'운영 안내와 라이브 일정은 최신 정보로 관리할 수 있습니다.':'선택한 우선순서대로 사용자 화면에 영상과 자료가 표시됩니다.'}</small></div><div class="panel product-side-guide"><b>${editing?'수정 가능 범위':'등록 후 흐름'}</b>${editing?`<ol><li>클래스명·소개</li><li>공개 상태</li><li>운영 안내</li><li>라이브 일정</li><li>FAQ</li></ol>`:`<ol><li>강의 콘텐츠 연결</li><li>클래스 공개</li><li>수강생 결제</li><li>내 학습에 클래스 표시</li></ol>`}</div></aside></div>
     <div class="editor-bottom-bar"><span><b>${editing?current.name:'새 클래스'}</b><small>${locked?'결제 이력 클래스 · 일부 항목만 수정 가능':'필수 항목과 연결 콘텐츠를 확인해 주세요.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('products')">취소</button><button type="submit" class="btn primary">${editing?'변경사항 저장':'클래스 등록'}</button></div></div>
   </form>`;
