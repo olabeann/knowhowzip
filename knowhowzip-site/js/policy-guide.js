@@ -2,8 +2,10 @@
   "use strict";
 
   const POLICIES=[
-    {id:"admin.dashboard",pages:["creator-admin"],selector:".metric-grid.three",type:"데이터",title:"대시보드 집계 기준",summary:"실서비스에서는 크리에이터 권한 범위의 서버 집계값만 표시합니다.",rules:["매출은 결제 완료 기준으로 집계합니다.","수강생 수는 현재 크리에이터의 수강 권한 기준입니다.","등록 클래스와 강의 콘텐츠를 구분해 집계합니다.","현재 숫자는 정적 화면 확인용 예시값입니다."],spec:"PRODUCT_SPEC §6.1 · §9"},
-    {id:"admin.content-list",pages:["creator-admin"],selector:".class-admin-grid",type:"목록 UI",title:"강의 콘텐츠 목록 정책",summary:"대표 이미지 없이 콘텐츠 정보와 연결 현황을 중심으로 표시합니다.",rules:["제목, 설명, 영상 수, 자료 수와 연결 클래스 수를 표시합니다.","카드 전체 클릭과 우측 메뉴의 수정은 같은 편집 화면으로 이동합니다.","우측 메뉴는 수정, 복제, 삭제만 제공합니다.","미리보기, 반복 칩과 하단 수정 버튼은 제공하지 않습니다."],spec:"PRODUCT_SPEC §6.2 · §13.1"},
+    {id:"admin.dashboard",pages:["creator-admin"],selector:".metric-grid.three",type:"데이터",title:"대시보드 집계 기준",summary:"대시보드의 각 지표는 다음 기준으로 집계합니다.",rules:["매출은 결제 완료 기준으로 집계합니다.","수강생은 해당 크리에이터의 강의를 수강 중이거나 무료 수강 중인 수강생 수를 집계합니다.","클래스는 등록된 클래스 기준으로 집계합니다."],spec:"PRODUCT_SPEC §6.1 · §9"},
+    {id:"admin.dashboard-content",pages:["creator-admin"],selector:".cohort-panel",type:"목록 · 정렬",title:"강의 콘텐츠 노출 기준",summary:"최근에 등록된 강의 콘텐츠를 빠르게 확인할 수 있도록 표시합니다.",rules:["강의 콘텐츠는 최근 등록순으로 표시합니다.","최대 3개까지 표시합니다.","전체 보기를 선택하면 강의 콘텐츠 목록으로 이동합니다."],spec:"PRODUCT_SPEC §6.1"},
+    {id:"admin.dashboard-enrollment",pages:["creator-admin"],selector:".recent-panel",type:"목록 · 정렬",title:"최근 수강 신청 노출 기준",summary:"새로 결제한 수강생을 최근 결제 순으로 표시합니다.",rules:["결제가 완료된 수강생만 표시합니다.","가장 최근에 결제한 수강생부터 최대 4명까지 표시합니다.","전체 보기를 선택하면 수강생 관리 목록으로 이동합니다."],spec:"PRODUCT_SPEC §6.1 · §9"},
+    {id:"admin.content-list",pages:["creator-admin"],selector:".class-admin-grid",type:"데이터 관계",title:"강의 콘텐츠 관리 기준",summary:"",rules:["강의 콘텐츠는 판매 단위인 클래스와 분리해 관리합니다.","하나의 강의 콘텐츠를 여러 클래스에서 재사용할 수 있습니다.","연결 클래스 수는 해당 콘텐츠를 사용 중인 등록 클래스를 기준으로 집계합니다."],spec:"PRODUCT_SPEC §6.2 · §13.1"},
     {id:"admin.class-list",pages:["creator-admin"],selector:".product-admin-grid",type:"목록 UI",title:"클래스 관리 목록 정책",summary:"수강생에게 노출·판매되는 클래스의 운영 정보를 표시합니다.",rules:["클래스명, 가격, 기간, 상태, 수강 조건과 연결 콘텐츠를 표시합니다.","우측 메뉴는 수정, 복제, 삭제를 제공합니다.","카드 메뉴에는 미리보기를 넣지 않습니다.","수강생 화면에서는 상품이 아니라 클래스라는 명칭을 사용합니다."],spec:"PRODUCT_SPEC §6.4 · §14.8"},
     {id:"admin.content-info",pages:["creator-admin"],selector:"#editor-content-info",type:"필수값",title:"강의 콘텐츠 정보 정책",summary:"콘텐츠 제목은 필수이고 콘텐츠 설명은 선택입니다.",rules:["콘텐츠 제목은 관리자용 구분값입니다.","수강생 판매 화면에는 콘텐츠 제목 대신 클래스명을 표시합니다.","제목은 80자 이내로 입력합니다."],spec:"PRODUCT_SPEC §6.3 · 1단계"},
     {id:"admin.content-assets",pages:["creator-admin"],selector:"#editor-content",type:"필수 · 파일",title:"영상·자료 등록 정책",summary:"영상은 1개 이상 필수이고 제공 자료는 선택입니다.",rules:["영상 순서가 수강생 화면의 강의 순서가 됩니다.","영상 형식은 MP4, MOV, WebM이며 강의당 최대 2GB입니다.","자료는 0개 이상이며 파일당 최대 50MB입니다.","기존 콘텐츠를 불러오면 독립 복제본으로 수정합니다."],spec:"PRODUCT_SPEC §4.5~4.6 · §6.3"},
@@ -197,7 +199,9 @@
     activeAnchor=anchor;
     popover.querySelector(".policy-guide-popover-type").textContent=policy.type;
     popover.querySelector("h3").textContent=policy.title;
-    popover.querySelector(".policy-guide-popover-summary").textContent=policy.summary;
+    const summary=popover.querySelector(".policy-guide-popover-summary");
+    summary.textContent=policy.summary||"";
+    summary.hidden=!policy.summary;
     popover.querySelector("ul").innerHTML=policy.rules.map(rule=>`<li>${rule}</li>`).join("");
     popover.querySelector(".policy-guide-popover-spec").textContent=policy.spec;
     popover.classList.add("open");
