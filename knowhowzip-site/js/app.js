@@ -197,7 +197,7 @@ function openDetail(pid){
           <div class="cohort-box">
             <div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">${ch.status}</span></div>
             <div class="ch-row"><span>수강 기간</span><b>${ch.period}</b></div>
-            <div class="ch-row"><span>모집 마감</span><b>${ch.deadline}</b></div>
+            <div class="ch-row"><span>${ch.recruitmentAlways?'모집 기간':'모집 마감'}</span><b>${ch.recruitmentAlways?'상시 모집':ch.deadline}</b></div>
           </div>
           ${includedClasses.length>1?`<div class="cohort-box included-class-box">
             <div class="ch-row"><span>강의 콘텐츠</span><b>${includedClasses.length}개</b></div>
