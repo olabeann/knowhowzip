@@ -774,10 +774,12 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
 .payment-history-head h2{font-size:23px;font-weight:900;margin-bottom:5px}
 .payment-history-head p{font-size:13px;color:var(--ink-soft)}
 .payment-list{display:flex;flex-direction:column;gap:10px}
-.payment-item{display:grid;grid-template-columns:145px minmax(220px,1fr) 130px 96px;align-items:center;gap:18px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.payment-item{display:grid;grid-template-columns:145px minmax(220px,1fr) 130px 96px 92px;align-items:center;gap:18px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px}
 .payment-item span,.payment-item small{display:block;font-size:10.5px;color:var(--ink-mute)}
 .payment-date b{display:block;font-size:12px;margin-bottom:4px}.payment-product b{display:block;font-size:13px;margin-top:4px}.payment-amount b{display:block;font-size:15px;margin-top:4px}
 .payment-status{display:flex;align-items:flex-end}.payment-status .pay-state{display:inline-block;color:var(--green);background:#e7f8ef;border-radius:6px;padding:4px 7px;font-weight:800}
+.refund-request-button{height:36px;border:0;border-radius:9px;background:#fee500;color:#191919;font-size:11px;font-weight:850;white-space:nowrap}
+.refund-request-button:hover{background:#f5dc00}
 /* Zoom schedule */
 .zoom-schedule{border:1px solid var(--line);border-radius:12px;background:#fff;margin:14px 0;overflow:hidden}
 .zoom-schedule-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:var(--bg)}
@@ -786,8 +788,8 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
 .zoom-order{width:26px;height:26px;border-radius:7px;background:#eef1ff;color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:850}
 .zoom-schedule-row div b,.zoom-schedule-row div small{display:block}.zoom-schedule-row div b{font-size:11.5px;margin-bottom:3px}.zoom-schedule-row div small{font-size:10px;color:var(--ink-mute)}
 .zoom-schedule-row button{border:0;background:none;color:var(--brand-dk);font-size:12px;font-weight:850;white-space:nowrap}
-@media(max-width:900px){.payment-item{grid-template-columns:110px 1fr 110px}.payment-status{grid-column:3}}
-@media(max-width:640px){.payment-history-head{align-items:stretch;flex-direction:column}.payment-item{grid-template-columns:1fr 1fr;gap:13px}.payment-product{grid-column:1/-1}.payment-status{grid-column:2;justify-content:flex-end}.zoom-schedule-head{align-items:flex-start;flex-direction:column}}
+@media(max-width:900px){.payment-item{grid-template-columns:110px 1fr 110px 92px}.payment-status{grid-column:3}}
+@media(max-width:640px){.payment-history-head{align-items:stretch;flex-direction:column}.payment-item{grid-template-columns:1fr 1fr;gap:13px}.payment-product{grid-column:1/-1}.payment-status{grid-column:1;justify-content:flex-start}.refund-request-button{grid-column:2}.zoom-schedule-head{align-items:flex-start;flex-direction:column}}
 
 
 /* One search across all enrolled class FAQs */

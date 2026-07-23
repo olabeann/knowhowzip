@@ -222,6 +222,7 @@ function openDetail(pid){
         <button onclick="goTab(this,'sec-content')">콘텐츠</button>
         <button onclick="goTab(this,'sec-op')">운영 안내</button>
         <button onclick="goTab(this,'sec-faq')">클래스 FAQ</button>
+        <button onclick="goTab(this,'sec-refund')">환불 규정</button>
       </div>
       <div class="d-tab-panels">
         <div class="d-panel active" id="sec-intro"><div class="d-section"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p>${detailIntroMedia(p,c,videos)}</div></div>
@@ -237,6 +238,7 @@ function openDetail(pid){
           ${detailOperationCards(p,owned)||'<p>등록된 운영 안내가 없습니다.</p>'}
         </div></div>
         <div class="d-panel" id="sec-faq"><div class="d-section"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div></div>
+        <div class="d-panel" id="sec-refund"><div class="d-section"><h3><span class="dot"></span>환불 규정</h3>${refundPolicyMarkup()}</div></div>
       </div>
       </div>
     </div></div>
@@ -410,7 +412,7 @@ const demoPayments=[
   {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료'}
 ];
 function renderPaymentHistory(){
-  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제 완료된 클래스 내역을 확인합니다.</p></div></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div></article>`).join('')}</div></section>`;
+  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제한 클래스 내역을 확인하고 환불을 요청할 수 있습니다.</p></div></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div></section>`;
 }
 function renderUserProfile(){
   const user=state.user;
@@ -508,13 +510,17 @@ const commonFaqs=[
   {q:'결제 후 바로 수강할 수 있나요?',a:'네. 결제가 완료되면 내 학습에서 바로 콘텐츠와 운영 안내를 확인할 수 있습니다.'},
   {q:'여러 크리에이터의 클래스를 한 계정으로 들을 수 있나요?',a:'네. 하나의 노하우집 계정으로 모든 크리에이터의 클래스를 구매·수강할 수 있고, 내 학습에서 크리에이터별로 모아 볼 수 있습니다.'},
   {q:'자료·단톡방은 어떻게 이용하나요?',a:'구매한 클래스의 내 학습에서 자료 다운로드와 단톡방·줌 링크가 활성화됩니다. 미구매 클래스는 제한됩니다.'},
-  {q:'환불 규정은 어떻게 되나요?',a:'첫 강의 시작 전까지 전액 환불, 이후에는 진행 회차를 제외한 잔여분에 대해 규정에 따라 처리됩니다.'},
+  {q:'환불 규정은 어떻게 되나요?',a:'지정 기간 수강 클래스는 결제일부터 수강 시작일까지 언제든지, 수강 시작 후에는 7일 이내 전액 환불할 수 있습니다. 결제 즉시 수강 클래스는 결제일부터 7일 이내 전액 환불할 수 있습니다. 이미 재생하거나 자료를 다운로드한 강의는 환불 대상에서 제외됩니다. 자세한 내용은 클래스 상세의 환불 규정을 확인해 주세요.'},
   {q:'크리에이터로 입점하려면요?',a:'상단 입점 문의 또는 고객센터의 카카오 채널을 통해 신청할 수 있습니다.'}
 ];
 function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
 function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';requestAnimationFrame(updateDetailBuycardPosition);}
-const KAKAO_CHANNEL_URL='http://pf.kakao.com/_xksSwX/chat';
+const KAKAO_CHANNEL_URL='https://pf.kakao.com/_xksSwX/chat';
 function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,noreferrer');}
+function openRefundRequest(orderId){
+  toast(`주문번호 ${orderId} 환불 문의를 위해 카카오톡 채널을 엽니다`);
+  openKakaoChannel();
+}
 
 /* ---------- view switch ---------- */
 function show(view){

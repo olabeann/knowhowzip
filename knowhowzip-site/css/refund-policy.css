@@ -1,0 +1,27 @@
+.refund-policy{color:#172033}
+.refund-policy-notice{margin:0 0 12px!important;padding:14px 16px;border-radius:11px;background:#f4f6ff;font-size:12px!important;font-weight:800;line-height:1.6!important;color:#4f5b70!important}
+.refund-policy-notice:before{content:"- ";color:#4c5cff}
+.refund-policy-details{overflow:hidden;border:1px solid #e4e8f1;border-radius:12px;background:#fff}
+.refund-policy-details>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;cursor:pointer;list-style:none;font-size:12px;font-weight:850;color:#34415a}
+.refund-policy-details>summary::-webkit-details-marker{display:none}
+.refund-policy-details>summary:hover{background:#fafbff}
+.refund-policy-details>summary i{font-style:normal;font-size:18px;color:#7c879b;transition:transform .2s}
+.refund-policy-details[open]>summary{border-bottom:1px solid #e7eaf1}
+.refund-policy-details[open]>summary i{transform:rotate(180deg)}
+.refund-policy-body{padding:18px}
+.refund-policy-lead{padding:18px 20px;border-radius:14px;background:#f4f6ff}
+.refund-policy-lead strong{display:block;font-size:16px;font-weight:900}
+.refund-policy-lead p{margin:5px 0 0!important;font-size:12px!important;line-height:1.6;color:#64708a!important}
+.refund-policy-section{padding:22px 2px;border-bottom:1px solid #e7eaf1}
+.refund-policy-section:last-child{padding-bottom:2px;border-bottom:0}
+.refund-policy-section h4{margin:0 0 13px;font-size:14px;font-weight:900}
+.refund-policy-section>p{margin:0;font-size:12px;line-height:1.75;color:#4f5b70}
+.refund-policy-section ul{margin:0;padding-left:19px}
+.refund-policy-section li{margin:7px 0;font-size:12px;line-height:1.65;color:#4f5b70}
+.refund-policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.refund-policy-grid article{padding:17px;border:1px solid #e4e8f1;border-radius:12px;background:#fff}
+.refund-policy-grid article>span{display:block;margin-bottom:9px;font-size:12px;font-weight:850;color:#34415a}
+.refund-policy-example{margin:11px 0 0!important;padding:10px 11px;border-radius:8px;background:#f7f8fb;font-size:10.5px!important;line-height:1.55!important;color:#69758b!important}
+.refund-policy-formula{margin-top:13px;padding:14px 16px;border-radius:10px;background:#f7f8fb;font-size:12px;font-weight:800;line-height:1.65;color:#34415a}
+.refund-policy-contact{margin-top:14px!important;font-weight:800;color:#4c5cff!important}
+@media(max-width:640px){.refund-policy-grid{grid-template-columns:1fr}.refund-policy-body{padding:14px}.refund-policy-lead{padding:16px}.refund-policy-section{padding:19px 0}}
