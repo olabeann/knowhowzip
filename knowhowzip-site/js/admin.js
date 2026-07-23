@@ -100,7 +100,7 @@ function renderDashboard(){
 
 function renderClasses(){
   return `${pageHeader('Lecture content','강의 콘텐츠','수강생에게 제공되는 영상, 자료, 강의 순서와 설명을 관리합니다. 등록한 콘텐츠는 여러 클래스에서 재사용할 수 있습니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 강의 콘텐츠</button>')}
-  <div class="class-admin-grid">${lectureContents.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" onclick="duplicateClass('${c.id}')">복제</button><button type="button" class="danger" onclick="adminToast('삭제는 운영팀 확인 후 진행됩니다')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join('')}</div>`;
+  <div class="class-admin-grid">${lectureContents.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" class="danger" onclick="adminToast('삭제는 운영팀 확인 후 진행됩니다')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join('')}</div>`;
 }
 
 function openClassPreview(classId=''){
@@ -122,15 +122,6 @@ function toggleClassMenu(event,id){
   document.querySelectorAll('.class-card-menu-pop').forEach(menu=>{if(menu.id!=='class-menu-'+id)menu.classList.remove('show');});
   document.getElementById('class-menu-'+id)?.classList.toggle('show');
 }
-function duplicateClass(classId){
-  const sourceIndex=lectureContents.findIndex(course=>course.id===classId);
-  if(sourceIndex<0)return;
-  const source=lectureContents[sourceIndex];
-  const copy={...source,content:{videos:[...(source.content?.videos||[])],files:[...(source.content?.files||[])]},id:`${source.id}-copy-${Date.now()}`,title:`${classShortTitle(source.title)} 커리큘럼 복제본`};
-  lectureContents.splice(sourceIndex+1,0,copy);
-  showAdminView('classes');
-  adminToast('강의 콘텐츠 복제본을 추가했습니다');
-}
 document.addEventListener('click',()=>document.querySelectorAll('.class-card-menu-pop.show').forEach(menu=>menu.classList.remove('show')));
 
 function renderClassEditor(mode='create',classId=''){
@@ -145,23 +136,11 @@ function renderClassEditor(mode='create',classId=''){
       <div class="editor-sections">
         <section class="panel editor-section" id="editor-content-info"><div class="editor-section-head"><i>1</i><div><h2>강의 콘텐츠 정보</h2><p>관리자에서 콘텐츠를 구분할 제목과 설명을 입력합니다.</p></div><span>제목 필수</span></div><div class="editor-fields"><label class="wide">콘텐츠 제목 <em>*</em><input required maxlength="80" value="${contentName}" placeholder="예: 경매 기초 커리큘럼"><small>수강생 판매 화면에는 클래스명이 표시되며, 이 제목은 관리자용입니다. 클래스명은 클래스 관리에서 클래스를 선택하면 확인할 수 있습니다.</small></label><label class="wide">콘텐츠 설명 <em class="optional">선택</em><textarea placeholder="이 커리큘럼의 학습 목표와 구성 특징을 적어주세요.">${editing?(course.intro||''):''}</textarea></label></div></section>
 
-        <section class="panel editor-section" id="editor-content"><div class="editor-section-head"><i>2</i><div><h2>영상·자료</h2><p>수강생에게 제공할 영상 순서와 다운로드 자료를 구성합니다.</p></div><span>영상 필수 · 자료 선택</span></div><div class="content-import-bar"><div><b>기존 강의 콘텐츠 복제</b><small>선택한 콘텐츠의 영상과 자료를 복사한 뒤 자유롭게 수정할 수 있습니다.</small></div><select id="contentImportClass"><option value="">강의 콘텐츠 선택</option>${lectureContents.map(item=>`<option value="${item.id}">${classShortTitle(item.title)} 커리큘럼</option>`).join('')}</select><button type="button" class="btn ghost" onclick="importClassContent()">콘텐츠 불러오기</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>1개 이상의 영상이 필요합니다. 제목과 설명을 입력하고 영상 파일을 업로드하세요.</p></div><span id="curriculumCount">${curriculum.length}강 · 필수</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>선택 항목입니다. 필요한 경우 자료 제목과 설명을 입력하고 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개 · 선택</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
+        <section class="panel editor-section" id="editor-content"><div class="editor-section-head"><i>2</i><div><h2>영상·자료</h2><p>수강생에게 제공할 영상 순서와 다운로드 자료를 구성합니다.</p></div><span>영상 필수 · 자료 선택</span></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>1개 이상의 영상이 필요합니다. 제목과 설명을 입력하고 영상 파일을 업로드하세요.</p></div><span id="curriculumCount">${curriculum.length}강 · 필수</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>선택 항목입니다. 필요한 경우 자료 제목과 설명을 입력하고 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개 · 선택</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
       </div>
     </div>
     <div class="editor-bottom-bar"><span><b>${editing?contentName:'새 강의 콘텐츠'}</b><small>영상 순서와 자료를 확인한 뒤 저장해 주세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">취소</button><button type="submit" class="btn primary">강의 콘텐츠 저장</button></div></div>
   </form>`;
-}
-
-const reusableClassContent=lectureContents.reduce((acc,course)=>{acc[course.id]={videos:course.content?.videos||[],files:course.content?.files||[]};return acc;},{});
-function importClassContent(){
-  const id=document.getElementById('contentImportClass')?.value,data=reusableClassContent[id];
-  if(!data){adminToast('불러올 강의 콘텐츠를 선택해 주세요');return;}
-  const videos=document.getElementById('curriculumRows'),files=document.getElementById('materialRows');
-  videos.innerHTML=data.videos.map((item,i)=>curriculumRow(i+1,item)).join('');
-  files.innerHTML=data.files.map((item,i)=>materialRow(i+1,item)).join('');
-  document.getElementById('curriculumCount').textContent=data.videos.length+'강 · 필수';
-  document.getElementById('materialCount').textContent=data.files.length+'개 · 선택';
-  adminToast('기존 콘텐츠를 불러왔습니다');
 }
 
 function curriculumRow(index,value=''){return `<div class="repeat-row curriculum-row"><div class="curriculum-row-head"><em>${index}강</em><input class="curriculum-title" required value="${value}" placeholder="강의 제목을 입력하세요"><div class="input-suffix duration"><input class="video-duration" type="number" readonly placeholder="자동"><span>분</span></div><button type="button" class="remove-row" onclick="removeEditorRow(this,'curriculumRows','curriculumCount','강')">×</button></div><textarea class="curriculum-description" placeholder="강의에서 다루는 내용을 간단히 설명해 주세요."></textarea><label class="video-upload"><input type="file" accept="video/mp4,video/quicktime,video/webm" onchange="handleCurriculumVideo(this)"><span><b>영상 파일 업로드</b><small>MP4, MOV, WebM · 강의당 최대 2GB</small></span><em class="video-file-status">파일을 선택해 주세요</em></label></div>`;}
