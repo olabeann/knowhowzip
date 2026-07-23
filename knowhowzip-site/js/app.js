@@ -418,7 +418,6 @@ function renderUserProfile(){
   const user=state.user;
   return `<section class="user-profile-card">
     <div class="user-profile-head">
-      <div class="user-profile-avatar">${user.name.slice(0,1)}</div>
       <div><span>내 정보</span><h2>${user.name}</h2><p>카카오 계정으로 연결된 정보입니다.</p></div>
     </div>
     <div class="user-profile-grid">

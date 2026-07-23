@@ -374,8 +374,7 @@ main{min-height:50vh}
 .my-empty h3{margin:16px 0 6px;font-size:20px;font-weight:800}.my-empty p{color:var(--ink-soft);margin:0 0 22px}
 .my-empty-icon{width:50px;height:50px;border-radius:50%;margin:0 auto;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900}
 .user-profile-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:var(--shadow-xs)}
-.user-profile-head{display:flex;align-items:center;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--line2)}
-.user-profile-avatar{width:58px;height:58px;border-radius:18px;background:var(--brand-soft);color:var(--brand-dk);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0}
+.user-profile-head{padding-bottom:22px;border-bottom:1px solid var(--line2)}
 .user-profile-head span{display:block;color:var(--brand);font-size:12px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
 .user-profile-head h2{font-size:24px;font-weight:900;margin:0}
 .user-profile-head p{margin:3px 0 0;color:var(--ink-soft);font-size:14px}
@@ -666,7 +665,6 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .op-card .obtn,.op-card .olock{width:100%;margin-left:52px}
   .my-learning-tabs button{flex:1;padding-left:8px;padding-right:8px}
   .user-profile-card{padding:22px}
-  .user-profile-head{align-items:flex-start}
   .user-profile-grid{grid-template-columns:1fr}
   .withdraw-reasons{grid-template-columns:1fr}
   .learning-group-head>span:not(.logo){display:none}
