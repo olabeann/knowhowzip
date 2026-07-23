@@ -86,7 +86,7 @@ function renderDashboard(){
 
       <article class="panel cohort-panel">
         <div class="panel-head"><div><h2>강의 콘텐츠</h2><p>재사용 가능한 영상·자료 커리큘럼을 관리합니다.</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
-        <div class="cohort-list">${lectureContents.slice(0,3).map(c=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}"></span><span class="cohort-info"><b>${classShortTitle(c.title)} 커리큘럼</b><small>${linkedClassCount(c.id)}개 클래스에서 사용 중</small></span><strong>수정</strong></button>`).join('')}</div>
+        <div class="cohort-list">${lectureContents.slice(0,3).map(c=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}"></span><span class="cohort-info"><b>${classShortTitle(c.title)} 커리큘럼</b><small>${linkedClassCount(c.id)}개 클래스에서 사용 중</small></span></button>`).join('')}</div>
       </article>
     </section>
 
