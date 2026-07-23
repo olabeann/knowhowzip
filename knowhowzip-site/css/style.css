@@ -497,8 +497,7 @@ main{min-height:50vh}
 /* login page */
 .login-page{min-height:calc(100vh - var(--gnb-h));background:#F8FAFC}
 .login-shell{min-height:calc(100vh - var(--gnb-h) - 42px);padding-top:64px;padding-bottom:64px;display:flex;align-items:center;justify-content:center}
-.login-card{position:relative;width:100%;max-width:440px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:58px 42px 34px;box-shadow:var(--shadow-lg);text-align:center}
-.login-back{position:absolute;top:20px;left:20px;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:var(--ink-soft);font-size:17px}.login-back:hover{background:var(--bg-alt);color:var(--ink)}
+.login-card{position:relative;width:100%;max-width:440px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:34px 42px;box-shadow:var(--shadow-lg);text-align:center}
 .login-card-copy h1{font-size:26px;letter-spacing:-.6px;margin:0 0 10px;font-weight:900}
 .login-card-copy p{font-size:14px;line-height:1.65;color:var(--ink-soft);margin:0 0 28px}
 .login-kakao{width:100%;height:54px;border:0;border-radius:12px;background:#FEE500;color:#191600;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:10px;transition:.15s}
@@ -615,7 +614,7 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .wrap{padding:0 18px}
   .login-page{min-height:calc(100vh - var(--gnb-h))}
   .login-shell{padding-top:38px;padding-bottom:48px}
-  .login-card{padding:54px 24px 30px;border-radius:18px}
+  .login-card{padding:30px 24px;border-radius:18px}
   .login-card-copy h1{font-size:24px}.login-card-copy p{margin-bottom:24px}
   .hero{padding:48px 0 56px}
   .hero h1{letter-spacing:-.6px}
