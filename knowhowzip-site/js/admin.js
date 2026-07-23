@@ -49,8 +49,7 @@ students.push(
   {name:'문태오',email:'taeo.moon@email.com',phone:'010-6104-7729',access:'스터디 참여',history:'기초 완료 · 심화 완료',course:'땅부자 루틴클럽',recentProduct:'땅부자 루틴클럽 8월',cohort:'8월',paid:'99,000원',period:'2026.08.01 ~ 08.31',joined:'06.24',state:'수강 대기',products:[{product:'땅부자 루틴클럽 8월',className:'땅부자 루틴클럽',paid:'99,000원',period:'2026.08.01 ~ 08.31',purchased:'2026.06.24',status:'수강 대기'}]},
   {name:'강서아',email:'seoa.kang@email.com',phone:'010-4927-6501',access:'심화 수강',history:'기초 완료 · 심화 수강 중',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.23',state:'수강 중',products:[{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.23',status:'수강 중'}]},
   {name:'윤재원',email:'jaewon.yoon@email.com',phone:'010-9762-1184',access:'기초 수강',history:'수강 종료',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'1기',paid:'290,000원',period:'2026.03.05 ~ 04.02',joined:'03.01',state:'수강 종료',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.03.05 ~ 04.02',purchased:'2026.03.01',status:'수강 종료'}]},
-  {name:'배수빈',email:'subin.bae@email.com',phone:'010-3088-4276',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.22',state:'수강 중',products:[{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.22',status:'수강 중'}]},
-  {name:'신예린',email:'yerin.shin@email.com',phone:'010-5536-8027',access:'기초 수강',history:'무료 수강 처리',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 무료 수강',cohort:'3기',paid:'0원',period:'2026.07.13 ~ 09.13',joined:'07.13',state:'무료 수강중',products:[{product:'경매 낙찰 기초반 무료 수강',className:'경매 낙찰 기초반',paid:'0원',period:'2026.07.13 ~ 09.13',purchased:'2026.07.13',status:'무료 수강중'}]}
+  {name:'배수빈',email:'subin.bae@email.com',phone:'010-3088-4276',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.22',state:'수강 중',products:[{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.22',status:'수강 중'}]}
 );
 
 const studentPageSize=10;
@@ -182,7 +181,6 @@ function studentAccessClass(access){
   return 'rookie';
 }
 function studentStateClass(state){
-  if(state.includes('무료'))return 'free';
   if(state.includes('대기'))return 'waiting';
   if(state.includes('종료'))return 'done';
   return 'active';
@@ -194,7 +192,7 @@ function creatorStudentProducts(student){
 function publicProductTitle(name=''){
   const match=classes.find(course=>name.includes(classShortTitle(course.title)));
   if(!match)return name;
-  return name.includes('무료')?`${match.title} 무료 수강`:match.title;
+  return match.title;
 }
 function studentProductOptions(){
   return [...new Set(students.map(student=>publicProductTitle(student.recentProduct)).filter(Boolean))];
@@ -217,7 +215,7 @@ function studentTable(rows,compact=false){
   return `<div class="table-wrap"><table><thead><tr><th>이름</th>${compact?'':'<th>전화번호</th>'}<th>최근 결제 상품</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(s=>`<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${s.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${s.email}')}"><td><div class="student-cell"><span>${s.name[0]}</span><div><b>${s.name}</b><small>${s.email}</small></div></div></td>${compact?'':`<td>${s.phone||'-'}</td>`}<td>${publicProductTitle(s.recentProduct)||s.course}</td><td>${s.period||'-'}</td><td><em class="table-state ${studentStateClass(s.state)}">${s.state}</em></td></tr>`).join(''):emptyRow}</tbody></table></div>`;
 }
 function studentStateSummary(){
-  const states=['전체 상태','수강 대기','수강 중','무료 수강중','수강 종료'];
+  const states=['전체 상태','수강 대기','수강 중','수강 종료'];
   const active=document.getElementById('studentStateFilter')?.value||'전체 상태';
   return `<div class="student-state-tabs">${states.map(state=>{const count=state==='전체 상태'?students.length:students.filter(student=>student.state===state).length;return `<button type="button" class="${active===state?'active':''}" onclick="setStudentStateFilter('${state}')"><span>${state}</span><b>${count}명</b></button>`;}).join('')}</div>`;
 }
@@ -232,10 +230,10 @@ function renderStudentTableSection(){
 }
 
 function renderStudents(){
-  return `${pageHeader('Student management','수강생 관리',"수강생에 대한 정보를 확인할 수 있습니다. 수강 기간 종료 후 무료로 수강을 하도록 하고자 할 때 '무료 수강 처리' 버튼을 클릭합니다.")}
+  return `${pageHeader('Student management','수강생 관리','수강생의 결제 클래스와 현재 수강 상태를 확인합니다.')}
   <input type="hidden" id="studentStateFilter" value="전체 상태">
   <section id="studentStateSummary">${studentStateSummary()}</section>
-  <div class="student-table-toolbar"><div class="filter-bar"><div class="admin-search">⌕ <input id="studentSearchInput" placeholder="이름, 이메일, 상품 검색" oninput="filterStudents()"></div><select id="studentProductFilter" onchange="filterStudents()"><option>전체 최근 결제상품</option>${studentProductOptions().map(product=>`<option>${product}</option>`).join('')}</select></div><button class="btn primary" onclick="openAccessRequestModal()">무료수강 처리</button></div>
+  <div class="student-table-toolbar"><div class="filter-bar"><div class="admin-search">⌕ <input id="studentSearchInput" placeholder="이름, 이메일, 상품 검색" oninput="filterStudents()"></div><select id="studentProductFilter" onchange="filterStudents()"><option>전체 최근 결제상품</option>${studentProductOptions().map(product=>`<option>${product}</option>`).join('')}</select></div></div>
   <article class="panel full-table" id="studentTable">${renderStudentTableSection()}</article>`;
 }
 
@@ -244,12 +242,6 @@ function filterStudents(resetPage=true){
   const summary=document.getElementById('studentStateSummary');
   if(summary)summary.innerHTML=studentStateSummary();
   document.getElementById('studentTable').innerHTML=renderStudentTableSection();
-}
-function refreshStudentProductFilter(){
-  const select=document.getElementById('studentProductFilter');
-  if(!select)return;
-  const selected=select.value;
-  select.innerHTML=`<option>전체 최근 결제상품</option>${studentProductOptions().map(product=>`<option ${product===selected?'selected':''}>${product}</option>`).join('')}`;
 }
 function setStudentStateFilter(state){
   const filter=document.getElementById('studentStateFilter');
@@ -262,12 +254,12 @@ function goStudentPage(page){
 }
 
 function openStudentDetail(email){
-  const student=students.find(item=>item.email===email),modal=document.getElementById('accessRequestModal');
+  const student=students.find(item=>item.email===email),modal=document.getElementById('studentDetailModal');
   if(!student||!modal)return;
   const histories=creatorStudentProducts(student);
-  modal.innerHTML=`<div class="access-request-backdrop" onclick="if(event.target===this)closeAccessRequestModal()">
-    <section class="access-request-dialog student-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="studentDetailTitle">
-      <div class="access-request-head"><div><span>수강생 상세</span><h2 id="studentDetailTitle">${student.name}</h2><p>${student.phone} · ${student.email}</p></div><button type="button" onclick="closeAccessRequestModal()" aria-label="닫기">×</button></div>
+  modal.innerHTML=`<div class="student-detail-backdrop" onclick="if(event.target===this)closeStudentDetailModal()">
+    <section class="student-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="studentDetailTitle">
+      <div class="student-detail-head"><div><span>수강생 상세</span><h2 id="studentDetailTitle">${student.name}</h2><p>${student.phone} · ${student.email}</p></div><button type="button" onclick="closeStudentDetailModal()" aria-label="닫기">×</button></div>
       <div class="student-detail-body">
         <div class="student-detail-summary"><div><span>최근 결제 상품</span><b>${publicProductTitle(student.recentProduct)||student.course}</b></div><div><span>현재 상태</span><em class="table-state ${studentStateClass(student.state)}">${student.state}</em></div><div><span>수강기간</span><b>${student.period||'-'}</b></div></div>
         <div class="student-history-head"><h3>결제 상품과 수강 클래스</h3><p>현재 크리에이터 채널의 클래스 이력만 표시합니다.</p></div>
@@ -494,23 +486,6 @@ function toggleRequirementChoice(input){
   if(input===none){if(input.checked)requirements.forEach(item=>{item.checked=false;});else if(!requirements.some(item=>item.checked))input.checked=true;return;}
   if(input.checked)none.checked=false;else if(!requirements.some(item=>item.checked))none.checked=true;
 }
-function productAlimtalkSection(product){
-  const settings=alimtalkProductSettings.find(item=>item.id===product.id);
-  const template=(settings||alimtalkProductSettings[0]).items[0];
-  const checked=settings&&template.enabled?'checked':'';
-  const hidden=checked?'':' is-hidden';
-  return `<section class="panel product-section product-alimtalk-section" id="product-alimtalk"><div class="product-section-head"><i>7</i><div><h2>결제 후 안내톡</h2><p>기본값은 사용 안 함이며, 활성화하면 안내 내용을 모두 입력해야 합니다.</p></div><em>선택 · ON 시 필수</em></div>
-    <label class="product-alimtalk-toggle"><input type="checkbox" name="alimtalkEnabled" ${checked} onchange="toggleProductAlimtalkDetails(this)"><span><b>결제 후 안내톡 보내기</b><small>알리고 템플릿 · 수강 준비 안내 · 결제 완료 후 5분 이내</small></span></label>
-    <div class="product-alimtalk-detail${hidden}" id="productAlimtalkDetail">
-      <div class="alimtalk-lock-note"><b>고정 문구는 수정할 수 없어요.</b><span>아래 입력값이 승인 템플릿의 변수 자리에 들어갑니다. 이모지는 사용할 수 없습니다.</span></div>
-      <div class="alimtalk-template-structure"><b>템플릿 구조</b><p>${alimtalkTemplatePreview(template).replace(/\n/g,'<br>')}</p></div>
-      <div class="alimtalk-setting-grid">${alimtalkEditableFields(template).join('')}</div>
-      <button type="button" class="alimtalk-example-toggle" onclick="toggleAlimtalkExample(this)">미리보기</button>
-      <div class="alimtalk-fixed-preview is-hidden">${alimtalkExampleMarkup(template)}</div>
-      <p class="product-alimtalk-help">활성화한 경우 모든 안내 내용을 입력해야 합니다. 저장 후 새로 결제하는 수강생부터 발송됩니다.</p>
-    </div>
-  </section>`;
-}
 function productOperationDefaults(product){
   return Object.assign({
     hasKakao:false,
@@ -563,10 +538,6 @@ function toggleOperationOption(control,type){
   const small=control.closest('label')?.querySelector('small');
   if(small)small.textContent=control.checked?(type==='kakao'?'단톡방 정보를 입력해 주세요.':'줌 링크와 라이브 일정을 입력해 주세요.'):(type==='kakao'?'현재 설정: 단톡방 없음':'현재 설정: 줌 없음');
 }
-function syncProductAlimtalkRequired(){const control=document.querySelector('input[name="alimtalkEnabled"]'),detail=document.getElementById('productAlimtalkDetail');detail?.querySelectorAll('input,select,textarea').forEach(field=>{field.required=!!control?.checked&&!field.closest('.is-hidden');});}
-function toggleProductAlimtalkDetails(control){const detail=document.getElementById('productAlimtalkDetail');if(detail)detail.classList.toggle('is-hidden',!control.checked);syncProductAlimtalkRequired();adminToast(control.checked?'결제 후 안내톡을 켰습니다':'결제 후 안내톡을 껐습니다');}
-function toggleAlimtalkExample(button){const preview=button.nextElementSibling;if(!preview)return;const open=preview.classList.toggle('is-hidden');button.textContent=open?'미리보기':'미리보기 닫기';}
-function toggleAlimtalkDirectLink(select){const field=select.closest('label')?.nextElementSibling;if(field)field.classList.toggle('is-hidden',select.value!=='direct');syncProductAlimtalkRequired();}
 function productCourseDates(product){
   const match=(product.period||'').match(/(\d{4})\.(\d{2})\.(\d{2})\s*~\s*(?:(\d{4})\.)?(\d{2})\.(\d{2})/);
   if(!match)return {start:'2026-07-05',end:'2026-08-02'};
@@ -593,7 +564,7 @@ function renderProductEditor(mode='create',productId=''){
     <div class="editor-head product-editor-head"><button type="button" class="editor-back" onclick="showAdminView('products')">← 클래스 관리</button><div><span>${editing?'Class editing':'Class setup'}</span><h1>${editing?'클래스 수정':'새 클래스 등록'}</h1><p>${locked?'결제 이력이 있어 가격·기간 등 일부 항목은 변경할 수 없습니다.':'클래스 정보와 판매 조건을 설정하고 기존 강의 콘텐츠를 연결합니다.'}</p></div><div class="editor-actions product-editor-actions"><label>공개 상태<select name="visibilityStatus"><option ${current.status!=='비공개'?'selected':''}>공개</option><option ${selectedOption('비공개',current.status)}>비공개</option></select></label><button type="button" class="btn ghost" onclick="openClassPreview('${current.id}')">미리보기 ↗</button><button type="submit" class="btn primary">${editing?'변경사항 저장':'클래스 등록'}</button></div></div>
     <details class="product-setup-hero panel"><summary><div><span>클래스 등록 안내</span><h2>수강생에게 노출·판매할 클래스를 만드는 화면입니다.</h2></div><em>자세히 보기</em></summary><div class="product-setup-detail"><p>클래스명과 소개, 대표 이미지, 모집·수강 기간, 가격, 운영 안내, 라이브 일정, FAQ, 공개 상태를 설정합니다.<br>강의 콘텐츠에서 만든 커리큘럼을 선택해 연결하며, 같은 콘텐츠를 여러 클래스에서 재사용할 수 있습니다.</p></div></details>
     ${locked?`<section class="product-lock-notice"><b>결제 이력 ${current.paymentCount}건</b><span>이미 결제가 발생한 클래스라 가격과 기간은 수정할 수 없습니다. 판매 조건을 바꾸려면 새 클래스를 등록하세요.</span></section>`:''}
-    <nav class="editor-steps product-editor-steps" aria-label="클래스 등록 단계"><button type="button" class="active" onclick="scrollEditorSection('product-class-info',this)"><i>1</i><span>클래스 정보<small>전체 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-content',this)"><i>2</i><span>강의 콘텐츠<small>1개 이상 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-requirement',this)"><i>3</i><span>수강 조건<small>1개 이상 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-period',this)"><i>4</i><span>기간·가격<small>할인 가격만 선택</small></span></button><button type="button" onclick="scrollEditorSection('product-operation',this)"><i>5</i><span>운영 안내<small>선택</small></span></button><button type="button" onclick="scrollEditorSection('product-faq',this)"><i>6</i><span>FAQ<small>선택</small></span></button><button type="button" onclick="scrollEditorSection('product-alimtalk',this)"><i>7</i><span>안내톡<small>선택 · ON 시 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-refund',this)"><i>8</i><span>플랫폼 정책<small>자동 적용 예정</small></span></button></nav>
+    <nav class="editor-steps product-editor-steps" aria-label="클래스 등록 단계"><button type="button" class="active" onclick="scrollEditorSection('product-class-info',this)"><i>1</i><span>클래스 정보<small>전체 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-content',this)"><i>2</i><span>강의 콘텐츠<small>1개 이상 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-requirement',this)"><i>3</i><span>수강 조건<small>1개 이상 필수</small></span></button><button type="button" onclick="scrollEditorSection('product-period',this)"><i>4</i><span>기간·가격<small>할인 가격만 선택</small></span></button><button type="button" onclick="scrollEditorSection('product-operation',this)"><i>5</i><span>운영 안내<small>선택</small></span></button><button type="button" onclick="scrollEditorSection('product-faq',this)"><i>6</i><span>FAQ<small>선택</small></span></button><button type="button" onclick="scrollEditorSection('product-refund',this)"><i>7</i><span>플랫폼 정책<small>자동 적용 예정</small></span></button></nav>
     <div class="product-editor-grid"><div class="product-editor-main">
       <section class="panel product-section editable" id="product-class-info"><div class="product-section-head"><i>1</i><div><h2>클래스 정보</h2><p>수강생이 신청 전에 확인하는 클래스명, 소개와 대표 이미지를 구성합니다.</p></div><em>전체 필수</em></div><div class="editor-cover-row"><div class="editor-cover-preview" style="background:linear-gradient(135deg,#DCE3FF,#AFC0FF)">${houseMark(72)}<button type="button" onclick="adminToast('대표 이미지 업로드')">이미지 변경</button></div><div class="editor-cover-guide"><b>대표 이미지 <em>*</em></b><p>필수 항목이며 클래스 목록과 상세 화면에 노출됩니다.</p><button type="button" class="btn ghost" onclick="adminToast('이미지 선택')">이미지 선택</button></div></div><div class="editor-fields"><label class="wide">클래스명 <em>*</em><input required value="${current.name}" placeholder="예: 경매 낙찰 기초반 14기"></label><label class="wide">한 줄 소개 <em>*</em><textarea required placeholder="수강생에게 클래스의 핵심 가치를 소개해 주세요.">${current.desc}</textarea></label><label>카테고리 <em>*</em><select required><option>부동산·경매</option><option>재테크·주식</option></select></label><label>난이도 <em>*</em><select required><option>입문</option><option>중급</option><option>심화</option></select></label><label class="wide">상세 소개 <em>*</em><textarea required placeholder="클래스의 진행 방식과 기대 효과를 자세히 적어주세요.">${current.desc}</textarea></label></div></section>
       <section class="panel product-section${lockClass}" id="product-content"><div class="product-section-head"><i>2</i><div><h2>강의 콘텐츠 연결</h2><p>한 개 이상의 강의 콘텐츠를 선택하세요. 같은 콘텐츠를 여러 클래스에 연결할 수 있고, 한 클래스에도 여러 콘텐츠를 연결할 수 있습니다.</p></div>${locked?'<em>수정 불가</em>':'<em>1개 이상 필수</em>'}</div><div class="included-lecture-list">${classChoiceList(current,lockAttr)}</div></section>
@@ -601,8 +572,7 @@ function renderProductEditor(mode='create',productId=''){
       <section class="panel product-section${lockClass}" id="product-period"><div class="product-section-head"><i>4</i><div><h2>모집·수강 기간과 가격</h2><p>클래스의 모집 기간, 수강 시작 방식과 실제 결제 가격을 설정합니다.</p></div>${locked?'<em>수정 불가</em>':''}</div><div class="period-setting-block"><div class="period-setting-head"><h3>가격 설정</h3><p>할인 가격을 비워두면 판매 가격으로 결제됩니다.</p></div><div class="editor-fields price-setting-fields"><label>판매 가격 <em>*</em><div class="input-suffix"><input required name="originalPrice" type="number" min="0" step="1000" value="${current.originalPrice||current.price}" ${lockAttr} oninput="updateProductPricePreview(this)"><span>원</span></div><small>할인 전 기준 가격</small></label><label>할인 가격 <em class="optional">선택</em><div class="input-suffix"><input name="discountPrice" type="number" min="0" step="1000" value="${current.discountPrice||''}" ${lockAttr} placeholder="할인할 경우 입력" oninput="updateProductPricePreview(this)"><span>원</span></div><small>판매 가격보다 낮게 입력해 주세요.</small></label></div><div class="price-result"><span>최종 결제 금액</span><strong id="finalPricePreview">${won(current.discountPrice||current.originalPrice||current.price)}</strong><em id="discountRatePreview">${discountRate(current.originalPrice||current.price,current.discountPrice)?`${discountRate(current.originalPrice||current.price,current.discountPrice)}% 할인`:'할인 없음'}</em></div></div><div class="period-setting-block"><div class="period-setting-head"><h3>모집 기간</h3><p>수강생이 클래스를 결제할 수 있는 기간입니다.</p></div><div class="editor-fields"><label>모집 시작일<input type="date" value="2026-07-01" ${lockAttr}></label><label>모집 종료일<input type="date" value="2026-07-31" ${lockAttr}></label></div></div><div class="period-setting-block"><div class="period-setting-head"><h3>수강 시작 방식</h3><p>기수제 클래스는 지정 기간, 상시 판매 클래스는 결제 즉시 시작이 적합합니다.</p></div><div class="course-access-mode"><label><input type="radio" name="accessMode" value="fixed" ${current.accessMode!=='immediate'?'checked':''} ${lockAttr} onchange="toggleCourseAccessMode(this)"><span><b>지정 기간 수강</b><small>모든 수강생이 같은 날짜에 시작하고 종료합니다.</small></span></label><label><input type="radio" name="accessMode" value="immediate" ${current.accessMode==='immediate'?'checked':''} ${lockAttr} onchange="toggleCourseAccessMode(this)"><span><b>결제 즉시 수강</b><small>수강생마다 결제한 시점부터 수강이 시작됩니다.</small></span></label></div><div class="editor-fields access-mode-fields${current.accessMode==='immediate'?' is-hidden':''}" data-access-mode="fixed"><label>수강 시작일<input type="date" value="${courseDates.start}" ${lockAttr}></label><label>수강 종료일<input type="date" value="${courseDates.end}" ${lockAttr}></label></div><div class="editor-fields access-mode-fields${current.accessMode==='immediate'?'':' is-hidden'}" data-access-mode="immediate"><label class="wide">수강 가능 기간 <em>*</em><div class="input-suffix"><input type="number" min="1" value="${current.periodDays||30}" ${lockAttr}><span>일</span></div><small>결제일부터 입력한 일수만큼 수강할 수 있습니다.</small></label></div></div></section>
       ${productOperationSection(current)}
       <section class="panel product-section" id="product-faq"><div class="product-section-head"><i>6</i><div><h2>FAQ</h2><p>필요한 경우 클래스 신청 전에 자주 묻는 질문과 답변을 등록합니다.</p></div><em>선택</em></div><div class="faq-editor-block"><div class="content-editor-title"><div><h3>클래스 FAQ</h3></div><span id="faqCount">${currentFaqs.length}개 · 선택</span></div><div class="repeat-list" id="faqRows">${currentFaqs.map((faq,index)=>faqEditorRow(index+1,faq)).join('')}</div><button type="button" class="add-row-btn" onclick="addFaqRow()">＋ FAQ 추가</button></div></section>
-      ${productAlimtalkSection(current)}
-      <section class="panel product-section platform-policy-section" id="product-refund"><div class="product-section-head"><i>8</i><div><h2>환불 정책</h2><p>플랫폼 공통 정책으로 관리되며 클래스별로 입력하지 않습니다.</p></div><em>플랫폼 공통</em></div><div class="platform-policy-placeholder"><b>환불 정책 조정 중</b><p>정책이 확정되면 모든 클래스의 결제 화면에 동일한 내용이 자동 적용됩니다. 크리에이터가 별도로 입력하거나 수정할 필요가 없습니다.</p><span>현재는 영역만 유지됩니다.</span></div></section>
+      <section class="panel product-section platform-policy-section" id="product-refund"><div class="product-section-head"><i>7</i><div><h2>환불 정책</h2><p>플랫폼 공통 정책으로 관리되며 클래스별로 입력하지 않습니다.</p></div><em>플랫폼 공통</em></div><div class="platform-policy-placeholder"><b>환불 정책 조정 중</b><p>정책이 확정되면 모든 클래스의 결제 화면에 동일한 내용이 자동 적용됩니다. 크리에이터가 별도로 입력하거나 수정할 필요가 없습니다.</p><span>현재는 영역만 유지됩니다.</span></div></section>
     </div><aside class="product-editor-side"><div class="panel product-summary"><span>클래스 요약</span><h3>${current.name}</h3><p>수강 조건 · ${current.requirement}</p><strong id="productSummaryPrice">${won(current.discountPrice||current.originalPrice||current.price)}</strong><div><b>연결 강의 콘텐츠</b><span id="linkedContentSummary">${linkedContentNames(current).length?linkedContentNames(current).map((name,index)=>`<em>${index+1}. ${name}</em>`).join(''):'<em>선택 필요</em>'}</span></div><small>${locked?'운영 안내와 라이브 일정은 최신 정보로 관리할 수 있습니다.':'선택한 우선순서대로 사용자 화면에 영상과 자료가 표시됩니다.'}</small></div><div class="panel product-side-guide"><b>${editing?'수정 가능 범위':'등록 후 흐름'}</b>${editing?`<ol><li>클래스명·소개</li><li>공개 상태</li><li>운영 안내</li><li>라이브 일정</li><li>FAQ</li></ol>`:`<ol><li>강의 콘텐츠 연결</li><li>클래스 공개</li><li>수강생 결제</li><li>내 학습에 클래스 표시</li></ol>`}</div></aside></div>
     <div class="editor-bottom-bar"><span><b>${editing?current.name:'새 클래스'}</b><small>${locked?'결제 이력 클래스 · 일부 항목만 수정 가능':'필수 항목과 연결 콘텐츠를 확인해 주세요.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('products')">취소</button><button type="submit" class="btn primary">${editing?'변경사항 저장':'클래스 등록'}</button></div></div>
   </form>`;
@@ -610,7 +580,6 @@ function renderProductEditor(mode='create',productId=''){
 function openProductEditor(mode='create',productId=''){
   document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='products'));
   document.getElementById('adminContent').innerHTML=renderProductEditor(mode,productId);
-  syncProductAlimtalkRequired();
   window.scrollTo({top:0});
   location.hash=mode==='edit'?'#product-edit-'+productId:'#product-new';
 }
@@ -623,69 +592,11 @@ function validateProductPeriodSettings(form){
 }
 function saveProductForm(event,mode){event.preventDefault();const form=event.currentTarget,selected=[...form.querySelectorAll('input[name="linkedContents[]"]:checked')];if(!selected.length){adminToast('강의 콘텐츠를 1개 이상 선택해 주세요');document.getElementById('product-content')?.scrollIntoView({behavior:'smooth',block:'start'});return;}const product=saleProducts.find(item=>item.id===form.dataset.productId),priceLocked=!!form.elements.originalPrice?.disabled,originalPrice=priceLocked?(product?.originalPrice||product?.price||0):(Number(form.elements.originalPrice?.value)||0),discountPrice=priceLocked?(product?.discountPrice||''):(Number(form.elements.discountPrice?.value)||0);if(discountPrice&&discountPrice>=originalPrice){adminToast('할인 가격은 판매 가격보다 낮게 입력해 주세요');document.getElementById('product-period')?.scrollIntoView({behavior:'smooth',block:'start'});return;}if(product){product.contentIds=selected.map(item=>item.value);product.status=form.elements.visibilityStatus?.value||product.status;const requirements=[...form.querySelectorAll('input[name="requirements[]"]:checked')].map(item=>item.value);product.requirement=form.querySelector('input[name="requirementNone"]:checked')?'조건 없음':requirements.join(' · ');product.originalPrice=originalPrice;product.discountPrice=discountPrice||'';product.price=discountPrice||originalPrice;if(!priceLocked){product.accessMode=form.elements.accessMode?.value||'fixed';product.periodDays=form.querySelector('[data-access-mode="immediate"] input')?.value||'';}}adminToast(mode==='edit'?'클래스 정보를 저장했습니다':'클래스를 등록했습니다');setTimeout(()=>showAdminView('products'),700);}
 
-function openAccessRequestModal(){
-  const modal=document.getElementById('accessRequestModal');
-  modal.innerHTML=`<div class="access-request-backdrop" onclick="if(event.target===this)closeAccessRequestModal()">
-    <form class="access-request-dialog" onsubmit="submitAccessRequest(event)" role="dialog" aria-modal="true" aria-labelledby="accessRequestTitle">
-      <div class="access-request-head"><div><span>무료 수강</span><h2 id="accessRequestTitle">무료 수강 처리</h2><p>결제 없이 클래스를 열어줘야 하는 경우에만 사용해 주세요.</p></div><button type="button" onclick="closeAccessRequestModal()" aria-label="닫기">×</button></div>
-      <div class="access-request-body">
-        <label>수강생<select id="accessRequestStudent" required onchange="syncAccessRequestStudent()"><option value="">수강생 선택</option>${students.map(student=>`<option value="${student.email}">${student.name} · ${student.course}</option>`).join('')}</select></label>
-        <div class="access-request-current" id="accessRequestCurrent"><b>현재 수강 상태</b><p>수강생을 선택하면 현재 수강 가능 클래스와 수강 이력이 표시됩니다.</p></div>
-        <label>추가로 볼 수 있게 할 클래스<select id="accessRequestClass" required><option value="">클래스 선택</option>${classes.map(course=>`<option>${course.title.split(' · ')[0]}</option>`).join('')}</select></label>
-        <div class="access-request-grid"><label>시작일<input id="accessRequestStart" type="date" value="2026-07-13"></label><label>종료일<input id="accessRequestEnd" type="date" value="2026-09-13"></label></div>
-        <label>처리 사유<textarea id="accessRequestReason" required placeholder="예: 오프라인 결제 확인, 보상 지급, 기존 수강생 확인 등"></textarea></label>
-        <p class="access-request-note">처리하면 선택한 클래스가 바로 내 학습에 표시됩니다.</p>
-      </div>
-      <div class="access-request-actions"><button type="button" class="btn ghost" onclick="closeAccessRequestModal()">취소</button><button type="submit" class="btn primary">무료 수강 처리</button></div>
-    </form>
-  </div>`;
-  modal.classList.add('show');
-}
-function closeAccessRequestModal(){
-  const modal=document.getElementById('accessRequestModal');
+function closeStudentDetailModal(){
+  const modal=document.getElementById('studentDetailModal');
   modal.classList.remove('show');
   modal.innerHTML='';
 }
-function syncAccessRequestStudent(){
-  const email=document.getElementById('accessRequestStudent')?.value;
-  const selected=students.find(student=>student.email===email);
-  const box=document.getElementById('accessRequestCurrent');
-  if(!selected||!box)return;
-  box.innerHTML=`<b>현재 수강 상태</b><p><strong>${selected.name}</strong> · ${selected.access}<br>${selected.history} · ${selected.state}</p>`;
-}
-function formatAccessPeriod(start,end){
-  const format=value=>{
-    if(!value)return '';
-    const [year,month,day]=value.split('-');
-    return `${year}.${month}.${day}`;
-  };
-  const startText=format(start),endText=format(end);
-  return startText&&endText?`${startText} ~ ${endText.replace(/^\d{4}\./,'')}`:startText||endText||'-';
-}
-function submitAccessRequest(event){
-  event.preventDefault();
-  const studentEmail=document.getElementById('accessRequestStudent').value;
-  const className=document.getElementById('accessRequestClass').value;
-  const startDate=document.getElementById('accessRequestStart')?.value;
-  const endDate=document.getElementById('accessRequestEnd')?.value;
-  const selected=students.find(student=>student.email===studentEmail);
-  if(selected){
-    selected.access=className.includes('루틴')?'스터디 참여':className.includes('권리')?'심화 수강':'기초 수강';
-    selected.history=selected.history.includes('무료 수강 처리')?selected.history:`${selected.history} · 무료 수강 처리`;
-    selected.course=selected.course.includes(className)?selected.course:`${selected.course} · ${className}`;
-    selected.recentProduct=`${className} 무료 수강`;
-    selected.paid='0원';
-    selected.period=formatAccessPeriod(startDate,endDate);
-    selected.state='무료 수강중';
-    selected.products=selected.products||[];
-    selected.products.push({product:`${className} 무료 수강`,className,paid:'0원',period:selected.period,purchased:startDate||'2026-07-13',status:'무료 수강중'});
-    const table=document.getElementById('studentTable');
-    if(table){refreshStudentProductFilter();filterStudents();}
-  }
-  closeAccessRequestModal();
-  adminToast(`${selected?.name||'수강생'}님 ${className} 무료 수강으로 처리했습니다`);
-}
-
 function renderSettings(activePanel='profile'){
   return `${pageHeader('Channel settings','채널 설정','공개 채널 정보와 운영에 필요한 설정을 관리합니다.')}
   <nav class="settings-tabs"><button class="${activePanel==='profile'?'active':''}" onclick="switchSettingsPanel('profile',this)">공개 채널</button><button class="${activePanel==='payout'?'active':''}" onclick="switchSettingsPanel('payout',this)">정산 정보</button></nav>
