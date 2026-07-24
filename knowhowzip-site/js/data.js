@@ -42,7 +42,7 @@ const creators=[
         cohort:{no:1,status:'모집중',period:'2026.07.05 ~ 08.09',deadline:'2026.06.30',seats:30,enrolled:0},
         operation:{guide:'기초반과 권리분석 실전반을 순서대로 수강할 수 있습니다.',hasKakao:true,kakaoTitle:'패키지 수강생 단톡방 입장',kakaoDesc:'공지 · 질문 · 다시보기 공유',kakaoUrl:'https://open.kakao.com/o/example',hasZoom:true,zoomTitle:'줌(Zoom) 라이브 입장',zoomDesc:'포함 클래스별 라이브 입장 링크',schedules:[{date:'2026-07-05',time:'20:00',title:'오리엔테이션 · 경매 절차 이해',url:'https://zoom.us/j/1000000001'},{date:'2026-07-12',time:'20:00',title:'물건 검색과 시세 분석',url:'https://zoom.us/j/1000000002'},{date:'2026-07-12',time:'20:00',title:'권리분석 핵심 개념',url:'https://zoom.us/j/2000000001'},{date:'2026-07-19',time:'20:00',title:'위험 물건 사례 분석',url:'https://zoom.us/j/2000000002'}]},
         faq:[{q:'처음 시작해도 들을 수 있나요?',a:'네. 기초반부터 순서대로 수강하도록 구성되어 있어 사전 지식 없이도 신청할 수 있습니다.'},{q:'두 클래스 자료를 모두 받을 수 있나요?',a:'네. 패키지에 포함된 두 클래스의 강의와 자료가 함께 제공됩니다.'}]}),
-     P({id:'mmoh-field',title:'현장 임장 마스터 · 발품 전략',tag:'현장',rate:4.9,reviews:96,price:450000,orig:520000,
+     P({id:'mmoh-field',title:'현장 임장 마스터 · 발품 전략',tag:'현장',rate:4.9,reviews:96,price:450000,orig:520000,isPublic:false,
         requirement:{type:'purchased',productId:'mmoh-right',label:'권리분석 실전반 수강 이력 필요',message:'권리분석 과정을 수강한 뒤 신청할 수 있습니다.'},
         grad:'linear-gradient(135deg,#CFE3D2,#5B9E72)',deep:'#1f4530',tags:['현장','임장','명도 협상'],
         lead:'임장 동선 설계부터 명도 협상까지, 발로 뛰는 노하우를 담았습니다.',
@@ -72,5 +72,5 @@ creators.forEach(creator=>{
 /* indexes */
 const productMap={},creatorOf={};
 creators.forEach(c=>c.products.forEach(p=>{productMap[p.id]=p;creatorOf[p.id]=c;}));
-const allProducts=()=>creators.flatMap(c=>c.products.map(p=>({p,c})));
+const allProducts=()=>creators.flatMap(c=>c.products.filter(p=>p.isPublic!==false).map(p=>({p,c})));
 const cats=['전체',...new Set(creators.map(c=>c.cat))];

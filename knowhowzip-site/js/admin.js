@@ -102,7 +102,7 @@ function renderDashboard(){
 
 function renderClasses(){
   return `${pageHeader('Lecture content','강의 콘텐츠','수강생에게 제공되는 영상, 자료, 강의 순서와 설명을 관리합니다. 등록한 콘텐츠는 여러 클래스에서 재사용할 수 있습니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 강의 콘텐츠</button>')}
-  <div class="class-admin-grid">${lectureContents.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" class="danger" onclick="adminToast('삭제는 운영팀 확인 후 진행됩니다')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join('')}</div>`;
+  <div class="class-admin-grid">${lectureContents.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" class="danger" onclick="deleteLectureContent('${c.id}')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join('')}</div>`;
 }
 
 function openClassPreview(classId=''){
@@ -125,6 +125,51 @@ function toggleClassMenu(event,id){
   document.getElementById('class-menu-'+id)?.classList.toggle('show');
 }
 document.addEventListener('click',()=>document.querySelectorAll('.class-card-menu-pop.show').forEach(menu=>menu.classList.remove('show')));
+
+let pendingLectureContentDeleteId='',contentDeleteTrigger=null;
+function deleteLectureContent(contentId){
+  const index=lectureContents.findIndex(item=>item.id===contentId);
+  if(index<0)return;
+  const content=lectureContents[index],linkedCount=linkedClassCount(contentId);
+  const modal=document.getElementById('contentDeleteModal');
+  const title=document.getElementById('contentDeleteTitle');
+  const description=document.getElementById('contentDeleteDescription');
+  const cancel=document.getElementById('contentDeleteCancel');
+  const confirm=document.getElementById('contentDeleteConfirm');
+  pendingLectureContentDeleteId='';
+  contentDeleteTrigger=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  if(linkedCount>0){
+    title.textContent='연결된 콘텐츠는 삭제할 수 없습니다';
+    description.textContent=`“${classShortTitle(content.title)}” 콘텐츠가 ${linkedCount}개의 클래스에서 사용 중입니다. 연결된 클래스를 먼저 삭제한 뒤, 연결 클래스가 없을 때 콘텐츠를 삭제할 수 있습니다.`;
+    cancel.textContent='확인';
+    confirm.hidden=true;
+  }else{
+    pendingLectureContentDeleteId=contentId;
+    title.textContent='강의 콘텐츠를 삭제할까요?';
+    description.textContent=`“${classShortTitle(content.title)}” 콘텐츠를 삭제하면 복구할 수 없습니다.`;
+    cancel.textContent='취소';
+    confirm.hidden=false;
+  }
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  requestAnimationFrame(()=>cancel.focus());
+}
+function closeContentDeleteModal(){
+  const modal=document.getElementById('contentDeleteModal');
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+  pendingLectureContentDeleteId='';
+  if(contentDeleteTrigger?.isConnected)contentDeleteTrigger.focus();
+  contentDeleteTrigger=null;
+}
+function confirmLectureContentDelete(){
+  const index=lectureContents.findIndex(item=>item.id===pendingLectureContentDeleteId);
+  if(index<0){closeContentDeleteModal();return;}
+  lectureContents.splice(index,1);
+  closeContentDeleteModal();
+  showAdminView('classes');
+  adminToast('강의 콘텐츠를 삭제했습니다');
+}
 
 function renderClassEditor(mode='create',classId=''){
   const editing=mode==='edit',course=lectureContents.find(c=>c.id===classId)||{};
@@ -590,6 +635,10 @@ function duplicateManagedClass(classId){
 function deleteManagedClass(classId){
   const index=saleProducts.findIndex(item=>item.id===classId);
   if(index<0)return;
+  if(saleProducts[index].paymentCount>0){
+    window.alert(`“${saleProducts[index].name}” 클래스는 결제 이력이 있어 삭제할 수 없습니다.\n삭제가 필요한 경우 노하우집 고객센터로 문의해 주세요.`);
+    return;
+  }
   if(!window.confirm(`“${saleProducts[index].name}” 클래스를 삭제할까요?`))return;
   saleProducts.splice(index,1);
   showAdminView('products');
@@ -915,6 +964,16 @@ document.addEventListener('click',event=>{
   requestUnsavedChangesLeave(()=>{location.href=link.href;});
 },true);
 document.addEventListener('keydown',event=>{
+  const contentDeleteModal=document.getElementById('contentDeleteModal');
+  if(contentDeleteModal?.classList.contains('show')){
+    if(event.key==='Escape'){closeContentDeleteModal();return;}
+    if(event.key==='Tab'){
+      const controls=[...contentDeleteModal.querySelectorAll('button:not([hidden]):not(:disabled)')],first=controls[0],last=controls.at(-1);
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    }
+    return;
+  }
   const unsavedModal=document.getElementById('unsavedChangesModal');
   if(unsavedModal?.classList.contains('show')){
     if(event.key==='Escape'){closeUnsavedChangesModal();return;}

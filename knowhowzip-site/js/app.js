@@ -80,7 +80,7 @@ function setCreatorDirectoryCat(cat){state.creatorCat=cat;renderCreatorsPage();}
 /* ---------- CREATOR storefront ---------- */
 
 function creatorCommerce(c){
-  return {products:c.products};
+  return {products:c.products.filter(product=>product.isPublic!==false)};
 }
 let activeCreator=null;
 function openCreator(id){
@@ -177,6 +177,7 @@ function openOperationLink(url,title){if(url)window.open(url,'_blank','noopener,
 function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];
   if(!p||!c)return showAccessDenied('product');
+  if(p.isPublic===false&&!state.purchased.has(pid))return showAccessDenied('product');
   activeDetail=pid;
   const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
   const hasRequirement=(p.requirement||{}).type&&p.requirement.type!=='none';
@@ -588,6 +589,7 @@ function confirmWithdraw(){
 /* ---------- purchase ---------- */
 function startPurchase(id){
   if(!state.user){state.pending=id;openAuth('login');toast('결제를 위해 먼저 로그인해 주세요');return;}
+  if(productMap[id]?.isPublic===false){toast('비공개 클래스는 새로 수강신청할 수 없습니다');return;}
   const req=purchaseRequirement(productMap[id]);
   if(!req.ok){toast(req.message);return;}
   openPay(id);
