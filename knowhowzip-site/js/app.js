@@ -91,7 +91,7 @@ function setCreatorDirectoryCat(cat){state.creatorCat=cat;renderCreatorsPage();}
 /* ---------- CREATOR storefront ---------- */
 
 function creatorCommerce(c){
-  return {products:c.products.filter(product=>product.isPublic!==false)};
+  return {products:c.products.filter(product=>product.isPublic!==false&&product.cohort?.status==='모집중')};
 }
 let activeCreator=null;
 function openCreator(id){
