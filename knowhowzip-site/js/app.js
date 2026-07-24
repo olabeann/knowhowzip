@@ -37,7 +37,10 @@ function renderHome(){
   const showCategoryFilters=cats.length>2;
   homeCats.hidden=!showCategoryFilters;
   homeCats.innerHTML=showCategoryFilters?cats.map(ct=>`<button class="chip ${state.cat===ct?'active':''}" onclick="setCat('${ct}')">${ct}</button>`).join(''):'';
-  const cs=creators.filter(c=>state.cat==='전체'||c.cat===state.cat).slice(0,4);
+  const cs=[...creators]
+    .filter(c=>state.cat==='전체'||c.cat===state.cat)
+    .sort((a,b)=>String(a.registeredAt||'').localeCompare(String(b.registeredAt||'')))
+    .slice(0,4);
   document.getElementById('creatorGrid').innerHTML=cs.map(c=>`
     <div class="ccard" onclick="openCreator('${c.id}')">
       <div class="cc-cover" style="background:${c.cover}"><div class="cc-logo">${creatorLogo(c,54)}</div></div>
@@ -47,7 +50,10 @@ function renderHome(){
         <div class="cc-desc">${c.tagline}</div>
       </div>
     </div>`).join('');
-  const pop=allProducts().filter(x=>state.cat==='전체'||x.c.cat===state.cat).sort((a,b)=>b.p.reviews-a.p.reviews).slice(0,8);
+  const pop=allProducts()
+    .filter(x=>state.cat==='전체'||x.c.cat===state.cat)
+    .sort((a,b)=>String(a.p.registeredAt||'').localeCompare(String(b.p.registeredAt||'')))
+    .slice(0,4);
   document.getElementById('popularGrid').innerHTML=pop.map(x=>prodCard(x.p,x.c)).join('');
   refreshOwned();
 }
@@ -55,12 +61,17 @@ function setCat(ct){state.cat=ct;renderHome();}
 
 /* ---------- CREATOR directory ---------- */
 const categoryIcons={'전체':'▦','부동산·경매':'⌂','재테크·주식':'↗','디자인':'✦','개발':'⌘'};
+function latestCreatorClassRegistration(creator){
+  return Math.max(0,...creator.products.map(product=>Date.parse(product.registeredAt||'')).filter(Number.isFinite));
+}
 function renderCreatorsPage(){
   const catBox=document.getElementById('creatorPageCats');
   const showCategoryFilters=cats.length>2;
   catBox.closest('.creator-category-nav').hidden=!showCategoryFilters;
   catBox.innerHTML=showCategoryFilters?cats.map(ct=>`<button class="creator-category ${state.creatorCat===ct?'active':''}" onclick="setCreatorDirectoryCat('${ct}')"><span>${categoryIcons[ct]||'●'}</span>${ct}</button>`).join(''):'';
-  const list=creators.filter(c=>state.creatorCat==='전체'||c.cat===state.creatorCat);
+  const list=[...creators]
+    .filter(c=>state.creatorCat==='전체'||c.cat===state.creatorCat)
+    .sort((a,b)=>latestCreatorClassRegistration(b)-latestCreatorClassRegistration(a));
   document.getElementById('creatorResultCount').textContent=list.length;
   document.getElementById('creatorPageGrid').innerHTML=list.map(c=>`
     <article class="creator-directory-card" onclick="openCreator('${c.id}')" tabindex="0" onkeydown="if(event.key==='Enter')openCreator('${c.id}')">

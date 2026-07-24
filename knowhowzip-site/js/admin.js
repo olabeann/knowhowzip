@@ -392,18 +392,28 @@ function publicProductTitle(name=''){
 function studentProductOptions(){
   return [...new Set(students.map(student=>publicProductTitle(student.recentProduct)).filter(Boolean))];
 }
+function studentLatestPurchaseTime(student){
+  const purchaseTimes=creatorStudentProducts(student)
+    .map(item=>Date.parse(item.purchased||''))
+    .filter(Number.isFinite);
+  if(purchaseTimes.length)return Math.max(...purchaseTimes);
+  const joined=String(student.joined||'').match(/^(\d{1,2})\.(\d{1,2})$/);
+  return joined?Date.UTC(2026,Number(joined[1])-1,Number(joined[2])):0;
+}
 function getFilteredStudents(){
   const q=(document.getElementById('studentSearchInput')?.value||'').trim().toLowerCase();
+  const phoneQuery=q.replace(/\D/g,'');
   const productFilter=document.getElementById('studentProductFilter')?.value||'전체 최근 결제상품';
   const stateFilter=document.getElementById('studentStateFilter')?.value||'전체 상태';
   return students.filter(s=>{
     const displayProduct=publicProductTitle(s.recentProduct);
     const keyword=`${s.name} ${s.email} ${s.phone||''} ${s.history} ${s.course} ${displayProduct||''}`.toLowerCase();
-    const matchesKeyword=keyword.includes(q);
+    const matchesPhone=phoneQuery.length>=3&&String(s.phone||'').replace(/\D/g,'').includes(phoneQuery);
+    const matchesKeyword=keyword.includes(q)||matchesPhone;
     const matchesProduct=productFilter==='전체 최근 결제상품'||displayProduct===productFilter;
     const matchesState=stateFilter==='전체 상태'||s.state===stateFilter;
     return matchesKeyword&&matchesProduct&&matchesState;
-  });
+  }).sort((a,b)=>studentLatestPurchaseTime(b)-studentLatestPurchaseTime(a)||a.email.localeCompare(b.email));
 }
 function studentTable(rows,compact=false){
   const emptyRow=`<tr><td class="empty-table-cell" colspan="${compact?4:5}">조건에 맞는 수강생이 없습니다.</td></tr>`;
@@ -467,10 +477,10 @@ function openStudentDetail(email){
 
 let salesSelectedMonth='2026-06';
 const salesMonthlyData={
-  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일',refund:186000,rows:[{count:24,amount:6960000},{count:20,amount:7800000},{count:11,amount:4950000}]},
-  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일',refund:273600,rows:[{count:21,amount:6090000},{count:18,amount:7020000},{count:9,amount:4050000}]},
-  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일',refund:198000,rows:[{count:17,amount:4930000},{count:14,amount:5460000},{count:6,amount:2700000}]},
-  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,rows:[{count:12,amount:3480000},{count:9,amount:3510000},{count:3,amount:1350000}]}
+  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일',refund:186000,rows:[{count:24,amount:6960000,refund:186000},{count:20,amount:7800000,refund:0},{count:11,amount:4950000,refund:0}]},
+  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일',refund:273600,rows:[{count:21,amount:6090000,refund:273600},{count:18,amount:7020000,refund:0},{count:9,amount:4050000,refund:0}]},
+  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일',refund:198000,rows:[{count:17,amount:4930000,refund:198000},{count:14,amount:5460000,refund:0},{count:6,amount:2700000,refund:0}]},
+  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,rows:[{count:12,amount:3480000,refund:0},{count:9,amount:3510000,refund:0},{count:3,amount:1350000,refund:0}]}
 };
 function setSalesMonth(month){salesSelectedMonth=month;showAdminView('sales');}
 function salesClassStudents(classTitle){
@@ -489,7 +499,7 @@ function renderSalesClassStudents(classId){
   const className=course.title.split(' · ')[0];
   const rows=salesClassStudents(course.title);
   const row=salesClassRowData(classId);
-  const payout=row.amount-Math.round(row.amount*.12);
+  const payout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));
   return `${pageHeader('Sales detail','클래스 결제 수강생','선택한 클래스의 월별 결제 수강생을 확인합니다.','<button class="btn ghost" onclick="showAdminView(\'sales\')">← 매출·정산으로 돌아가기</button>')}
   <section class="sales-detail-head panel"><div><span>${data.label}</span><h2>${className}</h2><p>${course.title}</p></div><div class="sales-detail-metrics"><article><span>결제 건수</span><strong>${row.count}건</strong></article><article><span>총 매출</span><strong>${won(row.amount)}</strong></article><article><span>정산 예정</span><strong>${won(payout)}</strong></article></div></section>
   <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 완료 기준</p></div></div><div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>최근 결제 상품</th><th>결제일</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(student=>{const item=(student.products||[]).find(product=>product.className===className)||student.products?.[0]||{};return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${publicProductTitle(item.product||student.recentProduct)||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.period||student.period||'-'}</td><td><em class="table-state ${studentStateClass(item.status||student.state)}">${item.status||student.state}</em></td></tr>`;}).join(''):'<tr><td colspan="6" class="empty-table">표시할 결제 수강생이 없습니다.</td></tr>'}</tbody></table></div></article>`;
@@ -505,10 +515,10 @@ function renderSales(){
   const gross=data.rows.reduce((sum,row)=>sum+row.amount,0);
   const payout=Math.max(0,Math.round((gross-data.refund)*.88));
   const monthSelect=`<select class="sales-month-select" aria-label="조회 월" onchange="setSalesMonth(this.value)">${Object.entries(salesMonthlyData).map(([value,item])=>`<option value="${value}" ${value===salesSelectedMonth?'selected':''}>${item.label}</option>`).join('')}</select>`;
-  return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
+  return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" id="salesPayoutSettingsButton" aria-label="정산 계좌 관리" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
   <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div></section>
-  <section class="metric-grid two"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong></article></section>
-  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0},fee=Math.round(row.amount*.12);return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(row.amount-fee)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
+  <section class="metric-grid two sales-overview-metrics"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong></article></section>
+  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0,refund:0},classPayout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(classPayout)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
 }
 
 const alimtalkProductSettings=[
@@ -577,11 +587,32 @@ function alimtalkExampleMarkup(template){
 }
 
 function settingsPanelMarkup(panel){
-  if(panel==='payout') return `<div class="settings-grid"><form class="panel settings-form" onsubmit="event.preventDefault();adminToast('정산 정보를 저장했습니다')"><div class="settings-section-title"><div><span>PAYOUT</span><h2>정산 정보</h2><p>매출 정산을 받을 계좌와 사업자 정보를 관리합니다.</p></div><em>확인 완료</em></div><div class="settings-fields two"><label>예금주<input value="애매모홈"></label><label>은행<select><option>국민은행</option></select></label><label class="wide">계좌번호<input value="123-456-789012"></label><label class="wide">정산 이메일<input value="creator@mmoh.kr"></label></div><div class="settings-save"><small>정산 정보는 정산일 7일 전까지 변경해야 합니다. 이후 변경은 주식회사 위이에 직접 요청해 주세요.</small><button class="btn primary" type="submit">정산 정보 저장</button></div></form><aside class="panel settings-help"><span>다음 정산</span><strong>7월 10일</strong><p>예정 금액 ₩15,936,000</p><button type="button" onclick="showAdminView('sales')">매출·정산 보기</button></aside></div>`;
-  return `<div class="settings-grid"><form class="panel settings-form settings-profile-form" onsubmit="event.preventDefault();adminToast('채널 정보를 저장했습니다')"><div class="settings-section-title"><div><span>PUBLIC CHANNEL</span><h2>공개 채널 정보</h2><p>크리에이터 페이지에 노출되는 프로필과 소개를 관리합니다.</p></div></div><div class="settings-profile-top"><div class="settings-avatar">${houseMark(72)}<div><b>프로필 이미지</b><small>권장 크기 400 × 400px</small><button type="button">이미지 변경</button></div></div></div><div class="settings-cover-picker"><div><b>프로필 배경색</b><small>크리에이터 공개 페이지 상단에 적용됩니다.</small></div><div class="settings-color-options"><button type="button" class="active" style="--swatch:#cbe7f1" onclick="selectChannelColor(this,'#cbe7f1')" aria-label="하늘색"></button><button type="button" style="--swatch:#e2e0ff" onclick="selectChannelColor(this,'#e2e0ff')" aria-label="보라색"></button><button type="button" style="--swatch:#f8ddd8" onclick="selectChannelColor(this,'#f8ddd8')" aria-label="분홍색"></button><button type="button" style="--swatch:#dceedb" onclick="selectChannelColor(this,'#dceedb')" aria-label="초록색"></button><button type="button" style="--swatch:#f8e7c5" onclick="selectChannelColor(this,'#f8e7c5')" aria-label="노란색"></button><label class="settings-custom-color"><input type="color" value="#cbe7f1" oninput="selectChannelColor(this,this.value)"><span>직접 선택</span></label></div></div><div class="settings-fields two"><label>크리에이터명<input value="애매모홈"></label><label>핸들<input value="@mmoh"></label><label class="wide">카테고리<select><option>부동산·경매</option></select></label><label class="wide">한 줄 소개<input value="월급쟁이도 이해하는 실전 부동산 경매"></label><label class="wide">상세 소개<textarea>경매 입문부터 권리분석, 현장 임장, 명도, 세금까지. 직장인 눈높이에 맞춰 실전에서 바로 쓰는 낙찰 노하우를 전합니다.</textarea></label></div><div class="settings-save"><small>저장한 정보는 공개 크리에이터 페이지에 바로 반영됩니다.</small><button class="btn primary" type="submit">변경사항 저장</button></div></form><aside class="panel settings-preview"><span>공개 페이지 미리보기</span><div class="settings-preview-card" id="settingsChannelPreview" style="background:${getSavedChannelColor()}">${houseMark(76)}<h3>애매모홈</h3><p>@mmoh · 부동산·경매</p><small>월급쟁이도 이해하는 실전 부동산 경매</small><button type="button" class="creator-page-link" onclick="openCreatorPublicPage()">내 페이지 보기 ↗</button></div></aside></div>`;
+  if(panel==='payout') return `<div class="settings-grid"><form class="panel settings-form settings-payout-form" onsubmit="savePayoutSettings(event,this)"><div class="settings-section-title"><div><span>PAYOUT</span><h2>정산 정보</h2><p>매출 정산을 받을 계좌와 사업자 정보를 관리합니다.</p></div><em>전체 필수</em></div><p class="settings-payout-warning">정산 정보 미입력 시 정산이 늦어질 수 있습니다.</p><div class="settings-fields two"><label>예금주 <em class="settings-required">*</em><input required value="애매모홈"></label><label>은행 <em class="settings-required">*</em><select required><option>국민은행</option></select></label><label class="wide">계좌번호 <em class="settings-required">*</em><input required inputmode="numeric" value="123-456-789012"></label><label class="wide">정산 이메일 <em class="settings-required">*</em><input required type="email" value="creator@mmoh.kr"></label></div><div class="settings-save"><small>정산 정보는 정산일 7일 전까지 변경해야 합니다. 이후 변경은 주식회사 위이에 직접 요청해 주세요.</small><button class="btn primary" type="submit">정산 정보 저장</button></div></form><aside class="panel settings-help"><span>다음 정산</span><strong>7월 10일</strong><p>예정 금액 ₩15,936,000</p><button type="button" onclick="showAdminView('sales')">매출·정산 보기</button></aside></div>`;
+  const coverColor=getSavedChannelColor();
+  return `<div class="settings-grid"><form class="panel settings-form settings-profile-form" data-profile-image="1" onsubmit="saveChannelSettings(event,this)"><div class="settings-section-title"><div><span>PUBLIC CHANNEL</span><h2>공개 채널 정보</h2><p>크리에이터 페이지에 노출되는 프로필과 소개를 관리합니다.</p></div><em>전체 필수</em></div><div class="settings-profile-top"><div class="settings-avatar">${houseMark(72)}<div><b>프로필 이미지 <em class="settings-required">*</em></b><small>권장 크기 400 × 400px</small><button type="button">이미지 변경</button></div></div></div><div class="settings-cover-picker"><div><b>프로필 배경색 <em class="settings-required">*</em></b><small>크리에이터 공개 페이지 상단에 적용됩니다.</small></div><div class="settings-color-options"><button type="button" class="active" style="--swatch:#cbe7f1" onclick="selectChannelColor(this,'#cbe7f1')" aria-label="하늘색"></button><button type="button" style="--swatch:#e2e0ff" onclick="selectChannelColor(this,'#e2e0ff')" aria-label="보라색"></button><button type="button" style="--swatch:#f8ddd8" onclick="selectChannelColor(this,'#f8ddd8')" aria-label="분홍색"></button><button type="button" style="--swatch:#dceedb" onclick="selectChannelColor(this,'#dceedb')" aria-label="초록색"></button><button type="button" style="--swatch:#f8e7c5" onclick="selectChannelColor(this,'#f8e7c5')" aria-label="노란색"></button><label class="settings-custom-color"><input type="color" value="${coverColor}" oninput="selectChannelColor(this,this.value)"><span>직접 선택</span></label><input type="hidden" name="profileCoverColor" value="${coverColor}"></div></div><div class="settings-fields two"><label>크리에이터명 <em class="settings-required">*</em><input required value="애매모홈"></label><label>핸들 <em class="settings-required">*</em><input required pattern="^@[A-Za-z0-9._]+$" value="@mmoh"></label><label class="wide">카테고리 <em class="settings-required">*</em><select required><option>부동산·경매</option></select></label><label class="wide">한 줄 소개 <em class="settings-required">*</em><input required value="월급쟁이도 이해하는 실전 부동산 경매"></label><label class="wide">상세 소개 <em class="settings-required">*</em><textarea required>경매 입문부터 권리분석, 현장 임장, 명도, 세금까지. 직장인 눈높이에 맞춰 실전에서 바로 쓰는 낙찰 노하우를 전합니다.</textarea></label></div><div class="settings-save"><small>모든 항목을 입력해야 저장할 수 있으며, 저장한 정보는 공개 크리에이터 페이지에 바로 반영됩니다.</small><button class="btn primary" type="submit">변경사항 저장</button></div></form><aside class="panel settings-preview"><span>공개 페이지 미리보기</span><div class="settings-preview-card" id="settingsChannelPreview" style="background:${coverColor}">${houseMark(76)}<h3>애매모홈</h3><p>@mmoh · 부동산·경매</p><small>월급쟁이도 이해하는 실전 부동산 경매</small><button type="button" class="creator-page-link" onclick="openCreatorPublicPage()">내 페이지 보기 ↗</button></div></aside></div>`;
 }
 function getSavedChannelColor(){try{return localStorage.getItem('nhz-mmoh-cover')||'#cbe7f1';}catch(error){return '#cbe7f1';}}
-function selectChannelColor(control,color){document.querySelectorAll('.settings-color-options>button').forEach(button=>button.classList.remove('active'));if(control.tagName==='BUTTON')control.classList.add('active');const preview=document.getElementById('settingsChannelPreview');if(preview)preview.style.background=color;try{localStorage.setItem('nhz-mmoh-cover',color);}catch(error){}adminToast('프로필 배경색을 선택했습니다');}
+function saveChannelSettings(event,form){
+  event.preventDefault();
+  const hasImage=form.dataset.profileImage==='1';
+  const hasCover=Boolean(form.elements.profileCoverColor?.value);
+  if(!hasImage||!hasCover||!form.checkValidity()){
+    form.reportValidity();
+    adminToast('전체 필수 항목을 입력해 주세요');
+    return;
+  }
+  adminToast('채널 정보를 저장했습니다');
+}
+function savePayoutSettings(event,form){
+  event.preventDefault();
+  if(!form.checkValidity()){
+    form.reportValidity();
+    adminToast('전체 필수 항목을 입력해 주세요');
+    return;
+  }
+  adminToast('정산 정보를 저장했습니다');
+}
+function selectChannelColor(control,color){document.querySelectorAll('.settings-color-options>button').forEach(button=>button.classList.remove('active'));if(control.tagName==='BUTTON')control.classList.add('active');const preview=document.getElementById('settingsChannelPreview');if(preview)preview.style.background=color;const coverInput=document.querySelector('.settings-profile-form [name="profileCoverColor"]');if(coverInput)coverInput.value=color;try{localStorage.setItem('nhz-mmoh-cover',color);}catch(error){}adminToast('프로필 배경색을 선택했습니다');}
 function switchSettingsPanel(panel,button){
   document.querySelectorAll('.settings-tabs button').forEach(item=>item.classList.remove('active'));
   button.classList.add('active');

@@ -135,6 +135,7 @@ main{min-height:50vh}
 
 /* creator grid */
 .creator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(264px,280px));justify-content:center;gap:22px}
+.home-popular-grid{grid-template-columns:repeat(auto-fit,minmax(252px,280px));justify-content:center}
 .ccard{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:.2s}
 .ccard:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:transparent}
 .cc-cover{height:88px;position:relative}

@@ -97,13 +97,13 @@
     </div>
 
     <!-- POPULAR -->
-    <div class="section alt">
+    <div class="section alt" id="homePopular">
       <div class="wrap">
         <div class="sec-head">
           <span class="eyebrow">Popular</span>
           <h2>지금 인기 클래스</h2>
         </div>
-        <div class="grid" id="popularGrid"></div>
+        <div class="grid home-popular-grid" id="popularGrid"></div>
       </div>
     </div>
 
@@ -152,12 +152,12 @@
     </div>
 
     <!-- CTA BAND -->
-    <div class="wrap" style="padding-bottom:80px">
+    <div class="wrap" id="homeBottomCta" style="padding-bottom:80px">
       <div class="cta-band">
         <h2>좋아하는 크리에이터의 강의,<br>이제 한곳에서 관리하세요</h2>
         <p>익숙한 방식으로 시작하고, 신청한 클래스는 내 학습에서 모아보세요.</p>
         <div class="btns">
-          <button class="b-w" onclick="openAuth('signup')">바로 시작하기</button>
+          <button class="b-w" onclick="openAuth('login')">바로 시작하기</button>
         </div>
       </div>
     </div>
@@ -183,11 +183,11 @@
       <div class="creator-filter-row">
         <div>
           <h2>전체 크리에이터</h2>
-          <p><b id="creatorResultCount">0</b>명의 크리에이터를 찾았어요.</p>
+          <p><b id="creatorResultCount">0</b>명의 크리에이터가 등록되어 있어요.</p>
         </div>
       </div>
       <div class="creator-directory-grid" id="creatorPageGrid"></div>
-      <div class="creator-empty" id="creatorEmpty" hidden>조건에 맞는 크리에이터가 없습니다.</div>
+      <div class="creator-empty" id="creatorEmpty" hidden>등록된 크리에이터가 없습니다.</div>
     </div>
   </section>
 
@@ -272,7 +272,7 @@
 <script src="./js/data.js"></script>
 <script src="./js/refund-policy.js"></script>
 <script src="./js/app.js"></script>
-<script src="./js/policy-guide.js?v=20260724-2"></script>
+<script src="./js/policy-guide.js?v=20260724-10"></script>
 
 </body>
 </html>
