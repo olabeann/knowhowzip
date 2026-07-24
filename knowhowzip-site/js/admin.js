@@ -72,37 +72,52 @@ function dashboardClassState(period){
 function pageHeader(kicker,title,desc,actions=''){
   return `<div class="admin-page-head"><div><span>${kicker}</span><h1>${title}</h1><p>${desc}</p></div>${actions?`<div class="page-actions">${actions}</div>`:''}</div>`;
 }
+let emptyPreviewMode=false;
+let currentAdminView='dashboard';
+function adminEmptyState(icon,title,description,actionLabel='',action=''){
+  return `<div class="admin-empty-state" role="status">
+    <span class="admin-empty-icon" aria-hidden="true">${icon}</span>
+    <h2>${title}</h2>
+    <p>${description}</p>
+    ${actionLabel&&action?`<button type="button" class="btn primary" onclick="${action}">${actionLabel}</button>`:''}
+  </div>`;
+}
+function emptyPreviewRows(rows){return emptyPreviewMode?[]:rows;}
 function openCreatorPublicPage(){
   window.open('./index.html#/c/mmoh','_blank','noopener');
 }
 
 function renderDashboard(){
+  const dashboardContents=emptyPreviewRows(lectureContents).slice(0,3);
+  const dashboardStudents=emptyPreviewRows(students).slice(0,4);
+  const dashboardClasses=emptyPreviewRows(saleProducts);
   return `${pageHeader('2026년 7월 9일 목요일','안녕하세요, 애매모홈님 👋','강의 콘텐츠와 클래스 운영 현황을 한눈에 확인하세요.','<button type="button" class="btn ghost creator-page-link" onclick="openCreatorPublicPage()">내 페이지 보기 ↗</button>')}
     <section class="metric-grid three">
-      <article class="metric-card"><div class="metric-icon blue">💸</div><span>이번 달 매출</span><strong>₩18,420,000</strong></article>
-      <article class="metric-card"><div class="metric-icon violet">👥</div><span>전체 수강생</span><strong>48명</strong></article>
-      <article class="metric-card"><div class="metric-icon green">🏫</div><span>등록 클래스</span><strong>3개</strong></article>
+      <article class="metric-card"><div class="metric-icon blue">💸</div><span>이번 달 매출</span><strong>${emptyPreviewMode?'₩0':'₩18,420,000'}</strong></article>
+      <article class="metric-card"><div class="metric-icon violet">👥</div><span>전체 수강생</span><strong>${emptyPreviewMode?'0명':'48명'}</strong></article>
+      <article class="metric-card"><div class="metric-icon green">🏫</div><span>등록 클래스</span><strong>${dashboardClasses.length}개</strong></article>
     </section>
 
     <section class="dashboard-grid single">
 
       <article class="panel cohort-panel">
         <div class="panel-head"><div><h2>강의 콘텐츠</h2><p>재사용 가능한 영상·자료 커리큘럼을 관리합니다.</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
-        <div class="cohort-list">${lectureContents.slice(0,3).map(c=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}"></span><span class="cohort-info"><b>${classShortTitle(c.title)} 커리큘럼</b><small>${linkedClassCount(c.id)}개 클래스에서 사용 중</small></span></button>`).join('')}</div>
+        ${dashboardContents.length?`<div class="cohort-list">${dashboardContents.map(c=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}"></span><span class="cohort-info"><b>${classShortTitle(c.title)} 커리큘럼</b><small>${linkedClassCount(c.id)}개 클래스에서 사용 중</small></span></button>`).join('')}</div>`:adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}
       </article>
     </section>
 
     <section class="dashboard-grid lower single">
       <article class="panel recent-panel">
         <div class="panel-head"><div><h2>최근 수강 신청</h2><p>새로 결제한 수강생</p></div><button class="text-btn" onclick="showAdminView('students')">전체 보기 →</button></div>
-        ${studentTable(students.slice(0,4),true)}
+        ${dashboardStudents.length?studentTable(dashboardStudents,true):adminEmptyState('👥','아직 수강 신청이 없습니다.','새로운 결제가 완료되면 최근 수강 신청이 이곳에 표시됩니다.')}
       </article>
     </section>`;
 }
 
 function renderClasses(){
+  const rows=emptyPreviewRows(lectureContents);
   return `${pageHeader('Lecture content','강의 콘텐츠','수강생에게 제공되는 영상, 자료, 강의 순서와 설명을 관리합니다. 등록한 콘텐츠는 여러 클래스에서 재사용할 수 있습니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 강의 콘텐츠</button>')}
-  <div class="class-admin-grid">${lectureContents.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" class="danger" onclick="deleteLectureContent('${c.id}')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join('')}</div>`;
+  <div class="class-admin-grid${rows.length?'':' is-empty'}">${rows.length?rows.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" class="danger" onclick="deleteLectureContent('${c.id}')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join(''):adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}</div>`;
 }
 
 function openClassPreview(classId=''){
@@ -136,6 +151,7 @@ function deleteLectureContent(contentId){
   const description=document.getElementById('contentDeleteDescription');
   const cancel=document.getElementById('contentDeleteCancel');
   const confirm=document.getElementById('contentDeleteConfirm');
+  const actions=modal.querySelector('.unsaved-changes-actions');
   pendingLectureContentDeleteId='';
   contentDeleteTrigger=document.activeElement instanceof HTMLElement?document.activeElement:null;
   if(linkedCount>0){
@@ -143,12 +159,14 @@ function deleteLectureContent(contentId){
     description.textContent=`“${classShortTitle(content.title)}” 콘텐츠가 ${linkedCount}개의 클래스에서 사용 중입니다. 연결된 클래스를 먼저 삭제한 뒤, 연결 클래스가 없을 때 콘텐츠를 삭제할 수 있습니다.`;
     cancel.textContent='확인';
     confirm.hidden=true;
+    actions.classList.add('single-action');
   }else{
     pendingLectureContentDeleteId=contentId;
     title.textContent='강의 콘텐츠를 삭제할까요?';
     description.textContent=`“${classShortTitle(content.title)}” 콘텐츠를 삭제하면 복구할 수 없습니다.`;
     cancel.textContent='취소';
     confirm.hidden=false;
+    actions.classList.remove('single-action');
   }
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
@@ -390,7 +408,7 @@ function publicProductTitle(name=''){
   return match.title;
 }
 function studentProductOptions(){
-  return [...new Set(students.map(student=>publicProductTitle(student.recentProduct)).filter(Boolean))];
+  return [...new Set(emptyPreviewRows(students).map(student=>publicProductTitle(student.recentProduct)).filter(Boolean))];
 }
 function studentLatestPurchaseTime(student){
   const purchaseTimes=creatorStudentProducts(student)
@@ -405,7 +423,7 @@ function getFilteredStudents(){
   const phoneQuery=q.replace(/\D/g,'');
   const productFilter=document.getElementById('studentProductFilter')?.value||'전체 최근 결제상품';
   const stateFilter=document.getElementById('studentStateFilter')?.value||'전체 상태';
-  return students.filter(s=>{
+  return emptyPreviewRows(students).filter(s=>{
     const displayProduct=publicProductTitle(s.recentProduct);
     const keyword=`${s.name} ${s.email} ${s.phone||''} ${s.history} ${s.course} ${displayProduct||''}`.toLowerCase();
     const matchesPhone=phoneQuery.length>=3&&String(s.phone||'').replace(/\D/g,'').includes(phoneQuery);
@@ -422,10 +440,14 @@ function studentTable(rows,compact=false){
 function studentStateSummary(){
   const states=['전체 상태','수강 대기','수강 중','수강 종료'];
   const active=document.getElementById('studentStateFilter')?.value||'전체 상태';
-  return `<div class="student-state-tabs">${states.map(state=>{const count=state==='전체 상태'?students.length:students.filter(student=>student.state===state).length;return `<button type="button" class="${active===state?'active':''}" onclick="setStudentStateFilter('${state}')"><span>${state}</span><b>${count}명</b></button>`;}).join('')}</div>`;
+  const rows=emptyPreviewRows(students);
+  return `<div class="student-state-tabs">${states.map(state=>{const count=state==='전체 상태'?rows.length:rows.filter(student=>student.state===state).length;return `<button type="button" class="${active===state?'active':''}" onclick="setStudentStateFilter('${state}')"><span>${state}</span><b>${count}명</b></button>`;}).join('')}</div>`;
 }
 function renderStudentTableSection(){
   const filtered=getFilteredStudents();
+  const hasAnyStudents=emptyPreviewRows(students).length>0;
+  if(!hasAnyStudents)return adminEmptyState('👥','아직 수강생이 없습니다.','클래스 결제가 완료되면 수강생 정보와 수강 상태가 이곳에 표시됩니다.');
+  if(!filtered.length)return adminEmptyState('⌕','조건에 맞는 수강생이 없습니다.','검색어나 상태·클래스 필터를 변경해 주세요.','검색·필터 초기화','resetStudentFilters()');
   const totalPages=Math.max(1,Math.ceil(filtered.length/studentPageSize));
   studentCurrentPage=Math.min(Math.max(1,studentCurrentPage),totalPages);
   const start=(studentCurrentPage-1)*studentPageSize;
@@ -457,6 +479,15 @@ function goStudentPage(page){
   studentCurrentPage=page;
   filterStudents(false);
 }
+function resetStudentFilters(){
+  const search=document.getElementById('studentSearchInput');
+  const product=document.getElementById('studentProductFilter');
+  const state=document.getElementById('studentStateFilter');
+  if(search)search.value='';
+  if(product)product.selectedIndex=0;
+  if(state)state.value='전체 상태';
+  filterStudents(true);
+}
 
 function openStudentDetail(email){
   const student=students.find(item=>item.email===email),modal=document.getElementById('studentDetailModal');
@@ -482,27 +513,31 @@ const salesMonthlyData={
   '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일',refund:198000,rows:[{count:17,amount:4930000,refund:198000},{count:14,amount:5460000,refund:0},{count:6,amount:2700000,refund:0}]},
   '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,rows:[{count:12,amount:3480000,refund:0},{count:9,amount:3510000,refund:0},{count:3,amount:1350000,refund:0}]}
 };
+function currentSalesData(){
+  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  return emptyPreviewMode?{...data,refund:0,rows:[]}:data;
+}
 function setSalesMonth(month){salesSelectedMonth=month;showAdminView('sales');}
 function salesClassStudents(classTitle){
   const className=classTitle.split(' · ')[0];
-  return students.filter(student=>(student.products||[]).some(item=>item.className===className||student.course===className));
+  return emptyPreviewRows(students).filter(student=>(student.products||[]).some(item=>item.className===className||student.course===className));
 }
 function salesClassRowData(classId){
   const index=classes.findIndex(item=>item.id===classId);
-  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  const data=currentSalesData();
   return data.rows[index]||{count:0,amount:0};
 }
 function renderSalesClassStudents(classId){
   const course=classes.find(item=>item.id===classId);
   if(!course)return renderSales();
-  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  const data=currentSalesData();
   const className=course.title.split(' · ')[0];
   const rows=salesClassStudents(course.title);
   const row=salesClassRowData(classId);
   const payout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));
   return `${pageHeader('Sales detail','클래스 결제 수강생','선택한 클래스의 월별 결제 수강생을 확인합니다.','<button class="btn ghost" onclick="showAdminView(\'sales\')">← 매출·정산으로 돌아가기</button>')}
   <section class="sales-detail-head panel"><div><span>${data.label}</span><h2>${className}</h2><p>${course.title}</p></div><div class="sales-detail-metrics"><article><span>결제 건수</span><strong>${row.count}건</strong></article><article><span>총 매출</span><strong>${won(row.amount)}</strong></article><article><span>정산 예정</span><strong>${won(payout)}</strong></article></div></section>
-  <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 완료 기준</p></div></div><div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>최근 결제 상품</th><th>결제일</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.length?rows.map(student=>{const item=(student.products||[]).find(product=>product.className===className)||student.products?.[0]||{};return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${publicProductTitle(item.product||student.recentProduct)||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.period||student.period||'-'}</td><td><em class="table-state ${studentStateClass(item.status||student.state)}">${item.status||student.state}</em></td></tr>`;}).join(''):'<tr><td colspan="6" class="empty-table">표시할 결제 수강생이 없습니다.</td></tr>'}</tbody></table></div></article>`;
+  <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 완료 기준</p></div></div>${rows.length?`<div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>최근 결제 상품</th><th>결제일</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.map(student=>{const item=(student.products||[]).find(product=>product.className===className)||student.products?.[0]||{};return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${publicProductTitle(item.product||student.recentProduct)||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.period||student.period||'-'}</td><td><em class="table-state ${studentStateClass(item.status||student.state)}">${item.status||student.state}</em></td></tr>`;}).join('')}</tbody></table></div>`:adminEmptyState('👥','결제 수강생이 없습니다.','선택한 기간에 이 클래스를 결제한 수강생이 없습니다.')}</article>`;
 }
 function openSalesClassStudents(classId){
   document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='sales'));
@@ -511,14 +546,14 @@ function openSalesClassStudents(classId){
   location.hash=`#sales-class-${classId}`;
 }
 function renderSales(){
-  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  const data=currentSalesData();
   const gross=data.rows.reduce((sum,row)=>sum+row.amount,0);
   const payout=Math.max(0,Math.round((gross-data.refund)*.88));
   const monthSelect=`<select class="sales-month-select" aria-label="조회 월" onchange="setSalesMonth(this.value)">${Object.entries(salesMonthlyData).map(([value,item])=>`<option value="${value}" ${value===salesSelectedMonth?'selected':''}>${item.label}</option>`).join('')}</select>`;
   return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" id="salesPayoutSettingsButton" aria-label="정산 계좌 관리" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
   <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div></section>
   <section class="metric-grid two sales-overview-metrics"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong></article></section>
-  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div><table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0,refund:0},classPayout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(classPayout)}</strong></td></tr>`;}).join('')}</tbody></table></article>`;
+  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div>${data.rows.length?`<table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0,refund:0},classPayout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(classPayout)}</strong></td></tr>`;}).join('')}</tbody></table>`:adminEmptyState('₩','선택한 기간의 정산 내역이 없습니다.','결제와 환불·취소 내역이 발생하면 클래스별 정산 금액이 이곳에 표시됩니다.')}</article>`;
 }
 
 const alimtalkProductSettings=[
@@ -652,8 +687,9 @@ function linkedClassCount(contentId){return saleProducts.filter(item=>(item.cont
 function linkedContentItems(product){return (product.contentIds||[]).map(id=>lectureContents.find(item=>item.id===id)).filter(Boolean);}
 function linkedContentNames(product){return linkedContentItems(product).map(item=>`${classShortTitle(item.title)} 커리큘럼`);}
 function renderProducts(){
+  const rows=emptyPreviewRows(saleProducts);
   return `${pageHeader('Class management','클래스 관리','수강생에게 노출되고 판매되는 클래스의 소개, 기간, 가격, 운영 안내, FAQ와 공개 상태를 관리합니다.','<button class="btn primary" onclick="openProductEditor(\'create\')">+ 새 클래스 등록</button>')}
-  <div class="product-admin-grid">${saleProducts.map(product=>`<article class="sale-product-card" role="button" tabindex="0" aria-label="${product.name} 클래스 수정" onclick="openProductEditor('edit','${product.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProductEditor('edit','${product.id}')}"><div class="sale-product-top"><span>${linkedContentItems(product).length>1?`${linkedContentItems(product).length}개 강의 콘텐츠`:(linkedContentNames(product)[0]||'콘텐츠 미연결')}</span><div class="sale-product-state"><em class="${product.status==='비공개'||product.status==='준비중'?'soon':'open'}">${product.status}</em><div class="class-card-menu"><button type="button" aria-label="${product.name} 더보기" onclick="toggleClassMenu(event,'sale-${product.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-sale-${product.id}" onclick="event.stopPropagation()"><button type="button" onclick="openProductEditor('edit','${product.id}')">수정</button><button type="button" onclick="duplicateManagedClass('${product.id}')">복제</button><button type="button" class="danger" onclick="deleteManagedClass('${product.id}')">삭제</button></div></div></div></div><h2>${product.name}</h2><p>${product.desc}</p><div class="product-card-price"><strong>${won(product.price)}</strong><small>${product.period}</small></div><div class="product-card-summary"><div><b>수강 조건</b><span>${product.requirement}</span></div><div><b>강의 콘텐츠</b><span>${linkedContentNames(product).join(' · ')||'미연결'}</span></div></div></article>`).join('')}</div>`;
+  <div class="product-admin-grid${rows.length?'':' is-empty'}">${rows.length?rows.map(product=>`<article class="sale-product-card" role="button" tabindex="0" aria-label="${product.name} 클래스 수정" onclick="openProductEditor('edit','${product.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProductEditor('edit','${product.id}')}"><div class="sale-product-top"><span>${linkedContentItems(product).length>1?`${linkedContentItems(product).length}개 강의 콘텐츠`:(linkedContentNames(product)[0]||'콘텐츠 미연결')}</span><div class="sale-product-state"><em class="${product.status==='비공개'||product.status==='준비중'?'soon':'open'}">${product.status}</em><div class="class-card-menu"><button type="button" aria-label="${product.name} 더보기" onclick="toggleClassMenu(event,'sale-${product.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-sale-${product.id}" onclick="event.stopPropagation()"><button type="button" onclick="openProductEditor('edit','${product.id}')">수정</button><button type="button" onclick="duplicateManagedClass('${product.id}')">복제</button><button type="button" class="danger" onclick="deleteManagedClass('${product.id}')">삭제</button></div></div></div></div><h2>${product.name}</h2><p>${product.desc}</p><div class="product-card-price"><strong>${won(product.price)}</strong><small>${product.period}</small></div><div class="product-card-summary"><div><b>수강 조건</b><span>${product.requirement}</span></div><div><b>강의 콘텐츠</b><span>${linkedContentNames(product).join(' · ')||'미연결'}</span></div></div></article>`).join(''):adminEmptyState('▣','등록된 클래스가 없습니다.','강의 콘텐츠를 연결해 수강생에게 판매할 첫 클래스를 만들어 보세요.','클래스 등록',"openProductEditor('create')")}</div>`;
 }
 function duplicateManagedClass(classId){
   const index=saleProducts.findIndex(item=>item.id===classId);
@@ -663,6 +699,7 @@ function duplicateManagedClass(classId){
   showAdminView('products');
   adminToast('클래스 복제본을 비공개 상태로 추가했습니다');
 }
+let pendingManagedClassDeleteId='',classDeleteTrigger=null;
 function deleteManagedClass(classId){
   const index=saleProducts.findIndex(item=>item.id===classId);
   if(index<0)return;
@@ -670,8 +707,28 @@ function deleteManagedClass(classId){
     window.alert(`“${saleProducts[index].name}” 클래스는 결제 이력이 있어 삭제할 수 없습니다.\n삭제가 필요한 경우 노하우집 고객센터로 문의해 주세요.`);
     return;
   }
-  if(!window.confirm(`“${saleProducts[index].name}” 클래스를 삭제할까요?`))return;
+  const modal=document.getElementById('classDeleteModal');
+  const description=document.getElementById('classDeleteDescription');
+  pendingManagedClassDeleteId=classId;
+  classDeleteTrigger=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  description.textContent=`“${saleProducts[index].name}” 클래스를 삭제하면 복구할 수 없습니다.`;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  requestAnimationFrame(()=>document.getElementById('classDeleteCancel')?.focus());
+}
+function closeClassDeleteModal(){
+  const modal=document.getElementById('classDeleteModal');
+  modal?.classList.remove('show');
+  modal?.setAttribute('aria-hidden','true');
+  pendingManagedClassDeleteId='';
+  if(classDeleteTrigger?.isConnected)classDeleteTrigger.focus();
+  classDeleteTrigger=null;
+}
+function confirmManagedClassDelete(){
+  const index=saleProducts.findIndex(item=>item.id===pendingManagedClassDeleteId);
+  if(index<0){closeClassDeleteModal();return;}
   saleProducts.splice(index,1);
+  closeClassDeleteModal();
   showAdminView('products');
   adminToast('클래스를 삭제했습니다');
 }
@@ -949,8 +1006,40 @@ function renderSettings(activePanel='profile'){
 }
 
 const viewRenderers={dashboard:renderDashboard,classes:renderClasses,products:renderProducts,students:renderStudents,sales:renderSales,settings:renderSettings};
+function updateEmptyPreviewIndicator(){
+  let indicator=document.getElementById('emptyPreviewIndicator');
+  if(!emptyPreviewMode){
+    indicator?.remove();
+    return;
+  }
+  if(!indicator){
+    indicator=document.createElement('div');
+    indicator.id='emptyPreviewIndicator';
+    indicator.className='empty-preview-indicator';
+    indicator.setAttribute('role','status');
+    document.body.appendChild(indicator);
+  }
+  indicator.innerHTML='<b>빈 화면 미리보기</b><span>⌘ ⇧ E를 다시 누르면 원래 데이터로 돌아갑니다.</span>';
+}
+function toggleEmptyPreviewMode(){
+  if(document.querySelector('.class-editor,.product-editor')){
+    adminToast('목록 화면에서 빈 화면 미리보기를 사용할 수 있습니다');
+    return;
+  }
+  const supported=['dashboard','classes','products','students','sales'];
+  const activeView=supported.includes(currentAdminView)?currentAdminView:document.querySelector('.admin-nav button.active')?.dataset.view;
+  if(!supported.includes(activeView)){
+    adminToast('이 화면에는 미리 볼 데이터 목록이 없습니다');
+    return;
+  }
+  emptyPreviewMode=!emptyPreviewMode;
+  updateEmptyPreviewIndicator();
+  showAdminView(activeView,true);
+  adminToast(emptyPreviewMode?'빈 화면 미리보기를 켰습니다':'원래 데이터로 돌아왔습니다');
+}
 function showAdminView(view,skipUnsavedCheck=false){
   runAdminNavigation(()=>{
+    currentAdminView=view;
     document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
     document.getElementById('adminContent').innerHTML=viewRenderers[view]();
     window.scrollTo({top:0,behavior:'smooth'});
@@ -995,6 +1084,16 @@ document.addEventListener('click',event=>{
   requestUnsavedChangesLeave(()=>{location.href=link.href;});
 },true);
 document.addEventListener('keydown',event=>{
+  const classDeleteModal=document.getElementById('classDeleteModal');
+  if(classDeleteModal?.classList.contains('show')){
+    if(event.key==='Escape'){closeClassDeleteModal();return;}
+    if(event.key==='Tab'){
+      const controls=[...classDeleteModal.querySelectorAll('button:not([hidden]):not(:disabled)')],first=controls[0],last=controls.at(-1);
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    }
+    return;
+  }
   const contentDeleteModal=document.getElementById('contentDeleteModal');
   if(contentDeleteModal?.classList.contains('show')){
     if(event.key==='Escape'){closeContentDeleteModal();return;}
@@ -1013,6 +1112,11 @@ document.addEventListener('keydown',event=>{
       if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
       else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
     }
+    return;
+  }
+  if(event.metaKey&&event.shiftKey&&event.key.toLowerCase()==='e'){
+    event.preventDefault();
+    toggleEmptyPreviewMode();
     return;
   }
   if(event.key==='Escape'){closeClassPreview();closeAccessRequestModal();}

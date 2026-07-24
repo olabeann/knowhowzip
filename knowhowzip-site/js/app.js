@@ -15,6 +15,8 @@ const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
 let state={user:null,purchased:new Set(),authMode:'kakao',pending:null,pendingLesson:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
+let publicEmptyPreviewMode=false;
+let currentPublicView='home';
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
@@ -424,10 +426,12 @@ const demoPayments=[
   {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료'}
 ];
 function renderPaymentHistory(){
-  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제한 클래스 내역을 확인하고 환불을 요청할 수 있습니다.</p></div></div><div class="payment-list">${demoPayments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div></section>`;
+  const payments=publicEmptyPreviewMode?[]:demoPayments;
+  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제한 클래스 내역을 확인하고 환불을 요청할 수 있습니다.</p></div></div>${payments.length?`<div class="payment-list">${payments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div>`:`<div class="my-empty payment-empty">${emptyLogo()}<h3>결제 내역이 없습니다</h3><p>클래스를 결제하면 주문번호와 결제 금액이 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`}</section>`;
 }
 function renderUserProfile(){
-  const user=state.user;
+  const user=state.user||(publicEmptyPreviewMode?{name:'김노하우',phone:'010-1234-5678',provider:'kakao'}:null);
+  if(!user)return '';
   return `<section class="user-profile-card">
     <div class="user-profile-head">
       <div><span>내 정보</span><h2>${user.name}</h2><p>카카오 계정으로 연결된 정보입니다.</p></div>
@@ -442,10 +446,10 @@ function renderUserProfile(){
 function renderMy(){
   const box=document.getElementById('myContent');
   const tabs=document.getElementById('myLearningTabs');
-  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
-  const allOwned=allProducts().filter(x=>state.purchased.has(x.p.id));
+  if(!state.user&&!publicEmptyPreviewMode){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  const allOwned=publicEmptyPreviewMode?[]:allProducts().filter(x=>state.purchased.has(x.p.id));
   renderLearningTabs(allOwned);
-  if(!allOwned.length){box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>아직 수강 중인 클래스가 없습니다</h3><p>크리에이터의 클래스를 둘러보세요.</p><button class="btn-red" onclick="show('creators')">둘러보기</button></div>`;return;}
+  if(!allOwned.length){box.innerHTML=`<div class="my-empty learning-empty">${emptyLogo()}<h3>아직 수강할 클래스가 없습니다</h3><p>클래스를 결제하면 수강 기간과 학습 콘텐츠가 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`;return;}
   const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
@@ -494,7 +498,7 @@ function renderAccountTabs(){
 }
 function renderAccount(){
   const box=document.getElementById('accountContent'),tabs=document.getElementById('accountTabs');
-  if(!state.user){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 결제 내역과 내 정보를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
+  if(!state.user&&!publicEmptyPreviewMode){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 결제 내역과 내 정보를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
   renderAccountTabs();
   box.innerHTML=state.accountFilter==='profile'?renderUserProfile():renderPaymentHistory();
 }
@@ -534,7 +538,40 @@ function openRefundRequest(orderId){
 }
 
 /* ---------- view switch ---------- */
+function updatePublicEmptyPreviewIndicator(){
+  let indicator=document.getElementById('publicEmptyPreviewIndicator');
+  if(!publicEmptyPreviewMode){
+    indicator?.remove();
+    return;
+  }
+  if(!indicator){
+    indicator=document.createElement('div');
+    indicator.id='publicEmptyPreviewIndicator';
+    indicator.className='empty-preview-indicator';
+    indicator.setAttribute('role','status');
+    document.body.appendChild(indicator);
+  }
+  indicator.innerHTML='<b>빈 화면 미리보기</b><span>⌘ ⇧ E를 다시 누르면 원래 데이터로 돌아갑니다.</span>';
+}
+function togglePublicEmptyPreviewMode(){
+  const supported=['mypage','account'];
+  if(!publicEmptyPreviewMode&&!supported.includes(currentPublicView)){
+    toast('내 학습 또는 마이 화면에서 빈 화면을 미리 볼 수 있습니다');
+    return;
+  }
+  publicEmptyPreviewMode=!publicEmptyPreviewMode;
+  if(publicEmptyPreviewMode&&currentPublicView==='account')state.accountFilter='payments';
+  updatePublicEmptyPreviewIndicator();
+  if(currentPublicView==='mypage')renderMy();
+  if(currentPublicView==='account')renderAccount();
+  toast(publicEmptyPreviewMode?'빈 화면 미리보기를 켰습니다':'원래 데이터로 돌아왔습니다');
+}
 function show(view){
+  currentPublicView=view;
+  if(publicEmptyPreviewMode&&!['mypage','account'].includes(view)){
+    publicEmptyPreviewMode=false;
+    updatePublicEmptyPreviewIndicator();
+  }
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
   document.getElementById('view-'+view).classList.add('show');
   document.getElementById('creatorInquiryStrip').hidden=view!=='home';
@@ -682,7 +719,14 @@ window.addEventListener('hashchange',()=>{if(!suppressHash)route();});
 
 let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200);}
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('show');}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-bg.show').forEach(m=>m.classList.remove('show'));document.getElementById('mnav').classList.remove('show');}});
+document.addEventListener('keydown',e=>{
+  if(e.metaKey&&e.shiftKey&&e.key.toLowerCase()==='e'){
+    e.preventDefault();
+    togglePublicEmptyPreviewMode();
+    return;
+  }
+  if(e.key==='Escape'){document.querySelectorAll('.modal-bg.show').forEach(m=>m.classList.remove('show'));document.getElementById('mnav').classList.remove('show');}
+});
 
 renderHome();
 route();

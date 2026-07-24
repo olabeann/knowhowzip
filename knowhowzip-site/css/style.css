@@ -374,6 +374,8 @@ main{min-height:50vh}
 .my-empty-logo{width:52px;height:52px;object-fit:contain;display:block;margin:0 auto}
 .my-empty h3{margin:16px 0 6px;font-size:20px;font-weight:800}.my-empty p{color:var(--ink-soft);margin:0 0 22px}
 .my-empty-icon{width:50px;height:50px;border-radius:50%;margin:0 auto;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900}
+.payment-history .my-empty{min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center}.payment-history .my-empty .btn-red,.learning-empty .btn-red{min-width:160px}
+.empty-preview-indicator{position:fixed;z-index:255;left:50%;bottom:24px;display:flex;align-items:center;gap:10px;transform:translateX(-50%);border:1px solid #c7d0ff;border-radius:999px;background:#172033;color:#fff;padding:10px 16px;box-shadow:0 14px 34px rgba(15,23,42,.24);white-space:nowrap}.empty-preview-indicator b{font-size:11px}.empty-preview-indicator span{color:#cbd2e1;font-size:9.5px}
 .user-profile-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:var(--shadow-xs)}
 .user-profile-head{padding-bottom:22px;border-bottom:1px solid var(--line2)}
 .user-profile-head span{display:block;color:var(--brand);font-size:12px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}

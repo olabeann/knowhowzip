@@ -63,6 +63,18 @@ creators.forEach(creator=>{
       description:item.intro,
       content:item.content
     }));
+  if(creator.id==='mmoh'){
+    creator.lectureContents.push({
+      id:'content-mmoh-photo-practice',
+      title:'경매 물건 사진 분석 실습',
+      description:'현장 사진을 바탕으로 물건 상태와 확인 항목을 정리하는 독립 강의 콘텐츠입니다.',
+      registeredAt:'2026-07-24T10:00:00+09:00',
+      content:{
+        videos:['현장 사진으로 물건 상태 파악하기'],
+        files:['현장 사진 분석 체크리스트(PDF)']
+      }
+    });
+  }
   creator.products.forEach(item=>{
     const sourceIds=item.includedProductIds?.length?item.includedProductIds:[item.id];
     item.contentIds=sourceIds.map(sourceId=>`content-${sourceId}`);

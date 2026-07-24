@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-  <link rel="stylesheet" href="./css/admin.css?v=20260724-2">
+  <link rel="stylesheet" href="./css/admin.css?v=20260724-4">
   <link rel="stylesheet" href="./css/refund-policy.css">
   <link rel="stylesheet" href="./css/policy-guide.css?v=20260724-2">
 </head>
@@ -84,10 +84,21 @@
       </div>
     </section>
   </div>
+  <div class="unsaved-changes-modal" id="classDeleteModal" aria-hidden="true" onclick="if(event.target===this)closeClassDeleteModal()">
+    <section class="unsaved-changes-dialog" role="dialog" aria-modal="true" aria-labelledby="classDeleteTitle" aria-describedby="classDeleteDescription">
+      <div class="unsaved-changes-icon" aria-hidden="true">!</div>
+      <h2 id="classDeleteTitle">클래스를 삭제할까요?</h2>
+      <p id="classDeleteDescription"></p>
+      <div class="unsaved-changes-actions">
+        <button type="button" class="btn" id="classDeleteCancel" onclick="closeClassDeleteModal()">취소</button>
+        <button type="button" class="btn leave" id="classDeleteConfirm" onclick="confirmManagedClassDelete()">삭제</button>
+      </div>
+    </section>
+  </div>
   <div class="admin-toast" id="adminToast"></div>
-  <script src="./js/data.js"></script>
+  <script src="./js/data.js?v=20260724-1"></script>
   <script src="./js/refund-policy.js"></script>
-  <script src="./js/admin.js"></script>
-  <script src="./js/policy-guide.js?v=20260724-14"></script>
+  <script src="./js/admin.js?v=20260724-3"></script>
+  <script src="./js/policy-guide.js?v=20260724-19"></script>
 </body>
 </html>
