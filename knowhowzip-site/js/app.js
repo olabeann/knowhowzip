@@ -669,10 +669,8 @@ function closePay(){document.getElementById('payModal').classList.remove('show')
 function openPurchaseComplete(){document.getElementById('purchaseCompleteModal').classList.add('show');}
 function closePurchaseComplete(){document.getElementById('purchaseCompleteModal').classList.remove('show');}
 function startPurchasedLesson(){
-  const productId=state.pendingPurchase;
   closePurchaseComplete();
-  if(productId)openLessonPlayer(productId,0);
-  else show('mypage');
+  show('mypage');
 }
 
 function refreshOwned(){
