@@ -751,6 +751,7 @@
   function publicPolicyUrl(){
     const source=new URL(location.href);
     const hash=source.hash;
+    const hashRoute=hash.replace(/^#/,"");
     let path=source.pathname.replace(/^\/+/,"");
     if(source.protocol==="file:"){
       const match=decodeURIComponent(source.pathname).match(/(?:^|\/)(knowhowzip-site\/[^?#]+)$/);
@@ -765,6 +766,8 @@
     });
     url.searchParams.set("policy","1");
     if(activePolicy)url.searchParams.set("focus",activePolicy.id);
+    if(page==="creator-admin"&&hashRoute)url.searchParams.set("admin_view",hashRoute);
+    if(page==="public"&&hashRoute.startsWith("/"))url.searchParams.set("public_route",hashRoute);
     url.hash=hash;
     return url.href;
   }

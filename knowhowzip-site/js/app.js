@@ -14,7 +14,7 @@ var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{in
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
-let state={user:null,purchased:new Set(),authMode:'kakao',pending:null,pendingLesson:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
+let state={user:null,purchased:new Set(),authMode:'kakao',pending:null,pendingLesson:null,pendingPurchase:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
 let publicEmptyPreviewMode=false;
 let currentPublicView='home';
 
@@ -657,12 +657,23 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
     <button class="btn-red" onclick="confirmPay('${id}')">${won(p.price)} 결제하기</button>`;
   document.getElementById('payModal').classList.add('show');}
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
-function confirmPay(id){const p=productMap[id],c=creatorOf[id];state.purchased.add(id);
-  document.getElementById('payTitle').textContent='결제 완료';
-  document.getElementById('payBody').innerHTML=`<div class="pay-done"><div class="check">✓</div><h3>결제가 완료되었습니다</h3><p>${c.name}의 “${p.title}”을 내 학습에서 바로 볼 수 있습니다.</p><button class="btn-red" style="width:100%" onclick="goMy()">내 학습으로 가기</button></div>`;
-  refreshOwned();}
+function confirmPay(id){
+  state.purchased.add(id);
+  state.pendingPurchase=id;
+  closePay();
+  refreshOwned();
+  openPurchaseComplete();
+}
 function goMy(){closePay();show('mypage');}
 function closePay(){document.getElementById('payModal').classList.remove('show');}
+function openPurchaseComplete(){document.getElementById('purchaseCompleteModal').classList.add('show');}
+function closePurchaseComplete(){document.getElementById('purchaseCompleteModal').classList.remove('show');}
+function startPurchasedLesson(){
+  const productId=state.pendingPurchase;
+  closePurchaseComplete();
+  if(productId)openLessonPlayer(productId,0);
+  else show('mypage');
+}
 
 function refreshOwned(){
   Object.keys(productMap).forEach(id=>{

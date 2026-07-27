@@ -252,6 +252,20 @@
   <div class="modal-body" id="payBody"></div>
 </div></div>
 
+<!-- PURCHASE COMPLETE MODAL -->
+<div class="modal-bg" id="purchaseCompleteModal"><div class="modal purchase-complete-modal" role="dialog" aria-modal="true" aria-labelledby="purchaseCompleteTitle">
+  <div class="modal-head purchase-complete-head"><button class="modal-x" onclick="closePurchaseComplete()">&times;</button></div>
+  <div class="modal-body purchase-complete-body">
+    <div class="purchase-complete-icon">✓</div>
+    <h3 id="purchaseCompleteTitle">수강신청 완료</h3>
+    <p>수강신청이 완료되었어요.<br>강의실로 이동하여 바로 학습하시겠어요?</p>
+    <div class="purchase-complete-actions">
+      <button type="button" class="btn-line" onclick="closePurchaseComplete()">취소</button>
+      <button type="button" class="btn-red" onclick="startPurchasedLesson()">바로 학습 시작</button>
+    </div>
+  </div>
+</div></div>
+
 <!-- WITHDRAW MODAL -->
 <div class="modal-bg" id="withdrawModal"><div class="modal withdraw-modal" role="dialog" aria-modal="true">
   <div class="modal-head"><div><h3>탈퇴 전 확인</h3><p>더 나은 서비스를 위해 이유를 알려주세요.</p></div><button class="modal-x" onclick="closeWithdraw()">&times;</button></div>
