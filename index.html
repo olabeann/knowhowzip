@@ -3,13 +3,35 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=./knowhowzip-site/index.html">
   <title>노하우집으로 이동 중</title>
   <script>
-    location.replace("./knowhowzip-site/index.html");
+    const params = new URLSearchParams(location.search);
+    const focus = params.get("focus") || "";
+    const adminHashes = new Set([
+      "dashboard",
+      "classes",
+      "products",
+      "students",
+      "sales",
+      "settings",
+      "settings-payout",
+      "class-new",
+      "product-new"
+    ]);
+    const hashValue = location.hash.replace(/^#/, "");
+    const isAdminRoute =
+      focus.startsWith("admin.") ||
+      adminHashes.has(hashValue) ||
+      hashValue.startsWith("class-edit-") ||
+      hashValue.startsWith("product-edit-") ||
+      hashValue.startsWith("sales-class-");
+    const target = isAdminRoute
+      ? "./knowhowzip-site/creator-admin.html"
+      : "./knowhowzip-site/index.html";
+    location.replace(`${target}${location.search}${location.hash}`);
   </script>
 </head>
 <body>
-  <p>노하우집 홈 화면으로 이동 중입니다. 자동으로 이동하지 않으면 <a href="./knowhowzip-site/index.html">여기를 눌러주세요</a>.</p>
+  <p>노하우집 화면으로 이동 중입니다. 자동으로 이동하지 않으면 <a href="./knowhowzip-site/index.html">여기를 눌러주세요</a>.</p>
 </body>
 </html>

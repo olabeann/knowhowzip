@@ -513,12 +513,15 @@
   const SUPABASE_URL="https://vnrjbyxilgorijjicyci.supabase.co";
   const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZucmpieXhpbGdvcmlqamljeWNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwODg4ODIsImV4cCI6MjEwMDY2NDg4Mn0.tnFR6_LyPN2EN7mcJ3rnqt6hfmUq4ZiY4utCEyqJFZ8";
   const POLICY_COMMENT_FUNCTION_URL=`${SUPABASE_URL}/functions/v1/rapid-function`;
+  const PUBLIC_SITE_BASE="https://olabeann.github.io/knowhowzip/";
+  const initialFocusPolicyId=new URLSearchParams(location.search).get("focus");
   let enabled=false;
   let pinned=false;
   let activeAnchor=null;
   let activePolicy=null;
   let observer=null;
   let scheduled=false;
+  let focusAttempts=0;
   let dock=null;
   let popover=null;
 
@@ -601,6 +604,7 @@
       document.querySelectorAll(policy.selector).forEach(target=>attachMarker(target,policy));
     });
     renderDock();
+    scheduleInitialPolicyFocus();
     if(activeAnchor&&!activeAnchor.isConnected){pinned=false;closePopover();}
   }
 
@@ -654,6 +658,28 @@
         if(marker){pinned=true;setTimeout(()=>openPopover(marker,policy),260);}
       });
       list.appendChild(button);
+    });
+  }
+
+  function focusPolicy(policy){
+    const target=targetsFor(policy,true)[0]||targetsFor(policy)[0];
+    if(!target)return false;
+    target.scrollIntoView({behavior:"smooth",block:"center"});
+    const marker=Array.from(target.children).find(child=>child.classList&&child.classList.contains("policy-guide-marker")&&child.dataset.policyId===policy.id);
+    if(!marker)return false;
+    pinned=true;
+    setTimeout(()=>openPopover(marker,policy),260);
+    return true;
+  }
+
+  function scheduleInitialPolicyFocus(){
+    if(!initialFocusPolicyId||focusAttempts>=8)return;
+    const policy=pagePolicies.find(item=>item.id===initialFocusPolicyId);
+    if(!policy){focusAttempts=8;return;}
+    focusAttempts+=1;
+    requestAnimationFrame(()=>{
+      if(focusPolicy(policy))focusAttempts=8;
+      else if(focusAttempts<8)setTimeout(scheduleAnnotate,160);
     });
   }
 
@@ -722,6 +748,31 @@
     return `${pageLabel()} > ${policy.title}`;
   }
 
+  function publicPolicyUrl(){
+    const source=new URL(location.href);
+    const hash=source.hash;
+    let path=source.pathname.replace(/^\/+/,"");
+    if(source.protocol==="file:"){
+      const match=decodeURIComponent(source.pathname).match(/(?:^|\/)(knowhowzip-site\/[^?#]+)$/);
+      path=match?match[1]:"knowhowzip-site/index.html";
+    }else if(source.hostname==="olabeann.github.io"){
+      path=path.replace(/^knowhowzip\//,"");
+    }
+    if(!path.startsWith("knowhowzip-site/"))path=`knowhowzip-site/${path.split("/").pop()||"index.html"}`;
+    const url=new URL(path,PUBLIC_SITE_BASE);
+    source.searchParams.forEach((value,key)=>{
+      if(key!=="policy"&&key!=="focus")url.searchParams.set(key,value);
+    });
+    url.searchParams.set("policy","1");
+    if(activePolicy)url.searchParams.set("focus",activePolicy.id);
+    url.hash=hash;
+    return url.href;
+  }
+
+  function policyPageUrl(){
+    return publicPolicyUrl();
+  }
+
   async function submitPolicyComment(event){
     event.preventDefault();
     if(!activePolicy)return;
@@ -744,11 +795,16 @@
     button.disabled=true;
     status.textContent="댓글을 등록하는 중입니다.";
     status.className="policy-guide-comment-status";
+    const screenUrl=policyPageUrl();
     const payload={
       policy_id:activePolicy.id,
       policy_title:activePolicy.title,
       page_name:pageLabel(),
       route:policyRoute(activePolicy),
+      page_url:screenUrl,
+      pageUrl:screenUrl,
+      screen_url:screenUrl,
+      url:screenUrl,
       author_name:author,
       comment
     };
@@ -763,12 +819,16 @@
         },
         body:JSON.stringify(payload)
       });
-      if(!notifyResponse.ok)throw new Error("comment-submit-failed");
+      if(!notifyResponse.ok){
+        let errorMessage="comment-submit-failed";
+        try{errorMessage=(await notifyResponse.json()).error||errorMessage;}catch(error){}
+        throw new Error(errorMessage);
+      }
       form.elements.comment.value="";
       status.textContent="댓글을 저장하고 Slack 알림을 보냈습니다.";
       status.className="policy-guide-comment-status success";
     }catch(error){
-      status.textContent="댓글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+      status.textContent=`댓글 등록에 실패했습니다. ${error.message||"잠시 후 다시 시도해 주세요."}`;
       status.className="policy-guide-comment-status error";
     }finally{
       button.disabled=false;
