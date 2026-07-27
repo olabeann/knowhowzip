@@ -51,6 +51,7 @@ students.push(
   {name:'윤재원',email:'jaewon.yoon@email.com',phone:'010-9762-1184',access:'기초 수강',history:'수강 종료',course:'경매 낙찰 기초반',recentProduct:'경매 낙찰 기초반 이용권',cohort:'1기',paid:'290,000원',period:'2026.03.05 ~ 04.02',joined:'03.01',state:'수강 종료',products:[{product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.03.05 ~ 04.02',purchased:'2026.03.01',status:'수강 종료'}]},
   {name:'배수빈',email:'subin.bae@email.com',phone:'010-3088-4276',access:'심화 수강',history:'기초 완료',course:'권리분석 실전반',recentProduct:'권리분석 실전반 이용권',cohort:'2기',paid:'390,000원',period:'2026.07.12 ~ 08.09',joined:'06.22',state:'수강 중',products:[{product:'권리분석 실전반 이용권',className:'권리분석 실전반',paid:'390,000원',period:'2026.07.12 ~ 08.09',purchased:'2026.06.22',status:'수강 중'}]}
 );
+students.find(student=>student.email==='yujin.jung@email.com')?.products.push({product:'경매 낙찰 기초반 이용권',className:'경매 낙찰 기초반',paid:'290,000원',period:'2026.07.05 ~ 08.02',purchased:'2026.06.21',status:'수강 대기',paymentStatus:'결제 취소'});
 
 const studentPageSize=10;
 let studentCurrentPage=1;
@@ -400,7 +401,12 @@ function studentStateClass(state){
 }
 function creatorStudentProducts(student){
   const creatorClasses=classes.map(course=>course.title.split(' · ')[0]);
-  return (student.products||[]).filter(item=>creatorClasses.includes(item.className));
+  return (student.products||[])
+    .filter(item=>creatorClasses.includes(item.className))
+    .sort((a,b)=>String(b.purchased||'').localeCompare(String(a.purchased||'')));
+}
+function paymentStatusFor(item,index=0){
+  return item.paymentStatus||item.payment||item.payStatus||'결제 완료';
 }
 function publicProductTitle(name=''){
   const match=classes.find(course=>name.includes(classShortTitle(course.title)));
@@ -493,13 +499,16 @@ function openStudentDetail(email){
   const student=students.find(item=>item.email===email),modal=document.getElementById('studentDetailModal');
   if(!student||!modal)return;
   const histories=creatorStudentProducts(student);
+  const latest=histories[0]||{};
+  const completedCount=histories.filter((item,index)=>paymentStatusFor(item,index)==='결제 완료').length;
+  const canceledCount=histories.filter((item,index)=>paymentStatusFor(item,index)==='결제 취소').length;
   modal.innerHTML=`<div class="student-detail-backdrop" onclick="if(event.target===this)closeStudentDetailModal()">
     <section class="student-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="studentDetailTitle">
       <div class="student-detail-head"><div><span>수강생 상세</span><h2 id="studentDetailTitle">${student.name}</h2><p>${student.phone} · ${student.email}</p></div><button type="button" onclick="closeStudentDetailModal()" aria-label="닫기">×</button></div>
       <div class="student-detail-body">
-        <div class="student-detail-summary"><div><span>최근 결제 상품</span><b>${publicProductTitle(student.recentProduct)||student.course}</b></div><div><span>현재 상태</span><em class="table-state ${studentStateClass(student.state)}">${student.state}</em></div><div><span>수강기간</span><b>${student.period||'-'}</b></div></div>
-        <div class="student-history-head"><h3>결제 상품과 수강 클래스</h3><p>현재 크리에이터 채널의 클래스 이력만 표시합니다.</p></div>
-        <div class="student-history-list">${histories.length?histories.map(item=>`<article><div><b>${publicProductTitle(item.product)}</b><small>${item.purchased} 결제 · ${item.className}</small></div><span>${item.paid}</span><span>${item.period}</span><em class="table-state ${studentStateClass(item.status)}">${item.status}</em></article>`).join(''):'<p class="empty-history">이 크리에이터의 수강 이력이 없습니다.</p>'}</div>
+        <div class="student-detail-summary"><div><span>최근 결제 상품</span><b>${publicProductTitle(latest.product||student.recentProduct)||student.course}</b></div><div><span>결제 완료</span><b>${completedCount}건</b></div><div><span>결제 취소</span><b>${canceledCount}건</b></div></div>
+        <div class="student-history-head"><h3>전체 결제 내역</h3><p>현재 크리에이터 채널에서 이 수강생이 결제한 전체 내역을 표시합니다.</p></div>
+        <div class="student-history-list">${histories.length?histories.map((item,index)=>{const status=paymentStatusFor(item,index);return `<article><div><b>${publicProductTitle(item.product)}</b><small>${item.purchased} 결제 · ${item.className}</small></div><span>${item.paid}</span><span>${item.period}</span><em class="table-state ${status==='결제 취소'?'cancel':'done'}">${status}</em></article>`;}).join(''):'<p class="empty-history">이 크리에이터의 결제 내역이 없습니다.</p>'}</div>
       </div>
     </section>
   </div>`;
@@ -508,19 +517,41 @@ function openStudentDetail(email){
 
 let salesSelectedMonth='2026-06';
 const salesMonthlyData={
-  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일',refund:186000,rows:[{count:24,amount:6960000,refund:186000},{count:20,amount:7800000,refund:0},{count:11,amount:4950000,refund:0}]},
-  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일',refund:273600,rows:[{count:21,amount:6090000,refund:273600},{count:18,amount:7020000,refund:0},{count:9,amount:4050000,refund:0}]},
-  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일',refund:198000,rows:[{count:17,amount:4930000,refund:198000},{count:14,amount:5460000,refund:0},{count:6,amount:2700000,refund:0}]},
-  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일',refund:0,rows:[{count:12,amount:3480000,refund:0},{count:9,amount:3510000,refund:0},{count:3,amount:1350000,refund:0}]}
+  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일'},
+  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일'},
+  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일'},
+  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일'}
 };
+function paymentAmount(item){
+  return Number(String(item.paid||'').replace(/[^\d]/g,''))||0;
+}
+function paymentRows(month,className=''){
+  const monthPrefix=month.replace('-','.');
+  return emptyPreviewRows(students).flatMap(student=>(student.products||[]).map((item,index)=>({student,item,index})))
+    .filter(row=>String(row.item.purchased||'').startsWith(monthPrefix))
+    .filter(row=>!className||row.item.className===className)
+    .sort((a,b)=>String(b.item.purchased||'').localeCompare(String(a.item.purchased||'')));
+}
+function monthlyClassRows(month){
+  return classes.map(course=>{
+    const className=course.title.split(' · ')[0];
+    const rows=paymentRows(month,className);
+    return {
+      count:rows.length,
+      amount:rows.reduce((sum,row)=>sum+paymentAmount(row.item),0),
+      refund:rows.filter(row=>paymentStatusFor(row.item,row.index)==='결제 취소').reduce((sum,row)=>sum+paymentAmount(row.item),0)
+    };
+  });
+}
 function currentSalesData(){
-  const data=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
-  return emptyPreviewMode?{...data,refund:0,rows:[]}:data;
+  const base=salesMonthlyData[salesSelectedMonth]||salesMonthlyData['2026-06'];
+  const rows=emptyPreviewMode?[]:monthlyClassRows(salesSelectedMonth);
+  return {...base,refund:rows.reduce((sum,row)=>sum+(row.refund||0),0),rows};
 }
 function setSalesMonth(month){salesSelectedMonth=month;showAdminView('sales');}
 function salesClassStudents(classTitle){
   const className=classTitle.split(' · ')[0];
-  return emptyPreviewRows(students).filter(student=>(student.products||[]).some(item=>item.className===className||student.course===className));
+  return paymentRows(salesSelectedMonth,className);
 }
 function salesClassRowData(classId){
   const index=classes.findIndex(item=>item.id===classId);
@@ -537,7 +568,7 @@ function renderSalesClassStudents(classId){
   const payout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));
   return `${pageHeader('Sales detail','클래스 결제 수강생','선택한 클래스의 월별 결제 수강생을 확인합니다.','<button class="btn ghost" onclick="showAdminView(\'sales\')">← 매출·정산으로 돌아가기</button>')}
   <section class="sales-detail-head panel"><div><span>${data.label}</span><h2>${className}</h2><p>${course.title}</p></div><div class="sales-detail-metrics"><article><span>결제 건수</span><strong>${row.count}건</strong></article><article><span>총 매출</span><strong>${won(row.amount)}</strong></article><article><span>정산 예정</span><strong>${won(payout)}</strong></article></div></section>
-  <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 완료 기준</p></div></div>${rows.length?`<div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>최근 결제 상품</th><th>결제일</th><th>수강기간</th><th>상태</th></tr></thead><tbody>${rows.map(student=>{const item=(student.products||[]).find(product=>product.className===className)||student.products?.[0]||{};return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${publicProductTitle(item.product||student.recentProduct)||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.period||student.period||'-'}</td><td><em class="table-state ${studentStateClass(item.status||student.state)}">${item.status||student.state}</em></td></tr>`;}).join('')}</tbody></table></div>`:adminEmptyState('👥','결제 수강생이 없습니다.','선택한 기간에 이 클래스를 결제한 수강생이 없습니다.')}</article>`;
+  <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 발생 기준</p></div></div>${rows.length?`<div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>결제 상품</th><th>결제일</th><th>결제 금액</th><th>상태</th></tr></thead><tbody>${rows.map(({student,item,index})=>{const paymentStatus=paymentStatusFor(item,index);return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${publicProductTitle(item.product||student.recentProduct)||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.paid||student.paid||'-'}</td><td><em class="table-state ${paymentStatus==='결제 취소'?'cancel':'done'}">${paymentStatus}</em></td></tr>`;}).join('')}</tbody></table></div>`:adminEmptyState('👥','결제 수강생이 없습니다.','선택한 기간에 이 클래스를 결제한 수강생이 없습니다.')}</article>`;
 }
 function openSalesClassStudents(classId){
   document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='sales'));
