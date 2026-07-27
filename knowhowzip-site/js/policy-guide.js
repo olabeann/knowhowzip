@@ -53,7 +53,7 @@
     {id:"public.refund",pages:["public"],selector:"#view-detail #sec-refund",type:"환불 기준",title:"환불 규정 확인",summary:"결제 전에 모든 클래스에 공통 적용되는 환불 기준을 확인합니다.",rules:["전액 환불 기간은 지정 기간 수강과 결제 즉시 수강을 구분합니다.","재생하거나 자료를 다운로드한 강의는 수강한 콘텐츠로 판단합니다.","7일 이후에는 수강한 콘텐츠 금액을 제외하는 계산식을 적용합니다.","환불 신청은 결제 내역에서 카카오톡 고객센터로 접수합니다."],spec:"PRODUCT_SPEC §5.4 · §14.6"},
     {id:"public.payment",pages:["public"],selector:"#payModal .modal",type:"결제 · 권한",title:"결제 처리",summary:"서버가 가격과 신청 조건을 검증하고 PG 결제 완료 후 수강 권한을 생성합니다.",rules:["클라이언트의 금액과 결제 결과를 신뢰하지 않고 서버에서 재검증합니다.","중복 주문과 결제 실패 이력을 보관합니다.","결제 완료 주문에만 클래스 수강 권한을 생성합니다."],spec:"PRODUCT_SPEC §4.2 · §10 · §14.5"},
     {id:"public.learning-faq",pages:["public"],selector:"#view-mypage .global-learning-faq",type:"검색 범위",title:"구매 클래스 FAQ 검색",summary:"현재 사용자가 구매한 클래스의 FAQ만 한 번에 검색합니다.",rules:["질문과 답변을 모두 검색합니다.","결과에 크리에이터와 클래스 출처를 함께 표시합니다."],spec:"PRODUCT_SPEC §4.4 · §5.5"},
-    {id:"public.learning",pages:["public"],selector:"#view-mypage .learning-group",type:"권한 · 진도",title:"내 학습 상태",summary:"내 학습은 결제 기록이 아니라 현재 수강 권한이 있는 클래스를 표시합니다.",rules:["영상은 실제 재생 전 수강 전, 재생 시작 후 수강 중, 마지막 구간 도달 후 수강 완료로 저장합니다.","수강 완료 상태는 다시 재생해도 되돌리지 않습니다.","수강 기간이 끝나면 콘텐츠 접근을 제한합니다."],spec:"PRODUCT_SPEC §5.5 · §14.5"},
+    {id:"public.learning",pages:["public"],selector:"#view-mypage .learning-group",type:"권한 · 콘텐츠 조합",title:"내 학습 클래스 표시",summary:"내 학습은 강의 콘텐츠 단독 화면이 아니라 결제한 클래스의 수강 화면입니다.",rules:["카드 1개는 수강 권한이 있는 클래스 1개를 의미합니다.","영상과 자료는 클래스에 연결된 강의 콘텐츠에서 가져옵니다.","운영 안내와 수강 FAQ는 연결 콘텐츠가 아니라 해당 클래스 설정값에서 가져옵니다.","여러 콘텐츠가 연결된 클래스는 영상·자료를 하나의 클래스 카드 안에서 합쳐 표시합니다."],spec:"PRODUCT_SPEC §5.5 · §14.5"},
     {id:"public.learning-empty",pages:["public"],selector:"#view-mypage .learning-empty",type:"상태 · 빈 화면",title:"내 학습 내역 없음",summary:"로그인했지만 유효한 클래스 수강 권한이 없을 때 탐색 경로를 안내합니다.",rules:["수강 중·수강 종료 건수를 모두 0으로 표시합니다.","클래스를 결제하면 수강 기간과 학습 콘텐츠가 표시된다고 안내합니다.","클래스 둘러보기 선택 시 크리에이터 목록 페이지로 이동합니다.","검토 단축키: 내 학습 화면에서 ⌘ + Shift + E를 누르면 빈 화면 미리보기를 켜거나 끕니다."],spec:"PRODUCT_SPEC §5.5 · §14.5"},
     {id:"public.player",pages:["public"],selector:"#view-player .lesson-player-page",type:"스트리밍 권한",title:"영상 재생",summary:"유효한 클래스 수강 권한이 있는 사용자만 영상을 재생할 수 있습니다.",rules:["스트리밍 URL은 서버 권한 검증 후 발급합니다.","재생 시작·진도·완료 로그를 사용자와 영상 단위로 저장합니다.","영상 원본 URL은 공개하지 않습니다."],spec:"PRODUCT_SPEC §8~10 · §14.5"},
     {id:"public.payments",pages:["public"],selector:"#view-account .payment-history",type:"환불 흐름",title:"결제 내역과 환불 요청",summary:"본인의 주문 상태를 확인하고 해당 주문의 환불 상담을 시작합니다.",rules:["환불 요청은 카카오톡 고객센터로 연결되며 즉시 자동 환불되지는 않습니다.","운영자는 주문과 재생·다운로드 로그를 확인해 환불 가능 금액을 판단합니다.","신청 후 3일 이내 원 결제 수단으로 처리하고 완료 시 수강 권한을 갱신합니다."],spec:"PRODUCT_SPEC §5.6 · §14.6"},
@@ -441,9 +441,18 @@
     ],
     "public.learning":[
       "목록 기준: 결제 기록이 아니라 현재 사용자에게 생성된 클래스 수강 권한을 기준으로 표시합니다.",
+      "카드 단위: 내 학습의 카드 1개는 관리자 페이지의 클래스 1개에 대응합니다.",
       "복수 권한: 같은 클래스의 수강 권한이 여러 개면 그중 하나라도 현재 유효할 때 이용할 수 있습니다.",
       "탭 분류: 수강 시작 전과 기간 안의 권한은 수강 중, 종료일이 지난 권한은 수강 종료로 구분합니다.",
-      "클래스 정보: 크리에이터·클래스명·수강 기간·영상 수·자료·운영 안내·FAQ를 표시합니다.",
+      "클래스 정보: 크리에이터·클래스명·수강 기간·연결 콘텐츠 수·전체 영상 수·자료·운영 안내·FAQ를 표시합니다.",
+      "연결 콘텐츠 표시: 클래스에 연결된 강의 콘텐츠가 2개 이상이면 카드 하단에 `연결 콘텐츠 N개 · 전체 N강`처럼 표시합니다.",
+      "영상 출처: 콘텐츠 · 영상 섹션은 클래스의 contentIds 순서대로 연결된 강의 콘텐츠를 불러오고, 각 콘텐츠 안의 영상 순서를 유지해 한 목록으로 합칩니다.",
+      "영상명 표시: 여러 콘텐츠를 합친 클래스에서는 영상명 앞에 원본 강의 콘텐츠명을 붙여 어떤 콘텐츠에서 온 영상인지 구분합니다.",
+      "자료 출처: 콘텐츠 · 자료 섹션은 연결된 강의 콘텐츠 안의 자료를 모두 합쳐 표시하며, 여러 콘텐츠를 합친 경우 자료명 앞에도 원본 콘텐츠명을 붙입니다.",
+      "운영 안내 출처: 운영 안내·단톡방·줌 일정은 강의 콘텐츠가 아니라 클래스 등록/수정의 운영 안내 단계에 저장된 값을 표시합니다.",
+      "수강 FAQ 출처: 수강 FAQ는 강의 콘텐츠가 아니라 클래스 등록/수정의 FAQ 단계에 저장된 값을 표시합니다.",
+      "패키지 클래스: `경매 기초+권리분석 패키지`처럼 여러 콘텐츠를 연결한 클래스는 영상과 자료만 연결 콘텐츠에서 합치고, 운영 안내와 FAQ는 패키지 클래스 자체의 값을 사용합니다.",
+      "단일 콘텐츠 클래스: 연결 콘텐츠가 1개인 클래스는 `전체 N강`만 표시하고 영상·자료는 해당 콘텐츠 하나에서 가져옵니다.",
       "영상 상태: 재생 전은 수강 전, 실제 재생 시작 후는 수강 중, 마지막 1초 구간 또는 종료 이벤트 도달 후는 수강 완료입니다.",
       "상태 유지: 수강 완료는 다시 재생해도 이전 상태로 되돌리지 않습니다.",
       "영상 선택: 내 학습 > 선택한 영상 재생 페이지로 이동하며 로그인과 권한을 다시 확인합니다.",
@@ -522,6 +531,16 @@
     ]
   };
 
+  const POLICY_RULE_GROUPS={
+    "public.learning":[
+      {title:"클래스 공통 표시",labels:["클래스 정보"]},
+      {title:"복수 콘텐츠 클래스",labels:["연결 콘텐츠 표시","영상 출처","영상명 표시","자료 출처","패키지 클래스"]},
+      {title:"단일 콘텐츠 클래스",labels:["단일 콘텐츠 클래스"]},
+      {title:"클래스 설정값 출처",labels:["운영 안내 출처","수강 FAQ 출처"]},
+      {title:"진도와 권한 처리",labels:["영상 상태","상태 유지","영상 선택","수강 종료","빈 상태","조회 실패"]}
+    ]
+  };
+
   POLICIES.forEach(policy=>{
     if(DETAILED_POLICY_RULES[policy.id])policy.rules=DETAILED_POLICY_RULES[policy.id];
   });
@@ -563,7 +582,7 @@
       popover.className="policy-guide-popover";
       popover.setAttribute("role","dialog");
       popover.setAttribute("aria-live","polite");
-      popover.innerHTML='<div class="policy-guide-popover-head"><div><span class="policy-guide-popover-type"></span><h3></h3></div><button class="policy-guide-close" type="button" aria-label="정책 닫기">×</button></div><p class="policy-guide-popover-summary"></p><ul></ul><div class="policy-guide-popover-spec"></div><form class="policy-guide-comment-form"><b>개발자 댓글</b><label>작성자<input name="author" type="text" autocomplete="name" placeholder="이름을 입력하세요" required></label><label>댓글<textarea name="comment" rows="3" placeholder="정책에 대한 질문이나 확인 내용을 적어주세요" required></textarea></label><button type="submit">댓글 등록</button><p class="policy-guide-comment-status" aria-live="polite"></p></form>';
+      popover.innerHTML='<div class="policy-guide-popover-head"><div><span class="policy-guide-popover-type"></span><h3></h3></div><button class="policy-guide-close" type="button" aria-label="정책 닫기">×</button></div><p class="policy-guide-popover-summary"></p><div class="policy-guide-rule-section"><div class="policy-guide-rule-label">핵심 기준</div><ul class="policy-guide-rule-primary"></ul></div><details class="policy-guide-rule-detail"><summary><span>상세 기준</span><b></b></summary><div class="policy-guide-rule-detail-body"></div></details><div class="policy-guide-popover-spec"></div><form class="policy-guide-comment-form"><b>개발자 댓글</b><label>작성자<input name="author" type="text" autocomplete="name" placeholder="이름을 입력하세요" required></label><label>댓글<textarea name="comment" rows="3" placeholder="정책에 대한 질문이나 확인 내용을 적어주세요" required></textarea></label><button type="submit">댓글 등록</button><p class="policy-guide-comment-status" aria-live="polite"></p></form>';
       popover.querySelector(".policy-guide-close").addEventListener("click",()=>{pinned=false;closePopover();});
       popover.querySelector(".policy-guide-comment-form").addEventListener("submit",submitPolicyComment);
       document.body.appendChild(popover);
@@ -712,9 +731,25 @@
     const summary=popover.querySelector(".policy-guide-popover-summary");
     summary.textContent=policy.summary||"";
     summary.hidden=!policy.summary;
-    const ruleList=popover.querySelector("ul");
-    ruleList.innerHTML="";
-    policy.rules.forEach(rule=>{
+    const primaryList=popover.querySelector(".policy-guide-rule-primary");
+    const detail=popover.querySelector(".policy-guide-rule-detail");
+    const detailBody=detail.querySelector(".policy-guide-rule-detail-body");
+    const primaryRules=policy.rules.slice(0,4);
+    const detailRules=policy.rules.slice(4);
+    primaryList.innerHTML="";
+    detailBody.innerHTML="";
+    primaryRules.forEach(rule=>appendPolicyRule(primaryList,rule));
+    detail.open=false;
+    detail.hidden=!detailRules.length;
+    detail.querySelector("b").textContent=detailRules.length?`${detailRules.length}개`:"";
+    renderPolicyRuleGroups(detailBody,policy,detailRules);
+    popover.querySelector(".policy-guide-popover-spec").textContent=policy.spec;
+    resetCommentForm();
+    popover.classList.add("open");
+    positionPopover(anchor);
+  }
+
+  function appendPolicyRule(list,rule){
       const item=document.createElement("li");
       const divider=rule.indexOf(":");
       if(divider>0&&divider<=18){
@@ -726,12 +761,43 @@
       }else{
         item.textContent=rule;
       }
-      ruleList.appendChild(item);
+      list.appendChild(item);
+  }
+
+  function renderPolicyRuleGroups(container,policy,rules){
+    const groups=groupPolicyRules(policy,rules);
+    groups.forEach(group=>{
+      const section=document.createElement("section");
+      section.className="policy-guide-rule-group";
+      const title=document.createElement("h4");
+      const list=document.createElement("ul");
+      title.textContent=group.title;
+      group.rules.forEach(rule=>appendPolicyRule(list,rule));
+      section.append(title,list);
+      container.appendChild(section);
     });
-    popover.querySelector(".policy-guide-popover-spec").textContent=policy.spec;
-    resetCommentForm();
-    popover.classList.add("open");
-    positionPopover(anchor);
+  }
+
+  function groupPolicyRules(policy,rules){
+    const config=POLICY_RULE_GROUPS[policy.id];
+    if(!config)return [{title:"상세 정책",rules}];
+    const remaining=[...rules];
+    const groups=[];
+    config.forEach(group=>{
+      const matched=[];
+      group.labels.forEach(label=>{
+        const index=remaining.findIndex(rule=>ruleLabel(rule)===label);
+        if(index>=0)matched.push(remaining.splice(index,1)[0]);
+      });
+      if(matched.length)groups.push({title:group.title,rules:matched});
+    });
+    if(remaining.length)groups.push({title:"기타 기준",rules:remaining});
+    return groups;
+  }
+
+  function ruleLabel(rule){
+    const divider=rule.indexOf(":");
+    return divider>0?rule.slice(0,divider).trim():rule;
   }
 
   function resetCommentForm(){
