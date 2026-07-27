@@ -509,9 +509,14 @@
   const page=detectPage();
   const pagePolicies=POLICIES.filter(policy=>policy.pages.includes(page));
   const sessionKey="nhz-policy-guide-mode";
+  const authorKey="nhz-policy-comment-author";
+  const SUPABASE_URL="https://vnrjbyxilgorijjicyci.supabase.co";
+  const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZucmpieXhpbGdvcmlqamljeWNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwODg4ODIsImV4cCI6MjEwMDY2NDg4Mn0.tnFR6_LyPN2EN7mcJ3rnqt6hfmUq4ZiY4utCEyqJFZ8";
+  const POLICY_COMMENT_FUNCTION_URL=`${SUPABASE_URL}/functions/v1/rapid-function`;
   let enabled=false;
   let pinned=false;
   let activeAnchor=null;
+  let activePolicy=null;
   let observer=null;
   let scheduled=false;
   let dock=null;
@@ -535,15 +540,16 @@
       popover.className="policy-guide-popover";
       popover.setAttribute("role","dialog");
       popover.setAttribute("aria-live","polite");
-      popover.innerHTML='<div class="policy-guide-popover-head"><div><span class="policy-guide-popover-type"></span><h3></h3></div><button class="policy-guide-close" type="button" aria-label="정책 닫기">×</button></div><p class="policy-guide-popover-summary"></p><ul></ul><div class="policy-guide-popover-spec"></div>';
+      popover.innerHTML='<div class="policy-guide-popover-head"><div><span class="policy-guide-popover-type"></span><h3></h3></div><button class="policy-guide-close" type="button" aria-label="정책 닫기">×</button></div><p class="policy-guide-popover-summary"></p><ul></ul><div class="policy-guide-popover-spec"></div><form class="policy-guide-comment-form"><b>개발자 댓글</b><label>작성자<input name="author" type="text" autocomplete="name" placeholder="이름을 입력하세요" required></label><label>댓글<textarea name="comment" rows="3" placeholder="정책에 대한 질문이나 확인 내용을 적어주세요" required></textarea></label><button type="submit">댓글 등록</button><p class="policy-guide-comment-status" aria-live="polite"></p></form>';
       popover.querySelector(".policy-guide-close").addEventListener("click",()=>{pinned=false;closePopover();});
+      popover.querySelector(".policy-guide-comment-form").addEventListener("submit",submitPolicyComment);
       document.body.appendChild(popover);
     }
     if(!dock){
       dock=document.createElement("aside");
       dock.className="policy-guide-dock";
       dock.setAttribute("aria-label","현재 화면 개발 정책");
-      dock.innerHTML='<div class="policy-guide-dock-head"><i>P</i><div><b>개발 정책 보기</b><small>현재 화면의 기능·검증 기준</small></div><button class="policy-guide-dock-close" type="button">종료</button></div><div class="policy-guide-list"></div><div class="policy-guide-shortcut">마커 Hover/Focus · 클릭 고정 · ⌘ + P 종료</div>';
+      dock.innerHTML='<div class="policy-guide-dock-head"><i>P</i><div><b>개발 정책 보기</b><small>현재 화면의 기능·검증 기준</small></div><button class="policy-guide-dock-close" type="button">종료</button></div><div class="policy-guide-list"></div><div class="policy-guide-shortcut">정책 클릭 후 댓글 등록 · ⌘ + P 종료</div>';
       dock.querySelector(".policy-guide-dock-close").addEventListener("click",()=>setMode(false));
       document.body.appendChild(dock);
     }
@@ -654,6 +660,7 @@
   function openPopover(anchor,policy){
     if(!popover)createChrome();
     activeAnchor=anchor;
+    activePolicy=policy;
     popover.querySelector(".policy-guide-popover-type").textContent=policy.type;
     popover.querySelector("h3").textContent=policy.title;
     const summary=popover.querySelector(".policy-guide-popover-summary");
@@ -676,8 +683,101 @@
       ruleList.appendChild(item);
     });
     popover.querySelector(".policy-guide-popover-spec").textContent=policy.spec;
+    resetCommentForm();
     popover.classList.add("open");
     positionPopover(anchor);
+  }
+
+  function resetCommentForm(){
+    const form=popover?.querySelector(".policy-guide-comment-form");
+    if(!form)return;
+    const status=form.querySelector(".policy-guide-comment-status");
+    form.elements.author.value=readStoredAuthor();
+    form.elements.comment.value="";
+    form.querySelector("button").disabled=false;
+    status.textContent="";
+    status.className="policy-guide-comment-status";
+  }
+
+  function readStoredAuthor(){
+    try{return localStorage.getItem(authorKey)||"";}catch(error){return "";}
+  }
+
+  function storeAuthor(author){
+    try{localStorage.setItem(authorKey,author);}catch(error){}
+  }
+
+  function pageLabel(){
+    if(page==="creator-admin")return "크리에이터 관리자";
+    if(page==="public")return "수강생 화면";
+    if(page==="access-denied")return "접근 제한";
+    if(page==="platform-admin")return "플랫폼 관리자 참고 화면";
+    if(page==="guide-creator")return "크리에이터 관리자 상태 가이드";
+    if(page==="guide-learning")return "내 학습 상태 가이드";
+    if(page==="guide-detail")return "클래스 상세 상태 가이드";
+    return document.title||"화면 정보 없음";
+  }
+
+  function policyRoute(policy){
+    return `${pageLabel()} > ${policy.title}`;
+  }
+
+  async function submitPolicyComment(event){
+    event.preventDefault();
+    if(!activePolicy)return;
+    const form=event.currentTarget;
+    const status=form.querySelector(".policy-guide-comment-status");
+    const button=form.querySelector("button");
+    const author=form.elements.author.value.trim();
+    const comment=form.elements.comment.value.trim();
+    if(!author||!comment){
+      status.textContent="작성자와 댓글을 모두 입력해 주세요.";
+      status.className="policy-guide-comment-status error";
+      return;
+    }
+    storeAuthor(author);
+    button.disabled=true;
+    status.textContent="댓글을 등록하는 중입니다.";
+    status.className="policy-guide-comment-status";
+    const payload={
+      policy_id:activePolicy.id,
+      policy_title:activePolicy.title,
+      page_name:pageLabel(),
+      route:policyRoute(activePolicy),
+      author_name:author,
+      comment
+    };
+    try{
+      const insertResponse=await fetch(`${SUPABASE_URL}/rest/v1/policy_comments`,{
+        method:"POST",
+        headers:{
+          apikey:SUPABASE_ANON_KEY,
+          Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type":"application/json",
+          Prefer:"return=minimal"
+        },
+        body:JSON.stringify(payload)
+      });
+      if(!insertResponse.ok)throw new Error("comment-save-failed");
+      const notifyResponse=await fetch(POLICY_COMMENT_FUNCTION_URL,{
+        method:"POST",
+        headers:{
+          apikey:SUPABASE_ANON_KEY,
+          Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(payload)
+      });
+      if(!notifyResponse.ok)throw new Error("slack-notify-failed");
+      form.elements.comment.value="";
+      status.textContent="댓글을 저장하고 Slack 알림을 보냈습니다.";
+      status.className="policy-guide-comment-status success";
+    }catch(error){
+      status.textContent=error.message==="slack-notify-failed"?"댓글은 저장됐지만 Slack 알림 전송에 실패했습니다.":"댓글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+      status.className="policy-guide-comment-status error";
+    }finally{
+      button.disabled=false;
+    }
   }
 
   function positionPopover(anchor){
@@ -709,6 +809,7 @@
   function closePopover(){
     if(popover)popover.classList.remove("open");
     activeAnchor=null;
+    activePolicy=null;
   }
 
   document.addEventListener("click",event=>{
