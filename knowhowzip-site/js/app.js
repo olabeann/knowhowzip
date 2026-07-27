@@ -457,7 +457,7 @@ function renderMy(){
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),lessonStates=productLessonStates(p.id,videos.length);if(endedCourses.has(p.id))return `
+      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length);if(endedCourses.has(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
@@ -468,7 +468,7 @@ function renderMy(){
         <article class="learning-card">
           <div class="learning-summary">
             <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><small>전체 ${videos.length}강</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><small>${contentSummary}</small></div>
             <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
           </div>
           <div class="learning-details">
@@ -595,7 +595,7 @@ function toggleMnav(){document.getElementById('mnav').classList.toggle('show');}
 function openAuth(m){switchAuth(m);show('login');}
 function closeAuth(){if(document.getElementById('view-login').classList.contains('show'))show('home');}
 function switchAuth(m){state.authMode='kakao';}
-const DEMO_PURCHASES=['mmoh-basic','mmoh-right'];
+const DEMO_PURCHASES=['mmoh-basic','mmoh-right','mmoh-basic-right-package'];
 function submitAuth(){
   state.user={name:'김노하우',phone:'010-1234-5678',provider:'kakao'};
   state.myFilter='active';
