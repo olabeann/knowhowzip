@@ -735,6 +735,11 @@
       status.className="policy-guide-comment-status error";
       return;
     }
+    if(author.length>30||comment.length>1000){
+      status.textContent="작성자는 30자, 댓글은 1000자 이내로 입력해 주세요.";
+      status.className="policy-guide-comment-status error";
+      return;
+    }
     storeAuthor(author);
     button.disabled=true;
     status.textContent="댓글을 등록하는 중입니다.";
@@ -748,32 +753,22 @@
       comment
     };
     try{
-      const insertResponse=await fetch(`${SUPABASE_URL}/rest/v1/policy_comments`,{
-        method:"POST",
-        headers:{
-          apikey:SUPABASE_ANON_KEY,
-          Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
-          "Content-Type":"application/json",
-          Prefer:"return=minimal"
-        },
-        body:JSON.stringify(payload)
-      });
-      if(!insertResponse.ok)throw new Error("comment-save-failed");
       const notifyResponse=await fetch(POLICY_COMMENT_FUNCTION_URL,{
         method:"POST",
         headers:{
           apikey:SUPABASE_ANON_KEY,
           Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+          "X-Policy-Comment-Client":"knowhowzip-policy-guide",
           "Content-Type":"application/json"
         },
         body:JSON.stringify(payload)
       });
-      if(!notifyResponse.ok)throw new Error("slack-notify-failed");
+      if(!notifyResponse.ok)throw new Error("comment-submit-failed");
       form.elements.comment.value="";
       status.textContent="댓글을 저장하고 Slack 알림을 보냈습니다.";
       status.className="policy-guide-comment-status success";
     }catch(error){
-      status.textContent=error.message==="slack-notify-failed"?"댓글은 저장됐지만 Slack 알림 전송에 실패했습니다.":"댓글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+      status.textContent="댓글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.";
       status.className="policy-guide-comment-status error";
     }finally{
       button.disabled=false;
