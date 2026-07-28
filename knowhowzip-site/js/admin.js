@@ -517,10 +517,10 @@ function openStudentDetail(email){
 
 let salesSelectedMonth='2026-06';
 const salesMonthlyData={
-  '2026-07':{label:'2026년 7월',settleDate:'2026년 8월 10일'},
-  '2026-06':{label:'2026년 6월',settleDate:'2026년 7월 10일'},
-  '2026-05':{label:'2026년 5월',settleDate:'2026년 6월 10일'},
-  '2026-04':{label:'2026년 4월',settleDate:'2026년 5월 10일'}
+  '2026-07':{label:'2026년 7월'},
+  '2026-06':{label:'2026년 6월'},
+  '2026-05':{label:'2026년 5월'},
+  '2026-04':{label:'2026년 4월'}
 };
 function paymentAmount(item){
   return Number(String(item.paid||'').replace(/[^\d]/g,''))||0;
@@ -565,9 +565,9 @@ function renderSalesClassStudents(classId){
   const className=course.title.split(' · ')[0];
   const rows=salesClassStudents(course.title);
   const row=salesClassRowData(classId);
-  const payout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));
+  const netAmount=Math.max(0,row.amount-(row.refund||0));
   return `${pageHeader('Sales detail','클래스 결제 수강생','선택한 클래스의 월별 결제 수강생을 확인합니다.','<button class="btn ghost" onclick="showAdminView(\'sales\')">← 매출·정산으로 돌아가기</button>')}
-  <section class="sales-detail-head panel"><div><span>${data.label}</span><h2>${className}</h2><p>${course.title}</p></div><div class="sales-detail-metrics"><article><span>결제 건수</span><strong>${row.count}건</strong></article><article><span>총 매출</span><strong>${won(row.amount)}</strong></article><article><span>정산 예정</span><strong>${won(payout)}</strong></article></div></section>
+  <section class="sales-detail-head panel"><div><span>${data.label}</span><h2>${className}</h2><p>${course.title}</p></div><div class="sales-detail-metrics"><article><span>결제 건수</span><strong>${row.count}건</strong></article><article><span>결제</span><strong>${won(row.amount)}</strong></article><article><span>환불·취소</span><strong>${won(row.refund||0)}</strong></article><article><span>순 결제액</span><strong>${won(netAmount)}</strong></article></div></section>
   <article class="panel full-table sales-student-page"><div class="panel-head"><div><h2>결제 수강생</h2><p>${data.label} 결제 발생 기준</p></div></div>${rows.length?`<div class="table-wrap"><table><thead><tr><th>이름</th><th>전화번호</th><th>결제 상품</th><th>결제일</th><th>결제 금액</th><th>상태</th></tr></thead><tbody>${rows.map(({student,item,index})=>{const paymentStatus=paymentStatusFor(item,index);return `<tr class="student-row" role="button" tabindex="0" onclick="openStudentDetail('${student.email}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudentDetail('${student.email}')}"><td><div class="student-cell"><span>${student.name[0]}</span><div><b>${student.name}</b><small>${student.email}</small></div></div></td><td>${student.phone||'-'}</td><td>${publicProductTitle(item.product||student.recentProduct)||student.course}</td><td>${item.purchased||student.joined||'-'}</td><td>${item.paid||student.paid||'-'}</td><td><em class="table-state ${paymentStatus==='결제 취소'?'cancel':'done'}">${paymentStatus}</em></td></tr>`;}).join('')}</tbody></table></div>`:adminEmptyState('👥','결제 수강생이 없습니다.','선택한 기간에 이 클래스를 결제한 수강생이 없습니다.')}</article>`;
 }
 function openSalesClassStudents(classId){
@@ -579,12 +579,12 @@ function openSalesClassStudents(classId){
 function renderSales(){
   const data=currentSalesData();
   const gross=data.rows.reduce((sum,row)=>sum+row.amount,0);
-  const payout=Math.max(0,Math.round((gross-data.refund)*.88));
+  const netAmount=Math.max(0,gross-data.refund);
   const monthSelect=`<select class="sales-month-select" aria-label="조회 월" onchange="setSalesMonth(this.value)">${Object.entries(salesMonthlyData).map(([value,item])=>`<option value="${value}" ${value===salesSelectedMonth?'selected':''}>${item.label}</option>`).join('')}</select>`;
-  return `${pageHeader('Sales & payout','매출·정산','월별 매출과 정산 예정 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" id="salesPayoutSettingsButton" aria-label="정산 계좌 관리" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
-  <section class="payout-hero"><div><span>${data.label} 정산 예정 금액</span><strong>${won(payout)}</strong><p>${data.settleDate} 입금 예정 · 환불·취소 반영 후</p></div></section>
-  <section class="metric-grid two sales-overview-metrics"><article class="metric-card"><span>${data.label} 총 결제</span><strong>${won(gross)}</strong></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong></article></section>
-  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 완료 기준</p></div></div>${data.rows.length?`<table><thead><tr><th>클래스</th><th>결제 건수</th><th>총 매출</th><th>정산 예정</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0,refund:0},classPayout=Math.max(0,Math.round((row.amount-(row.refund||0))*.88));return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td><strong>${won(classPayout)}</strong></td></tr>`;}).join('')}</tbody></table>`:adminEmptyState('₩','선택한 기간의 정산 내역이 없습니다.','결제와 환불·취소 내역이 발생하면 클래스별 정산 금액이 이곳에 표시됩니다.')}</article>`;
+  return `${pageHeader('Sales & payout','매출·정산','월별 결제와 환불·취소 금액을 확인합니다.',`${monthSelect}<button class="btn ghost" id="salesPayoutSettingsButton" aria-label="정산 계좌 관리" onclick="openSettingsPanel('payout')">정산 계좌 관리</button>`)}
+  <section class="payout-hero"><div><span>${data.label} 순 결제액</span><strong>${won(netAmount)}</strong><p>결제 금액에서 환불·취소 금액을 제외한 금액</p></div></section>
+  <section class="metric-grid two sales-overview-metrics"><article class="metric-card"><span>${data.label} 결제</span><strong>${won(gross)}</strong></article><article class="metric-card"><span>환불·취소</span><strong>${won(data.refund)}</strong></article></section>
+  <article class="panel payout-table"><div class="panel-head"><div><h2>클래스별 매출</h2><p>${data.label} 결제 발생 기준</p></div></div>${data.rows.length?`<table><thead><tr><th>클래스</th><th>결제 건수</th><th>결제</th><th>환불·취소</th><th>순 결제액</th></tr></thead><tbody>${classes.map((c,i)=>{const row=data.rows[i]||{count:0,amount:0,refund:0},classNetAmount=Math.max(0,row.amount-(row.refund||0));return `<tr class="sales-class-row" role="button" tabindex="0" onclick="openSalesClassStudents('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSalesClassStudents('${c.id}')}"><td><b>${c.title}</b><small>클릭하면 결제 수강생 상세로 이동합니다.</small></td><td>${row.count}건</td><td>${won(row.amount)}</td><td>${won(row.refund||0)}</td><td><strong>${won(classNetAmount)}</strong></td></tr>`;}).join('')}</tbody></table>`:adminEmptyState('₩','선택한 기간의 결제 내역이 없습니다.','결제 또는 환불·취소 내역이 발생하면 클래스별 금액이 이곳에 표시됩니다.')}</article>`;
 }
 
 const alimtalkProductSettings=[
