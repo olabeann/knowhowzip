@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FE Guide · 상품 상세 상태</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/policy-guide.css">
+  <link rel="stylesheet" href="../css/style.css?v=20260728-2">
+  <link rel="stylesheet" href="../css/policy-guide.css?v=20260728-1">
   <style>
     body{background:#F5F7FB;color:#101828}
     .guide-shell{max-width:1180px;margin:0 auto;padding:42px 22px 80px}
@@ -49,12 +49,18 @@
     .scenario-card .bc-actions .btn-red[disabled]{background:#EEF2F7;color:#98A2B3;cursor:not-allowed}
     .scenario-toast{margin-top:12px;border-radius:13px;background:#101828;color:#fff;padding:13px 15px;font-size:13px;font-weight:800}
     .scenario-card .bc-owned{display:block;margin:0}
+    .content-state-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+    .content-state-card{border:1px solid #E4E7EC;border-radius:18px;padding:20px;background:#FAFBFC}
+    .content-state-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+    .content-state-head b{font-size:17px}.content-state-head span{background:#EEF2FF;color:#4F66F5;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}
+    .content-state-card .curr,.content-state-card .mat-list{margin:0;padding:0;list-style:none}
+    .content-state-card .detail-content-state{background:#fff}
     .op-demo{display:grid;gap:10px}
     .op-item{display:flex;align-items:center;gap:12px;border:1px solid #E4E7EC;border-radius:14px;padding:14px}
     .op-item i{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#FEE500;font-style:normal}
     .op-item .zoom{background:#E8F0FE}
     .op-item b{display:block}.op-item small{color:#667085}.op-item em{margin-left:auto;color:#98A2B3;font-style:normal;font-weight:800}
-    @media(max-width:900px){.detail-state-grid,.scenario-layout{grid-template-columns:1fr}.guide-head{display:block}.guide-head h1{font-size:28px}}
+    @media(max-width:900px){.detail-state-grid,.scenario-layout,.content-state-grid{grid-template-columns:1fr}.guide-head{display:block}.guide-head h1{font-size:28px}}
   </style>
 </head>
 <body>
@@ -90,6 +96,29 @@
           <div class="price-demo"><span>26%</span>₩290,000</div>
           <div class="cta-row"><button class="primary">수강신청</button><button class="ghost">🔗 공유</button></div>
         </aside>
+      </div>
+    </section>
+
+    <section class="state-section">
+      <div class="state-title"><i></i><h2>콘텐츠 권한 상태</h2></div>
+      <p class="state-note">모집 여부는 신청 가능 상태를 결정하고, 콘텐츠 액션은 유효한 수강 권한으로 결정합니다. 클래스 상세에서는 직접 재생하거나 다운로드하지 않습니다.</p>
+      <div class="state-board content-state-grid">
+        <article class="content-state-card">
+          <div class="content-state-head"><b>구매 전</b><span>미구매 · 모집중</span></div>
+          <div class="detail-content-state is-locked"><div><b>수강 신청 전에 커리큘럼을 확인해 보세요</b><p>영상과 자료는 수강 권한이 생성된 후 내 학습에서 이용할 수 있습니다.</p></div></div>
+          <div class="sub-h">📹 영상 커리큘럼</div>
+          <ul class="curr"><li><span class="wk">1강</span><span>경매 기초 개념</span><span class="content-lock">🔒 수강 후 이용</span></li><li><span class="wk">2강</span><span>입찰표 작성</span><span class="content-lock">🔒 수강 후 이용</span></li></ul>
+          <div class="sub-h">📄 제공 자료</div>
+          <ul class="mat-list"><li><span class="mi">📄</span><span>입찰표 템플릿</span><span class="content-lock">🔒 수강 후 제공</span></li></ul>
+        </article>
+        <article class="content-state-card">
+          <div class="content-state-head"><b>구매 후</b><span>유효한 수강 권한</span></div>
+          <div class="detail-content-state is-owned"><div><b>구매한 클래스예요</b><p>영상 재생과 자료 다운로드는 내 학습에서 이용할 수 있습니다.</p></div><button type="button">내 학습에서 보기 →</button></div>
+          <div class="sub-h">📹 영상 커리큘럼</div>
+          <ul class="curr"><li><span class="wk">1강</span><span>경매 기초 개념</span><button type="button" class="content-learning-link">내 학습에서 보기 →</button></li><li><span class="wk">2강</span><span>입찰표 작성</span><button type="button" class="content-learning-link">내 학습에서 보기 →</button></li></ul>
+          <div class="sub-h">📄 제공 자료</div>
+          <ul class="mat-list"><li><span class="mi">📄</span><span>입찰표 템플릿</span><button type="button" class="content-learning-link">내 학습에서 보기 →</button></li></ul>
+        </article>
       </div>
     </section>
 
@@ -191,6 +220,6 @@
       </div>
     </section>
   </main>
-  <script src="../js/policy-guide.js"></script>
+  <script src="../js/policy-guide.js?v=20260728-3"></script>
 </body>
 </html>

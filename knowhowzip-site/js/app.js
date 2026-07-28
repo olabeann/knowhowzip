@@ -187,6 +187,17 @@ function operationScheduleRows(product,owned=false){
 }
 function formatScheduleDate(date=''){const m=String(date).match(/(\d{4})-(\d{2})-(\d{2})/);return m?`${m[2]}.${m[3]}`:date;}
 function openOperationLink(url,title){if(url)window.open(url,'_blank','noopener,noreferrer');else toast(`${title} 링크는 추후 안내됩니다`);}
+function openMyLearningContent(productId,section='video'){
+  if(!state.user)return openAuth('login');
+  if(!state.purchased.has(productId))return toast('클래스를 수강 신청한 뒤 이용할 수 있습니다');
+  state.myFilter=endedCourses.has(productId)?'ended':'active';
+  show('mypage');
+  requestAnimationFrame(()=>{
+    const target=document.getElementById(`learn-${productId}-${section}`);
+    if(target&&!target.classList.contains('open'))target.classList.add('open');
+    (target?.closest('.learning-card')||target)?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+}
 function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];
   if(!p||!c)return showAccessDenied('product');
@@ -241,10 +252,14 @@ function openDetail(pid){
       <div class="d-tab-panels">
         <div class="d-panel active" id="sec-intro"><div class="d-section"><h3><span class="dot"></span>클래스 소개</h3><p>${p.intro}</p>${detailIntroMedia(p,c,videos)}</div></div>
         <div class="d-panel" id="sec-content"><div class="d-section"><h3><span class="dot"></span>콘텐츠 <span class="sub">영상 · 자료</span></h3>
+          <div class="detail-content-state ${owned?'is-owned':'is-locked'}">
+            <div><b>${owned?'구매한 클래스예요':'수강 신청 전에 커리큘럼을 확인해 보세요'}</b><p>${owned?'영상 재생과 자료 다운로드는 내 학습에서 이용할 수 있습니다.':'영상과 자료는 수강 권한이 생성된 후 내 학습에서 이용할 수 있습니다.'}</p></div>
+            ${owned?`<button type="button" onclick="openMyLearningContent('${pid}','video')">내 학습에서 보기 →</button>`:''}
+          </div>
           <div class="sub-h">📹 영상 커리큘럼</div>
-          <ul class="curr">${videos.map((s,i)=>`<li><span class="wk">${i+1}강</span><span>${s}</span><span class="pl">▶</span></li>`).join('')}</ul>
+          <ul class="curr">${videos.map((s,i)=>`<li><span class="wk">${i+1}강</span><span>${s}</span>${owned?`<button type="button" class="content-learning-link" onclick="openMyLearningContent('${pid}','video')">내 학습에서 보기 →</button>`:'<span class="content-lock">🔒 수강 후 이용</span>'}</li>`).join('')}</ul>
           <div class="sub-h">📄 제공 자료</div>
-          <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span><span class="lock">${owned?'다운로드 가능':'🔒 수강 후 제공'}</span></li>`).join('')}</ul>
+          <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span>${owned?`<button type="button" class="content-learning-link" onclick="openMyLearningContent('${pid}','files')">내 학습에서 보기 →</button>`:'<span class="content-lock">🔒 수강 후 제공</span>'}</li>`).join('')}</ul>
         </div></div>
         <div class="d-panel" id="sec-op"><div class="d-section"><h3><span class="dot"></span>운영 안내 <span class="sub">단톡방 · 줌</span></h3>
           <p style="margin-bottom:14px">${op.guide}</p>

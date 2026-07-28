@@ -325,6 +325,12 @@ main{min-height:50vh}
 .intro-video-copy strong{display:block;font-size:31px;line-height:1.2;font-weight:900;letter-spacing:-.4px;max-width:440px}
 .intro-video-copy p{color:rgba(255,255,255,.78);margin-top:10px;max-width:480px}
 .intro-detail-image{display:block;width:100%;height:auto;border-radius:16px;box-shadow:var(--shadow-sm);background:#AFD6E7}
+.detail-content-state{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid var(--line);border-radius:14px;padding:15px 16px;background:var(--bg-alt);margin-bottom:18px}
+.detail-content-state.is-owned{border-color:#DCE3FF;background:var(--brand-soft)}
+.detail-content-state b{display:block;font-size:14px;font-weight:900;color:var(--ink)}
+.detail-content-state p{margin-top:3px;font-size:13px;line-height:1.5;color:var(--ink-soft)}
+.detail-content-state button,.content-learning-link{border:0;background:none;color:var(--brand-dk);font-size:13px;font-weight:850;white-space:nowrap;padding:7px 0}
+.detail-content-state button:hover,.content-learning-link:hover{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
 .sub-h{font-size:14px;font-weight:800;color:var(--ink-soft);margin:22px 0 10px}
 .curr{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
 .curr li{display:flex;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line2);font-size:15px;align-items:center}
@@ -334,6 +340,8 @@ main{min-height:50vh}
 .mat-list li{display:flex;gap:10px;align-items:center;padding:12px 15px;border:1px solid var(--line);border-radius:12px;margin-bottom:9px;font-size:15px;font-weight:600;background:#fff}
 .mat-list li .mi{width:32px;height:32px;border-radius:9px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .mat-list li .lock{margin-left:auto;color:var(--ink-mute);font-size:13px;font-weight:700}
+.content-learning-link,.content-lock{margin-left:auto;flex-shrink:0}
+.content-lock{color:var(--ink-mute);font-size:13px;font-weight:700;white-space:nowrap}
 .op-card{display:flex;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff}
 .op-card .oi{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
 .op-card .ot{font-weight:800;font-size:15px}.op-card .od{font-size:13px;color:var(--ink-soft)}
@@ -674,6 +682,10 @@ footer{background:#0B1220;color:#98A2B3;padding:48px 0 36px}
   .included-class-list em{padding:8px 9px;font-size:11.5px}
   .curr li{gap:9px;padding:13px 12px;font-size:14px}
   .curr li .wk{width:42px}
+  .detail-content-state{align-items:flex-start;flex-direction:column;gap:7px;padding:14px}
+  .detail-content-state button{padding:3px 0}
+  .curr li,.mat-list li{flex-wrap:wrap}
+  .content-learning-link,.content-lock{width:100%;margin-left:51px;text-align:left}
   .op-card{flex-wrap:wrap}
   .op-card .obtn,.op-card .olock{width:100%;margin-left:52px}
   .my-learning-tabs button{flex:1;padding-left:8px;padding-right:8px}
