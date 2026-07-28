@@ -27,7 +27,7 @@ function prodCard(p,c){
       <div style="position:absolute;inset:0;background:${p.grad}"></div><div style="position:relative">${c.logoType==='house'?houseSVG(72,{ink:p.deep,text:false}):''}</div></div>
     <div class="c-body">
       <div class="c-creator"><span class="mini">${creatorLogo(c,18)}</span>${c.name}</div>
-      <span class="c-cohort">${p.cohort.status}</span>
+      <span class="c-level">${p.level||'입문'}</span>
       <h3 class="c-title">${p.title}</h3>
       <div class="c-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">${won(p.orig)}</span>`:''}</div>
     </div></article>`;
