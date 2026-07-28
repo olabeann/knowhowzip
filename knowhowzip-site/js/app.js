@@ -427,7 +427,7 @@ const demoPayments=[
 ];
 function renderPaymentHistory(){
   const payments=publicEmptyPreviewMode?[]:demoPayments;
-  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제한 클래스 내역을 확인하고 환불을 요청할 수 있습니다.</p></div></div>${payments.length?`<div class="payment-list">${payments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b><small>주문번호 ${payment.id}</small></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div>`:`<div class="my-empty payment-empty">${emptyLogo()}<h3>결제 내역이 없습니다</h3><p>클래스를 결제하면 주문번호와 결제 금액이 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`}</section>`;
+  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제한 클래스 내역을 확인하고 환불을 요청할 수 있습니다.</p></div></div>${payments.length?`<div class="payment-list">${payments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div>`:`<div class="my-empty payment-empty">${emptyLogo()}<h3>결제 내역이 없습니다</h3><p>클래스를 결제하면 클래스와 결제 금액이 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`}</section>`;
 }
 function renderUserProfile(){
   const user=state.user||(publicEmptyPreviewMode?{name:'김노하우',phone:'010-1234-5678',provider:'kakao'}:null);
@@ -533,7 +533,7 @@ function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;
 const KAKAO_CHANNEL_URL='https://pf.kakao.com/_xksSwX/chat';
 function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,noreferrer');}
 function openRefundRequest(orderId){
-  toast(`주문번호 ${orderId} 환불 문의를 위해 카카오톡 채널을 엽니다`);
+  toast('선택한 결제 건의 환불 문의를 위해 카카오톡 채널을 엽니다');
   openKakaoChannel();
 }
 
