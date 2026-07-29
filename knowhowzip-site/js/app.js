@@ -245,7 +245,6 @@ function openDetail(pid){
       <div class="d-tabs">
         <button class="active" onclick="goTab(this,'sec-intro')">클래스 소개</button>
         <button onclick="goTab(this,'sec-content')">콘텐츠</button>
-        <button onclick="goTab(this,'sec-op')">운영 안내</button>
         <button onclick="goTab(this,'sec-faq')">클래스 FAQ</button>
         <button onclick="goTab(this,'sec-refund')">환불 규정</button>
       </div>
@@ -260,11 +259,6 @@ function openDetail(pid){
           <ul class="curr">${videos.map((s,i)=>`<li><span class="wk">${i+1}강</span><span>${s}</span>${owned?`<button type="button" class="content-learning-link" onclick="openMyLearningContent('${pid}','video')">내 학습에서 보기 →</button>`:'<span class="content-lock">🔒 수강 후 이용</span>'}</li>`).join('')}</ul>
           <div class="sub-h">📄 제공 자료</div>
           <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span>${owned?`<button type="button" class="content-learning-link" onclick="openMyLearningContent('${pid}','files')">내 학습에서 보기 →</button>`:'<span class="content-lock">🔒 수강 후 제공</span>'}</li>`).join('')}</ul>
-        </div></div>
-        <div class="d-panel" id="sec-op"><div class="d-section"><h3><span class="dot"></span>운영 안내 <span class="sub">단톡방 · 줌</span></h3>
-          <p style="margin-bottom:14px">${op.guide}</p>
-          ${operationScheduleRows(p,false)}
-          ${detailOperationCards(p,owned)||'<p>등록된 운영 안내가 없습니다.</p>'}
         </div></div>
         <div class="d-panel" id="sec-faq"><div class="d-section"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div></div>
         <div class="d-panel" id="sec-refund"><div class="d-section"><h3><span class="dot"></span>환불 규정</h3>${refundPolicyMarkup()}</div></div>
