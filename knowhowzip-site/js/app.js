@@ -348,6 +348,37 @@ function setLessonLearningState(productId,index,status){
 }
 function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
 function toggleLearningAcc(id){document.getElementById(id)?.classList.toggle('open');}
+function learningOperationNoticeKey(productId){
+  const userKey=state.user?.phone||state.user?.name||'guest';
+  return `nhz-learning-operation:${userKey}:${productId}`;
+}
+function hasCheckedLearningOperation(product){
+  const guide=productOperation(product).guide.trim();
+  if(!guide)return true;
+  try{return localStorage.getItem(learningOperationNoticeKey(product.id))===guide;}
+  catch(error){return false;}
+}
+function acknowledgeLearningOperation(productId){
+  const product=productMap[productId];
+  if(!product)return;
+  try{localStorage.setItem(learningOperationNoticeKey(productId),productOperation(product).guide.trim());}
+  catch(error){}
+  document.getElementById(`learn-${productId}-operation-notice`)?.remove();
+}
+function toggleLearningOperation(productId){
+  const panel=document.getElementById(`learn-${productId}-operation`);
+  if(!panel)return;
+  const opening=!panel.classList.contains('open');
+  panel.classList.toggle('open');
+  if(opening)acknowledgeLearningOperation(productId);
+}
+function openLearningOperation(productId){
+  const panel=document.getElementById(`learn-${productId}-operation`);
+  if(!panel)return;
+  acknowledgeLearningOperation(productId);
+  panel.classList.add('open');
+  requestAnimationFrame(()=>panel.scrollIntoView({behavior:'smooth',block:'center'}));
+}
 function emptyLogo(){return '<img class="my-empty-logo" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="노하우집">';}
 function playLesson(productId,index,title){
   openLessonPlayer(productId,index);
@@ -481,6 +512,7 @@ function renderMy(){
             <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
           </div>
           <div class="learning-details">
+            ${productOperation(p).guide.trim()&&!hasCheckedLearningOperation(p)?`<div class="learning-operation-notice" id="learn-${p.id}-operation-notice"><span class="learning-operation-notice-icon">!</span><div><b><em>필독</em> 수강 전 운영 안내를 확인해 주세요</b><small>일정 · 준비사항 · 참여 링크를 먼저 확인할 수 있어요.</small></div><button type="button" onclick="openLearningOperation('${p.id}')">확인하기 <i>→</i></button></div>`:''}
             <div class="learning-acc open" id="learn-${p.id}-video">
               <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-video')"><span><i class="video">▶</i>콘텐츠 · 영상 <small>${videos.length}강</small></span><b>＋</b></button>
               <div class="learning-acc-body"><div class="learning-acc-inner"><div class="learning-player" id="player-${p.id}"><div class="learning-player-screen"><span>▶</span></div><div><b class="learning-player-title">강의를 선택해 주세요</b><small class="learning-player-meta">카드 안에서 바로 재생됩니다</small></div></div>${videos.map((video,idx)=>{const status=lessonStates[idx],meta=lessonStateMeta(status);return `<button class="lesson-row ${meta.className}" data-product="${p.id}" data-lesson="${idx}" onclick="playLesson('${p.id}',${idx},'${video}')"><span class="lesson-state ${meta.className}">${meta.icon}</span><span class="lesson-title">${video}</span><span class="lesson-duration">${lessonDurations[idx%lessonDurations.length]}</span><strong>${meta.label}</strong></button>`;}).join('')}</div></div>
@@ -490,7 +522,7 @@ function renderMy(){
               <div class="learning-acc-body"><div class="learning-acc-inner">${files.map(file=>`<button class="learning-resource" onclick="toast('&quot;${file}&quot; 다운로드를 시작합니다')"><i>📄</i><span>${file}<small>강의 자료</small></span><b>다운로드</b></button>`).join('')}</div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-operation">
-              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-operation')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
+              <button class="learning-acc-head" onclick="toggleLearningOperation('${p.id}')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
               <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${productOperation(p).guide}</p>${renderZoomSchedules(p.id)}${productOperation(p).hasKakao?`<button class="learning-resource" onclick="openOperationLink('${productOperation(p).kakaoUrl||''}','${productOperation(p).kakaoTitle}')"><i class="kakao">💬</i><span>${productOperation(p).kakaoTitle}<small>${productOperation(p).kakaoDesc}</small></span><b>입장 →</b></button>`:''}</div></div>
             </div>
             <div class="learning-acc" id="learn-${p.id}-faq">
