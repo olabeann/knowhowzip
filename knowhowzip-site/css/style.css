@@ -136,6 +136,10 @@ main{min-height:50vh}
 /* creator grid */
 .creator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(264px,280px));justify-content:center;gap:22px}
 .home-popular-grid{grid-template-columns:repeat(auto-fit,minmax(252px,280px));justify-content:center}
+.home-popular-more{display:flex;justify-content:center;margin-top:34px}
+.home-popular-more .btn-soft{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:190px}
+.home-popular-more .btn-soft span{font-size:18px;line-height:1;transition:transform .16s}
+.home-popular-more .btn-soft:hover span{transform:translateX(3px)}
 .ccard{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:.2s}
 .ccard:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:transparent}
 .cc-cover{height:88px;position:relative}

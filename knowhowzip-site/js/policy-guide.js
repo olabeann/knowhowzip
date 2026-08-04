@@ -41,7 +41,7 @@
 
     {id:"public.home",pages:["public"],selector:"#view-home .hero",type:"이동 · 임시 노출",title:"홈 히어로",summary:"홈의 주요 탐색 경로와 입점 초기 대표 크리에이터를 안내합니다.",rules:["크리에이터 둘러보기는 크리에이터 탭으로 이동합니다.","이용 방법 보기는 홈 하단의 이용 방법 영역으로 이동합니다.","추가 크리에이터 입점 전까지 애매모홈을 대표 카드로 표시합니다."],spec:"PRODUCT_SPEC §5.1"},
     {id:"public.home-creators",pages:["public"],selector:"#view-home #creators",type:"정렬 · 표시 개수",title:"믿고 배우는 크리에이터",summary:"등록된 크리에이터를 등록 순서대로 최대 4명까지 가운데 정렬해 표시합니다.",rules:["카드 선택 시 해당 크리에이터 상세 페이지로 이동합니다."],spec:"PRODUCT_SPEC §5.1"},
-    {id:"public.home-popular",pages:["public"],selector:"#view-home #homePopular",type:"정렬 · 표시 개수",title:"지금 인기 클래스",summary:"공개 상태이면서 모집중인 클래스를 등록 순서대로 최대 4개까지 가운데 정렬해 표시합니다.",rules:["모집 전·모집 완료·비공개 클래스는 표시하지 않습니다.","카드 뱃지에는 모집 상태 대신 클래스 레벨을 표시합니다.","카드 선택 시 해당 클래스 상세 페이지로 이동합니다."],spec:"PRODUCT_SPEC §5.1"},
+    {id:"public.home-popular",pages:["public"],selector:"#view-home #homePopular",type:"정렬 · 표시 개수 · 이동",title:"지금 인기 클래스",summary:"공개 상태이면서 모집중인 클래스를 등록 순서대로 최대 4개까지 가운데 정렬해 표시합니다.",rules:["모집 전·모집 완료·비공개 클래스는 표시하지 않습니다.","카드 뱃지에는 모집 상태 대신 클래스 레벨을 표시합니다.","카드 선택 시 해당 클래스 상세 페이지로 이동합니다.","클래스 더 보러가기 선택 시 크리에이터 목록 페이지로 이동합니다."],spec:"PRODUCT_SPEC §5.1"},
     {id:"public.home-bottom-cta",pages:["public"],selector:"#view-home #homeBottomCta",type:"이동 경로",title:"홈 하단 바로 시작하기",summary:"홈 하단 CTA에서 카카오 로그인 화면으로 이동합니다.",rules:["이동 경로: 홈 > 로그인 페이지.","이동 방식: 같은 창."],spec:"PRODUCT_SPEC §4.9 · §5.1"},
     {id:"public.creator-directory",pages:["public"],selector:"#view-creators .creator-directory-body",type:"정렬 · 표시 정보",title:"크리에이터 목록",summary:"등록된 모든 크리에이터를 최근 클래스 등록 순으로 표시합니다.",rules:["카드 선택 시 해당 크리에이터 상세로 이동합니다."],spec:"PRODUCT_SPEC §4.10 · §5.2"},
     {id:"public.creator-profile",pages:["public"],selector:"#view-creator .cbanner",type:"게시 데이터",title:"크리에이터 공개 정보",summary:"관리자 채널 설정에서 저장한 게시 데이터를 표시합니다.",rules:["프로필·핸들·카테고리·소개·배경색을 동일하게 반영합니다.","페이지 공유는 현재 크리에이터의 고유 URL을 사용합니다."],spec:"PRODUCT_SPEC §4.10 · §5.3"},
@@ -342,7 +342,8 @@
       "카드 정보: 크리에이터명·레벨·클래스명·가격을 표시합니다.",
       "레벨 뱃지: 모집 상태 대신 저장된 클래스 레벨을 표시합니다.",
       "모집 상태 비노출: 모집 상태는 표시 대상을 판단하는 데만 사용하고 카드에는 표시하지 않습니다.",
-      "카드 선택: 홈 > 선택한 클래스 상세 페이지로 이동합니다."
+      "카드 선택: 홈 > 선택한 클래스 상세 페이지로 이동합니다.",
+      "더 보기: 클래스 더 보러가기 선택 시 홈 > 크리에이터 탭으로 이동합니다."
     ],
     "public.home-bottom-cta":[
       "버튼 선택: 홈 > 로그인 페이지로 이동합니다.",
