@@ -375,37 +375,6 @@ function setLessonLearningState(productId,index,status){
 }
 function setMyLearningFilter(filter){state.myFilter=filter;renderMy();}
 function toggleLearningAcc(id){document.getElementById(id)?.classList.toggle('open');}
-function learningOperationNoticeKey(productId){
-  const userKey=state.user?.phone||state.user?.name||'guest';
-  return `nhz-learning-operation:${userKey}:${productId}`;
-}
-function hasCheckedLearningOperation(product){
-  const guide=productOperation(product).guide.trim();
-  if(!guide)return true;
-  try{return localStorage.getItem(learningOperationNoticeKey(product.id))===guide;}
-  catch(error){return false;}
-}
-function acknowledgeLearningOperation(productId){
-  const product=productMap[productId];
-  if(!product)return;
-  try{localStorage.setItem(learningOperationNoticeKey(productId),productOperation(product).guide.trim());}
-  catch(error){}
-  document.getElementById(`learn-${productId}-operation-notice`)?.remove();
-}
-function toggleLearningOperation(productId){
-  const panel=document.getElementById(`learn-${productId}-operation`);
-  if(!panel)return;
-  const opening=!panel.classList.contains('open');
-  panel.classList.toggle('open');
-  if(opening)acknowledgeLearningOperation(productId);
-}
-function openLearningOperation(productId){
-  const panel=document.getElementById(`learn-${productId}-operation`);
-  if(!panel)return;
-  acknowledgeLearningOperation(productId);
-  panel.classList.add('open');
-  requestAnimationFrame(()=>panel.scrollIntoView({behavior:'smooth',block:'center'}));
-}
 function emptyLogo(){return '<img class="my-empty-logo" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="노하우집">';}
 function playLesson(productId,index,title){
   openLessonPlayer(productId,index);
@@ -512,6 +481,52 @@ function renderUserProfile(){
     <div class="user-profile-withdraw"><button type="button" onclick="openWithdraw()">탈퇴하기</button></div>
   </section>`;
 }
+function learningStatus(productId){
+  if(hasWaitingAccess(productId))return {label:'수강 대기',className:'waiting'};
+  if(hasEndedAccess(productId))return {label:'수강 종료',className:'ended'};
+  return {label:'수강 중',className:'active'};
+}
+function learningOperationViewKey(productId){
+  const userKey=state.user?.phone||state.user?.name||'guest';
+  return `nhz-operation-viewed:${userKey}:${productId}`;
+}
+function hasViewedLearningOperation(product){
+  const guide=productOperation(product).guide.trim();
+  if(!guide)return true;
+  try{return localStorage.getItem(learningOperationViewKey(product.id))===guide;}
+  catch(error){return false;}
+}
+function closeLearningOperationModal(){document.getElementById('learningOperationModal')?.remove();}
+function openLearningOperationModal(productId){
+  const product=productMap[productId],creator=creatorOf[productId];
+  if(!product||!creator)return;
+  if(hasWaitingAccess(productId)){toast('수강 시작 후 운영 안내를 확인할 수 있습니다.');return;}
+  const operation=productOperation(product),schedules=operation.schedules||[];
+  try{localStorage.setItem(learningOperationViewKey(productId),operation.guide.trim());}catch(error){}
+  renderMy();
+  closeLearningOperationModal();
+  document.body.insertAdjacentHTML('beforeend',`<div class="learning-operation-modal" id="learningOperationModal" role="dialog" aria-modal="true" aria-labelledby="learningOperationModalTitle" onclick="if(event.target===this)closeLearningOperationModal()"><section><header><div><span>${creator.name}</span><h2 id="learningOperationModalTitle">${product.title}</h2><p>운영 안내</p></div><button type="button" onclick="closeLearningOperationModal()" aria-label="운영 안내 닫기">×</button></header><div class="learning-operation-modal-body"><h3>운영 공지</h3><p class="learning-operation-modal-guide">${operation.guide.trim()||'등록된 운영 안내가 없습니다.'}</p>${schedules.length?`<div class="learning-operation-modal-schedules"><h3>라이브 일정</h3>${schedules.map(schedule=>`<div><span><b>${schedule.title}</b><small>${schedule.date} · ${schedule.time}</small></span>${schedule.url?`<button type="button" onclick="openOperationLink('${schedule.url}','${schedule.title}')">입장 →</button>`:''}</div>`).join('')}</div>`:''}${operation.hasKakao?`<button class="learning-operation-modal-link" type="button" onclick="openOperationLink('${operation.kakaoUrl||''}','${operation.kakaoTitle}')"><span>💬</span><div><b>${operation.kakaoTitle}</b><small>${operation.kakaoDesc}</small></div><em>입장 →</em></button>`:''}</div></section></div>`);
+  document.querySelector('#learningOperationModal header button')?.focus();
+}
+function creatorLearningFaqSearch(creator,products){
+  const entries=products.flatMap(product=>(product.faq||[]).map(faq=>({product,faq})));
+  return `<div class="global-learning-faq creator-learning-faq" id="creatorFaq-${creator.id}"><button class="global-learning-faq-copy" type="button" aria-expanded="false" aria-controls="creatorFaqBody-${creator.id}" onclick="toggleCreatorLearningFaq('${creator.id}')"><span>?</span><div><b>강의에 대해 궁금한 게 있나요?</b><small>${creator.name} 수강 클래스의 FAQ에서 먼저 검색해 보세요.</small></div><i>⌄</i></button><div class="global-learning-faq-body" id="creatorFaqBody-${creator.id}"><label class="learning-faq-search"><span>⌕</span><input type="search" placeholder="궁금한 내용을 검색해 보세요" aria-label="${creator.name} 클래스 FAQ 검색" oninput="filterCreatorLearningFaq('${creator.id}',this.value)"></label><p class="learning-faq-result" aria-live="polite"></p><div class="creator-learning-faq-results" hidden>${entries.map(({product,faq})=>`<article class="global-learning-faq-item" data-search="${`${faq.q} ${faq.a}`.toLowerCase().replaceAll('"','&quot;')}" hidden><span>${product.title}</span><b>${faq.q}</b><p>${faq.a}</p></article>`).join('')}</div><p class="learning-faq-empty" hidden>검색 결과가 없습니다.</p></div></div>`;
+}
+function toggleCreatorLearningFaq(creatorId){
+  const root=document.getElementById(`creatorFaq-${creatorId}`);
+  if(!root)return;
+  const open=root.classList.toggle('open'),button=root.querySelector('.global-learning-faq-copy');
+  button?.setAttribute('aria-expanded',String(open));
+  if(open)setTimeout(()=>root.querySelector('input')?.focus(),0);
+}
+function filterCreatorLearningFaq(creatorId,value){
+  const root=document.getElementById(`creatorFaq-${creatorId}`);
+  if(!root)return;
+  const query=value.trim().toLowerCase(),items=[...root.querySelectorAll('.global-learning-faq-item')],results=root.querySelector('.creator-learning-faq-results'),count=root.querySelector('.learning-faq-result'),empty=root.querySelector('.learning-faq-empty');
+  if(!query){items.forEach(item=>item.hidden=true);results.hidden=true;empty.hidden=true;count.textContent='';return;}
+  let matches=0;items.forEach(item=>{const matched=item.dataset.search.includes(query);item.hidden=!matched;if(matched)matches+=1;});
+  results.hidden=!matches;empty.hidden=!!matches;count.textContent=matches?`${matches}개의 FAQ를 찾았습니다.`:'일치하는 FAQ가 없습니다.';
+}
 function renderMy(){
   const box=document.getElementById('myContent');
   const tabs=document.getElementById('myLearningTabs');
@@ -522,52 +537,7 @@ function renderMy(){
   const owned=allOwned.filter(x=>state.myFilter==='ended'?hasEndedAccess(x.p.id):(hasValidAccess(x.p.id)||hasWaitingAccess(x.p.id)));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
-  box.innerHTML=Object.values(byCreator).map(g=>`
-    <section class="learning-group">
-      <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
-      ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period;if(hasWaitingAccess(p.id))return `
-        <article class="learning-card waiting">
-          <div class="learning-summary">
-            <div class="learning-thumb waiting" style="background:${p.grad}"><span>수강 대기</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><div class="waiting-course-note">${entitlement.startAt.replaceAll('-','.')}부터 수강할 수 있습니다.</div><small>수강 기간 · ${displayPeriod}</small></div>
-            <span class="waiting-course-badge">수강 대기</span>
-          </div>
-        </article>`;if(hasEndedAccess(p.id))return `
-        <article class="learning-card ended">
-          <div class="learning-summary">
-            <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>수강 기간 · ${displayPeriod}</small></div>
-            <span class="ended-course-badge">수강 종료</span>
-          </div>
-        </article>`;return `
-        <article class="learning-card">
-          <div class="learning-summary">
-            <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><small>${contentSummary} · 수강 기간 ${displayPeriod}</small></div>
-            <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
-          </div>
-          <div class="learning-details">
-            ${productOperation(p).guide.trim()&&!hasCheckedLearningOperation(p)?`<div class="learning-operation-notice" id="learn-${p.id}-operation-notice"><span class="learning-operation-notice-icon">!</span><div class="learning-operation-notice-copy"><div class="learning-operation-notice-title"><em>필수 확인</em><b>수강 전 운영 안내를 반드시 확인해 주세요</b></div><small>미확인 시 일정 · 준비사항 · 참여 링크를 놓칠 수 있어요.</small></div><button type="button" onclick="openLearningOperation('${p.id}')">운영 안내 확인 <i>→</i></button></div>`:''}
-            <div class="learning-acc open" id="learn-${p.id}-video">
-              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-video')"><span><i class="video">▶</i>콘텐츠 · 영상 <small>${videos.length}강</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><div class="learning-player" id="player-${p.id}"><div class="learning-player-screen"><span>▶</span></div><div><b class="learning-player-title">강의를 선택해 주세요</b><small class="learning-player-meta">카드 안에서 바로 재생됩니다</small></div></div>${videos.map((video,idx)=>{const status=lessonStates[idx],meta=lessonStateMeta(status);return `<button class="lesson-row ${meta.className}" data-product="${p.id}" data-lesson="${idx}" onclick="playLesson('${p.id}',${idx},'${video}')"><span class="lesson-state ${meta.className}">${meta.icon}</span><span class="lesson-title">${video}</span><span class="lesson-duration">${lessonDurations[idx%lessonDurations.length]}</span><strong>${meta.label}</strong></button>`;}).join('')}</div></div>
-            </div>
-            <div class="learning-acc" id="learn-${p.id}-files">
-              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-files')"><span><i class="file">▤</i>콘텐츠 · 자료 <small>${files.length}개</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner">${files.map(file=>`<button class="learning-resource" onclick="toast('&quot;${file}&quot; 다운로드를 시작합니다')"><i>📄</i><span>${file}<small>강의 자료</small></span><b>다운로드</b></button>`).join('')}</div></div>
-            </div>
-            <div class="learning-acc" id="learn-${p.id}-operation">
-              <button class="learning-acc-head" onclick="toggleLearningOperation('${p.id}')"><span><i class="operation">●</i>운영 안내 <small>단톡방 · 줌</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><p class="learning-guide">${productOperation(p).guide}</p>${renderZoomSchedules(p.id)}${productOperation(p).hasKakao?`<button class="learning-resource" onclick="openOperationLink('${productOperation(p).kakaoUrl||''}','${productOperation(p).kakaoTitle}')"><i class="kakao">💬</i><span>${productOperation(p).kakaoTitle}<small>${productOperation(p).kakaoDesc}</small></span><b>입장 →</b></button>`:''}</div></div>
-            </div>
-            <div class="learning-acc" id="learn-${p.id}-faq">
-              <button class="learning-acc-head" onclick="toggleLearningAcc('learn-${p.id}-faq')"><span><i class="faq">?</i>수강 FAQ <small>${p.faq.length}개</small></span><b>＋</b></button>
-              <div class="learning-acc-body"><div class="learning-acc-inner"><div class="faq-list">${faqAcc(p.faq,'lf'+p.id)}</div></div></div>
-            </div>
-          </div>
-        </article>`;}).join('')}
-    </section>`).join('');
+  box.innerHTML=Object.values(byCreator).map(g=>`<section class="learning-list-group"><div class="learning-list-group-head"><span>${creatorLogo(g.c,30)}</span><b>${g.c.name}</b><button type="button" onclick="openCreator('${g.c.id}')">페이지 보기 →</button></div>${creatorLearningFaqSearch(g.c,g.items)}${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),period=entitlementPeriod(entitlement)||p.cohort.period,status=learningStatus(p.id),hasOperation=!!productOperation(p).guide.trim(),operationLocked=status.className==='waiting',unreadOperation=hasOperation&&status.className==='active'&&!hasViewedLearningOperation(p);return `<article class="learning-course-row ${status.className}${unreadOperation?' operation-unread':''}"><div class="learning-course-main"><span class="learning-list-thumb" style="background:${p.grad}">${g.c.logoType==='house'?houseSVG(38,{ink:p.deep,text:false}):creatorLogo(g.c,38)}</span><div class="learning-list-copy"><span><em class="learning-status ${status.className}">${status.label}</em></span><b>${p.title}</b><small>영상 ${videos.length}강 · 자료 ${files.length}개</small><small>수강 기간 · ${period}</small></div></div><div class="learning-course-operation${operationLocked?' locked':''}"><span>${unreadOperation?'! 운영 안내를 확인해 주세요':'운영 안내'}</span><b>${operationLocked?'수강 시작 후 확인할 수 있습니다.':hasOperation?(unreadOperation?'일정과 참여 방법을 먼저 확인해 주세요.':'일정과 참여 방법을 확인할 수 있습니다.'):'등록된 안내가 없습니다.'}</b>${hasOperation&&!operationLocked?`<button type="button" onclick="openLearningOperationModal('${p.id}')">운영 안내 보기 →</button>`:''}</div><div class="learning-course-action">${status.className==='active'?`<button type="button" onclick="continueLearning('${p.id}',0)">학습하기</button>`:`<button type="button" disabled>${status.label}</button>`}</div></article>`;}).join('')}</section>`).join('');
 }
 function setAccountFilter(filter){state.accountFilter=filter;renderAccount();}
 function renderAccountTabs(){
@@ -578,23 +548,6 @@ function renderAccount(){
   if(!state.user&&!publicEmptyPreviewMode){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 결제 내역과 내 정보를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
   renderAccountTabs();
   box.innerHTML=state.accountFilter==='profile'?renderUserProfile():renderPaymentHistory();
-}
-
-function renderCreatorLearningFaq(creator,products){
-  const entries=products.flatMap(product=>(product.faq||[]).map(faq=>({...faq,course:product.title})));
-  return '<section class="global-learning-faq"><button type="button" class="global-learning-faq-copy" onclick="toggleGlobalLearningFaq(this)" aria-expanded="false"><span>?</span><div><b>강의에 대해 궁금한 게 있나요?</b><small>'+creator.name+' 수강 클래스의 FAQ에서 먼저 검색해 보세요.</small></div><i>⌄</i></button><div class="global-learning-faq-body"><label class="learning-faq-search"><span>⌕</span><input type="search" placeholder="궁금한 내용을 자유롭게 검색해 보세요" oninput="filterCreatorLearningFaq(this)"></label><div class="learning-faq-result"></div><div class="global-learning-faq-results" hidden>'+entries.map(faq=>'<article class="global-learning-faq-item"><span>'+creator.name+' · '+faq.course+'</span><b>Q. '+faq.q+'</b><p>'+faq.a+'</p></article>').join('')+'</div><div class="learning-faq-empty" hidden>검색 결과가 없습니다.</div></div></section>';
-}
-function toggleGlobalLearningFaq(button){
-  const panel=button.closest('.global-learning-faq'),open=panel.classList.toggle('open');
-  button.setAttribute('aria-expanded',String(open));
-  if(open)setTimeout(()=>panel.querySelector('input')?.focus(),0);
-}
-function filterCreatorLearningFaq(input){
-  const panel=input.closest('.global-learning-faq'),results=panel.querySelector('.global-learning-faq-results'),empty=panel.querySelector('.learning-faq-empty'),result=panel.querySelector('.learning-faq-result');
-  if(!results)return;
-  const query=input.value.trim().toLowerCase();let visible=0;
-  results.querySelectorAll('.global-learning-faq-item').forEach(item=>{const matched=!query||item.textContent.toLowerCase().includes(query);item.hidden=!matched;if(matched)visible++;});
-  results.hidden=!query||visible===0;empty.hidden=!query||visible!==0;result.textContent=query?'검색 결과 '+visible+'개':'';
 }
 
 /* ---------- platform FAQ ---------- */
