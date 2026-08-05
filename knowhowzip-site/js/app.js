@@ -462,8 +462,8 @@ const demoPayments=[
   {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료'}
 ];
 function renderPaymentHistory(){
-  const repurchasePayments=state.orders.map(order=>{const product=productMap[order.productId];return {id:order.id,date:order.purchasedAt,productId:order.productId,title:order.title||product?.title||order.productId,amount:order.amount??product?.price??0,payment:order.status==='paid'?'결제 완료':'결제 취소'};});
-  const rawPayments=publicEmptyPreviewMode?[]:[...repurchasePayments,...demoPayments];
+  const orderPayments=state.orders.map(order=>{const product=productMap[order.productId];return {id:order.id,date:order.purchasedAt,productId:order.productId,title:order.title||product?.title||order.productId,amount:order.amount??product?.price??0,payment:order.status==='paid'?'결제 완료':'결제 취소'};});
+  const rawPayments=publicEmptyPreviewMode?[]:[...orderPayments,...demoPayments];
   const payments=[...rawPayments].sort((a,b)=>b.date.localeCompare(a.date));
   return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>모든 결제를 주문별로 확인하고 환불을 요청할 수 있습니다.</p></div></div>${payments.length?`<div class="payment-list">${payments.map(payment=>`<article class="payment-item"><div class="payment-date"><span>결제일</span><b>${payment.date}</b></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div>`:`<div class="my-empty payment-empty">${emptyLogo()}<h3>결제 내역이 없습니다</h3><p>클래스를 결제하면 클래스와 결제 금액이 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`}</section>`;
 }
