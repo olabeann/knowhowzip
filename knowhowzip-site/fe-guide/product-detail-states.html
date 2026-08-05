@@ -68,13 +68,9 @@
     <header class="guide-head">
       <div>
         <span>PRODUCT DETAIL STATES</span>
-        <h1>상품 상세 상태 가이드</h1>
-        <p>상품 단위 상세 화면에서 신청 조건, 패키지, 운영 안내, 구매 여부 상태를 빠짐없이 확인합니다.</p>
+        <h1>클래스 상세 상태 가이드</h1>
+        <p>현재 모집 중인 클래스 상세에서 신청 조건과 수강권 여부에 따른 CTA를 확인합니다.</p>
       </div>
-      <nav class="guide-nav">
-        <a href="./my-learning-states.html">내 학습</a>
-        <a href="./creator-admin-states.html">관리자</a>
-      </nav>
     </header>
 
     <section class="state-section">
@@ -172,13 +168,29 @@
             </div>
           </article>
           <article class="scenario-card">
-            <strong>이미 구매함</strong>
+            <strong>유효한 수강권 있음</strong>
             <div class="scenario-layout">
-              <div class="scenario-preview"><h3>구매 완료 상태</h3><p>수강신청 CTA 영역은 사라지고 내 학습에서 확인 가능한 상태 문구를 표시합니다.</p><div class="visual-demo">수강 중 상태</div></div>
+              <div class="scenario-preview"><h3>수강 중 상태</h3><p>구매 이력이 아니라 현재 유효한 수강권을 기준으로 내 학습 진입 CTA를 표시합니다.</p><div class="visual-demo">수강 중 상태</div></div>
               <aside class="buycard"><div class="bc-body">
                 <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">모집중</span></div><div class="ch-row"><span>수강 기간</span><b>2026.07.12 ~ 08.09</b></div></div>
                 <div class="bc-price"><span class="final">₩390,000</span></div>
                 <div class="bc-owned">✓ 수강 중 · 내 학습에서 확인</div>
+              </div></aside>
+            </div>
+          </article>
+          <article class="scenario-card">
+            <strong>재구매 가능</strong>
+            <div class="scenario-layout">
+              <div class="scenario-preview">
+                <div class="tags-demo"><span>입문</span><span>입찰 실습</span><span>직장인 추천</span></div>
+                <h3>경매 낙찰 기초반 · 4주 완성</h3>
+                <p>경매가 처음인 직장인을 위한 입문 과정. 한 달이면 혼자 입찰표를 쓸 수 있습니다.</p>
+                <div class="visual-demo">클래스 대표 이미지</div>
+              </div>
+              <aside class="buycard"><div class="bc-body">
+                <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">모집중</span></div><div class="ch-row"><span>수강 기간</span><b>2026.07.05 ~ 08.02</b></div><div class="ch-row"><span>모집 마감</span><b>2026.06.30</b></div></div>
+                <div class="bc-price"><span class="disc">26%</span><span class="final">₩290,000</span><span class="orig">정가 ₩390,000</span></div>
+                <div class="bc-actions"><button class="btn-red">다시 수강하기</button><button class="bc-share">🔗 공유</button></div>
               </div></aside>
             </div>
           </article>
@@ -190,17 +202,6 @@
                 <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st">모집중</span></div><div class="ch-row"><span>수강 기간</span><b>2026.07.19 ~ 08.16</b></div></div>
                 <div class="bc-price"><span class="final">₩450,000</span></div>
                 <div class="bc-actions"><button class="btn-red">수강신청</button><button class="bc-share">🔗 공유</button></div>
-              </div></aside>
-            </div>
-          </article>
-          <article class="scenario-card">
-            <strong>모집 마감</strong>
-            <div class="scenario-layout">
-              <div class="scenario-preview"><h3>모집 마감 상품</h3><p>상태 배지는 모집마감으로 표시하고 수강신청 CTA는 비활성화합니다.</p><div class="visual-demo">마감 상태</div></div>
-              <aside class="buycard"><div class="bc-body">
-                <div class="cohort-box"><div class="ch-top"><span class="ch-no">수강 신청</span><span class="ch-st" style="background:#98A2B3">모집마감</span></div><div class="ch-row"><span>모집 마감</span><b>2026.06.30</b></div></div>
-                <div class="bc-price"><span class="disc">26%</span><span class="final">₩290,000</span><span class="orig">정가 ₩390,000</span></div>
-                <div class="bc-actions"><button class="btn-red" disabled>모집이 마감되었습니다</button><button class="bc-share">🔗 공유</button></div>
               </div></aside>
             </div>
           </article>

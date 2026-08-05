@@ -14,9 +14,30 @@ var _ml=document.getElementById('mockLogo');if(_ml)_ml.innerHTML=houseSVG(36,{in
 const won=n=>'₩'+Number(n).toLocaleString('ko-KR');
 const stars=r=>'★★★★★'.slice(0,Math.round(r))+'☆☆☆☆☆'.slice(0,5-Math.round(r));
 
-let state={user:null,purchased:new Set(),authMode:'kakao',pending:null,pendingLesson:null,pendingPurchase:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
+let state={user:null,purchased:new Set(),entitlements:[],orders:[],authMode:'kakao',pending:null,pendingLesson:null,pendingPurchase:null,cat:'전체',creatorCat:'전체',myFilter:'active',accountFilter:'payments',payMethod:'card',activeLesson:null};
 let publicEmptyPreviewMode=false;
 let currentPublicView='home';
+
+function entitlementTime(value,endOfDay=false){
+  if(!value)return NaN;
+  const date=new Date(`${value}T${endOfDay?'23:59:59':'00:00:00'}+09:00`);
+  return date.getTime();
+}
+function productEntitlements(productId){return state.entitlements.filter(item=>item.productId===productId&&item.status!=='cancelled'&&item.status!=='refunded');}
+function validEntitlement(productId){
+  const now=Date.now();
+  return productEntitlements(productId).filter(item=>entitlementTime(item.startAt)<=now&&now<=entitlementTime(item.endAt,true)).sort((a,b)=>entitlementTime(b.endAt,true)-entitlementTime(a.endAt,true))[0]||null;
+}
+function latestEntitlement(productId){return productEntitlements(productId).sort((a,b)=>entitlementTime(b.endAt,true)-entitlementTime(a.endAt,true))[0]||null;}
+function hasValidAccess(productId){return !!validEntitlement(productId);}
+function hasPurchaseHistory(productId){return state.purchased.has(productId)||productEntitlements(productId).length>0;}
+function hasEndedAccess(productId){return !hasValidAccess(productId)&&!!latestEntitlement(productId);}
+function entitlementPeriod(item){return item?`${item.startAt.replaceAll('-','.')} ~ ${item.endAt.replaceAll('-','.')}`:'';}
+function classPurchaseState(product){
+  if(hasValidAccess(product.id))return {type:'active',label:'내 학습에서 보기'};
+  const repurchase=hasPurchaseHistory(product.id);
+  return {type:repurchase?'repurchase':'purchase',label:repurchase?'다시 수강하기':'수강신청'};
+}
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
@@ -135,7 +156,7 @@ function faqAcc(list,prefix){return list.map((f,i)=>`<div class="faq-item"><butt
 function purchaseRequirement(product){
   const req=product.requirement||{type:'none',label:'처음 참여 가능',message:'사전 수강 이력 없이 신청할 수 있습니다.'};
   if(req.type==='none')return {ok:true,label:req.label,message:req.message};
-  const ok=state.purchased.has(req.productId);
+  const ok=hasPurchaseHistory(req.productId);
   return {ok,label:req.label,message:ok?'신청 조건을 충족했습니다.':req.message};
 }
 function productContentSources(product){
@@ -189,8 +210,8 @@ function formatScheduleDate(date=''){const m=String(date).match(/(\d{4})-(\d{2})
 function openOperationLink(url,title){if(url)window.open(url,'_blank','noopener,noreferrer');else toast(`${title} 링크는 추후 안내됩니다`);}
 function openMyLearningContent(productId,section='video'){
   if(!state.user)return openAuth('login');
-  if(!state.purchased.has(productId))return toast('클래스를 수강 신청한 뒤 이용할 수 있습니다');
-  state.myFilter=endedCourses.has(productId)?'ended':'active';
+  if(!hasValidAccess(productId))return toast(hasEndedAccess(productId)?'수강 기간이 종료되었습니다':'클래스를 수강 신청한 뒤 이용할 수 있습니다');
+  state.myFilter='active';
   show('mypage');
   requestAnimationFrame(()=>{
     const target=document.getElementById(`learn-${productId}-${section}`);
@@ -201,9 +222,10 @@ function openMyLearningContent(productId,section='video'){
 function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];
   if(!p||!c)return showAccessDenied('product');
-  if(p.isPublic===false&&!state.purchased.has(pid))return showAccessDenied('product');
+  if(p.isPublic===false&&!hasValidAccess(pid))return showAccessDenied('product');
+  if(!hasValidAccess(pid)&&!p.cohort?.recruitmentAlways&&p.cohort?.status!=='모집중')return showAccessDenied('product');
   activeDetail=pid;
-  const owned=state.purchased.has(pid),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
+  const owned=hasValidAccess(pid),purchaseState=classPurchaseState(p),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
   const hasRequirement=(p.requirement||{}).type&&p.requirement.type!=='none';
   const includedClasses=productClassNames(p),op=productOperation(p);
   const videos=productVideoTitles(p),files=productFileTitles(p);
@@ -234,7 +256,7 @@ function openDetail(pid){
           </div>`:''}
           <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
           <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
-            <button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>
+            <button class="btn-red" onclick="startPurchase('${pid}')">${purchaseState.label}</button>
             <button class="bc-share" onclick="shareProduct('${pid}')">🔗 공유</button>
           </div>
           <div class="bc-owned" data-owned="${pid}" style="display:${owned?'block':'none'}">✓ 수강 중 · 내 학습에서 확인</div>
@@ -267,7 +289,7 @@ function openDetail(pid){
     </div></div>
     <div class="buybar" id="buybar"></div>`;
   const bar=document.getElementById('buybar');
-  bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">수강신청</button>`;
+  bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">${purchaseState.label}</button>`;
   show('detail');window.scrollTo({top:0});setHash('#/p/'+pid);requestAnimationFrame(updateDetailBuycardPosition);
 }
 function goTab(btn,id){
@@ -323,7 +345,6 @@ const lessonLearningStates={
   'mmoh-basic':['completed','completed','in-progress','before'],
   'mmoh-right':['completed','before','before','before']
 };
-const endedCourses=new Set();
 const lessonDurations=['88분','92분','76분','81분','68분','74분'];
 function renderZoomSchedules(productId){
   const product=productMap[productId];
@@ -405,7 +426,7 @@ function openLessonPlayer(productId,index=0){
     state.pendingLesson={productId,index:next};
     return showAccessDenied('login',productId);
   }
-  if(!state.purchased.has(productId)){
+  if(!hasValidAccess(productId)){
     return showAccessDenied('purchase',productId);
   }
   const currentStatus=productLessonStates(productId,videos.length)[next];
@@ -458,7 +479,7 @@ function showAccessDenied(type,productId){
   location.href='./access-denied.html?type='+encodeURIComponent(type||'lesson')+(productId?'&product='+encodeURIComponent(productId):'');
 }
 function renderLearningTabs(owned){
-  const ended=owned.filter(x=>endedCourses.has(x.p.id)).length,active=owned.length-ended;
+  const ended=owned.filter(x=>hasEndedAccess(x.p.id)).length,active=owned.filter(x=>hasValidAccess(x.p.id)).length;
   document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`]].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
 }
 const demoPayments=[
@@ -466,7 +487,8 @@ const demoPayments=[
   {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료'}
 ];
 function renderPaymentHistory(){
-  const payments=publicEmptyPreviewMode?[]:demoPayments;
+  const repurchasePayments=state.orders.map(order=>{const product=productMap[order.productId];return {id:order.id,date:order.purchasedAt,productId:order.productId,title:product?.title||order.productId,amount:product?.price||0,payment:order.status==='paid'?'결제 완료':'결제 취소'};});
+  const payments=publicEmptyPreviewMode?[]:[...repurchasePayments,...demoPayments];
   return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제한 클래스 내역을 확인하고 환불을 요청할 수 있습니다.</p></div></div>${payments.length?`<div class="payment-list">${payments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div>`:`<div class="my-empty payment-empty">${emptyLogo()}<h3>결제 내역이 없습니다</h3><p>클래스를 결제하면 클래스와 결제 금액이 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`}</section>`;
 }
 function renderUserProfile(){
@@ -487,28 +509,28 @@ function renderMy(){
   const box=document.getElementById('myContent');
   const tabs=document.getElementById('myLearningTabs');
   if(!state.user&&!publicEmptyPreviewMode){tabs.innerHTML='';box.innerHTML=`<div class="my-empty">${emptyLogo()}<h3>로그인이 필요합니다</h3><p>로그인 후 구매한 클래스를 확인할 수 있습니다.</p><button class="btn-red" onclick="openAuth('login')">바로 시작하기</button></div>`;return;}
-  const allOwned=publicEmptyPreviewMode?[]:allProducts().filter(x=>state.purchased.has(x.p.id));
+  const allOwned=publicEmptyPreviewMode?[]:allProducts().filter(x=>hasPurchaseHistory(x.p.id));
   renderLearningTabs(allOwned);
   if(!allOwned.length){box.innerHTML=`<div class="my-empty learning-empty">${emptyLogo()}<h3>아직 수강할 클래스가 없습니다</h3><p>클래스를 결제하면 수강 기간과 학습 콘텐츠가 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`;return;}
-  const owned=allOwned.filter(x=>state.myFilter==='ended'?endedCourses.has(x.p.id):!endedCourses.has(x.p.id));
+  const owned=allOwned.filter(x=>state.myFilter==='ended'?hasEndedAccess(x.p.id):hasValidAccess(x.p.id));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
   box.innerHTML=Object.values(byCreator).map(g=>`
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length);if(endedCourses.has(p.id))return `
+      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period;if(hasEndedAccess(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>${p.cohort.period}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>${displayPeriod}</small></div>
             <span class="ended-course-badge">수강 종료</span>
           </div>
         </article>`;return `
         <article class="learning-card">
           <div class="learning-summary">
             <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><small>${contentSummary}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><small>${contentSummary} · ${displayPeriod}</small></div>
             <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
           </div>
           <div class="learning-details">
@@ -637,10 +659,16 @@ function openAuth(m){switchAuth(m);show('login');}
 function closeAuth(){if(document.getElementById('view-login').classList.contains('show'))show('home');}
 function switchAuth(m){state.authMode='kakao';}
 const DEMO_PURCHASES=['mmoh-basic','mmoh-right','mmoh-basic-right-package'];
+const DEMO_ENTITLEMENTS=[
+  {id:'E-DEMO-1',productId:'mmoh-basic',orderId:'P-DEMO-1',startAt:'2026-07-05',endAt:'2026-08-02',status:'active'},
+  {id:'E-DEMO-2',productId:'mmoh-right',orderId:'P-DEMO-2',startAt:'2026-07-12',endAt:'2026-08-09',status:'active'},
+  {id:'E-DEMO-3',productId:'mmoh-basic-right-package',orderId:'P-DEMO-3',startAt:'2026-07-05',endAt:'2026-08-09',status:'active'}
+];
 function submitAuth(){
   state.user={name:'김노하우',phone:'010-1234-5678',provider:'kakao'};
   state.myFilter='active';
   DEMO_PURCHASES.forEach(id=>state.purchased.add(id));
+  if(!state.entitlements.length)state.entitlements=DEMO_ENTITLEMENTS.map(item=>({...item}));
   document.getElementById('signupBtn').style.display='none';
   document.getElementById('userChip').style.display='flex';document.getElementById('userName').textContent=state.user.name;
   document.getElementById('mAuth').style.display='none';document.getElementById('mUser').style.display='flex';document.getElementById('mUserName').textContent=state.user.name;
@@ -649,7 +677,7 @@ function submitAuth(){
   else if(state.pendingLesson){const lesson=state.pendingLesson;state.pendingLesson=null;openLessonPlayer(lesson.productId,lesson.index);}
   else if(document.getElementById('view-account').classList.contains('show'))show('account');
   else show('mypage');}
-function logout(){state.user=null;state.purchased.clear();
+function logout(){state.user=null;state.purchased.clear();state.entitlements=[];state.orders=[];
   document.getElementById('signupBtn').style.display='';
   document.getElementById('userChip').style.display='none';
   document.getElementById('mAuth').style.display='flex';document.getElementById('mUser').style.display='none';
@@ -666,7 +694,7 @@ function selectWithdrawReason(btn){
 }
 function confirmWithdraw(){
   closeWithdraw();
-  state.user=null;state.purchased.clear();
+  state.user=null;state.purchased.clear();state.entitlements=[];state.orders=[];
   document.getElementById('signupBtn').style.display='';
   document.getElementById('userChip').style.display='none';
   document.getElementById('mAuth').style.display='flex';document.getElementById('mUser').style.display='none';
@@ -679,6 +707,8 @@ function confirmWithdraw(){
 function startPurchase(id){
   if(!state.user){state.pending=id;openAuth('login');toast('결제를 위해 먼저 로그인해 주세요');return;}
   if(productMap[id]?.isPublic===false){toast('비공개 클래스는 새로 수강신청할 수 없습니다');return;}
+  if(hasValidAccess(id)){toast('이미 수강 중인 클래스입니다');openMyLearningContent(id);return;}
+  if(!productMap[id]?.cohort?.recruitmentAlways&&productMap[id]?.cohort?.status!=='모집중'){toast('현재 모집 중인 클래스가 아닙니다');return;}
   const req=purchaseRequirement(productMap[id]);
   if(!req.ok){toast(req.message);return;}
   openPay(id);
@@ -699,6 +729,12 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
   document.getElementById('payModal').classList.add('show');}
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
 function confirmPay(id){
+  const now=new Date(),days=Number(productMap[id]?.periodDays||30),end=new Date(now);
+  end.setDate(end.getDate()+days);
+  const dateString=date=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  const orderId=`P${Date.now()}`,entitlementId=`E${Date.now()}`;
+  state.orders.push({id:orderId,productId:id,status:'paid',purchasedAt:dateString(now)});
+  state.entitlements.push({id:entitlementId,productId:id,orderId,startAt:dateString(now),endAt:dateString(end),status:'active'});
   state.purchased.add(id);
   state.pendingPurchase=id;
   closePay();
@@ -716,7 +752,7 @@ function startPurchasedLesson(){
 
 function refreshOwned(){
   Object.keys(productMap).forEach(id=>{
-    const owned=state.purchased.has(id);
+    const owned=hasValidAccess(id);
     document.querySelectorAll(`[data-own="${id}"]`).forEach(e=>e.style.display=owned?'block':'none');
     const act=document.querySelector(`[data-actions="${id}"]`),note=document.querySelector(`[data-owned="${id}"]`);
     if(act)act.style.display=owned?'none':'flex';if(note)note.style.display=owned?'block':'none';
