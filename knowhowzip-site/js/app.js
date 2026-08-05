@@ -38,8 +38,6 @@ function hasWaitingAccess(productId){return !!waitingEntitlement(productId);}
 function hasPurchaseHistory(productId){return state.purchased.has(productId)||productEntitlements(productId).length>0;}
 function hasEndedAccess(productId){return !hasValidAccess(productId)&&!hasWaitingAccess(productId)&&!!latestEntitlement(productId);}
 function entitlementPeriod(item){return item?`${item.startAt.replaceAll('-','.')} ~ ${item.endAt.replaceAll('-','.')}`:'';}
-function entitlementOrder(item){return item?state.orders.find(order=>order.id===item.orderId)||null:null;}
-function isRepurchaseEntitlement(item){return entitlementOrder(item)?.isRepurchase===true;}
 function classPurchaseState(product){
   if(hasValidAccess(product.id))return {type:'active',label:'내 학습에서 보기'};
   if(hasWaitingAccess(product.id))return {type:'waiting',label:'수강 대기 · 내 학습에서 확인'};
@@ -528,11 +526,11 @@ function renderMy(){
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period,repurchased=isRepurchaseEntitlement(entitlement);if(hasWaitingAccess(p.id))return `
+      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period;if(hasWaitingAccess(p.id))return `
         <article class="learning-card waiting">
           <div class="learning-summary">
             <div class="learning-thumb waiting" style="background:${p.grad}"><span>수강 대기</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3>${repurchased?'<div class="repurchase-course-note">재수강</div>':''}<div class="waiting-course-note">${entitlement.startAt.replaceAll('-','.')}부터 수강할 수 있습니다.</div><small>수강 기간 · ${displayPeriod}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><div class="waiting-course-note">${entitlement.startAt.replaceAll('-','.')}부터 수강할 수 있습니다.</div><small>수강 기간 · ${displayPeriod}</small></div>
             <span class="waiting-course-badge">수강 대기</span>
           </div>
         </article>`;if(hasEndedAccess(p.id))return `
@@ -546,7 +544,7 @@ function renderMy(){
         <article class="learning-card">
           <div class="learning-summary">
             <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3>${repurchased?'<div class="repurchase-course-note">재수강</div>':''}<small>${contentSummary} · 수강 기간 ${displayPeriod}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><small>${contentSummary} · 수강 기간 ${displayPeriod}</small></div>
             <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
           </div>
           <div class="learning-details">
@@ -682,7 +680,7 @@ const DEMO_ENTITLEMENTS=[
   {id:'E-DEMO-3',productId:'mmoh-basic-right-package',orderId:'P-DEMO-3',startAt:'2026-08-20',endAt:'2026-09-20',status:'active'}
 ];
 const DEMO_ORDERS=[
-  {id:'P-DEMO-REPURCHASE',productId:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',amount:290000,isRepurchase:true,status:'paid',purchasedAt:'2026.08.05'}
+  {id:'P-DEMO-REPURCHASE',productId:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',amount:290000,status:'paid',purchasedAt:'2026.08.05'}
 ];
 function submitAuth(){
   state.user={name:'김노하우',phone:'010-1234-5678',provider:'kakao'};
@@ -751,11 +749,11 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
   document.getElementById('payModal').classList.add('show');}
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
 function confirmPay(id){
-  const product=productMap[id],isRepurchase=hasPurchaseHistory(id),now=new Date(),days=Number(product?.periodDays||30),end=new Date(now);
+  const product=productMap[id],now=new Date(),days=Number(product?.periodDays||30),end=new Date(now);
   end.setDate(end.getDate()+days);
   const dateString=date=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   const orderId=`P${Date.now()}`,entitlementId=`E${Date.now()}`;
-  state.orders.push({id:orderId,productId:id,title:product?.title||id,amount:product?.price||0,isRepurchase,status:'paid',purchasedAt:dateString(now)});
+  state.orders.push({id:orderId,productId:id,title:product?.title||id,amount:product?.price||0,status:'paid',purchasedAt:dateString(now)});
   state.entitlements.push({id:entitlementId,productId:id,orderId,startAt:dateString(now),endAt:dateString(end),status:'active'});
   state.purchased.add(id);
   state.pendingPurchase=id;
