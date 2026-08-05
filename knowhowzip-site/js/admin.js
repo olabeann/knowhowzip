@@ -103,7 +103,7 @@ function renderDashboard(){
 
       <article class="panel cohort-panel">
         <div class="panel-head"><div><h2>강의 콘텐츠</h2><p>재사용 가능한 영상·자료 커리큘럼을 관리합니다.</p></div><button class="text-btn" onclick="showAdminView('classes')">전체 보기 →</button></div>
-        ${dashboardContents.length?`<div class="cohort-list">${dashboardContents.map(c=>`<button onclick="openClassEditor('edit','${c.id}')"><span class="cohort-color" style="background:${c.color}"></span><span class="cohort-info"><b>${classShortTitle(c.title)} 커리큘럼</b><small>${linkedClassCount(c.id)}개 클래스에서 사용 중</small></span></button>`).join('')}</div>`:adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}
+        ${dashboardContents.length?`<div class="cohort-list">${dashboardContents.map(c=>`<button onclick="requestLectureContentEdit('${c.id}')"><span class="cohort-color" style="background:${c.color}"></span><span class="cohort-info"><b>${classShortTitle(c.title)} 커리큘럼</b><small>${linkedClassCount(c.id)}개 클래스에서 사용 중</small></span></button>`).join('')}</div>`:adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}
       </article>
     </section>
 
@@ -118,7 +118,7 @@ function renderDashboard(){
 function renderClasses(){
   const rows=emptyPreviewRows(lectureContents);
   return `${pageHeader('Lecture content','강의 콘텐츠','수강생에게 제공되는 영상, 자료, 강의 순서와 설명을 관리합니다. 등록한 콘텐츠는 여러 클래스에서 재사용할 수 있습니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 강의 콘텐츠</button>')}
-  <div class="class-admin-grid${rows.length?'':' is-empty'}">${rows.length?rows.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="openClassEditor('edit','${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openClassEditor('edit','${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="openClassEditor('edit','${c.id}')">수정</button><button type="button" class="danger" onclick="deleteLectureContent('${c.id}')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join(''):adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}</div>`;
+  <div class="class-admin-grid${rows.length?'':' is-empty'}">${rows.length?rows.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="requestLectureContentEdit('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();requestLectureContentEdit('${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="requestLectureContentEdit('${c.id}')">수정</button><button type="button" class="danger" onclick="deleteLectureContent('${c.id}')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join(''):adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}</div>`;
 }
 
 function openClassPreview(classId=''){
@@ -143,32 +143,50 @@ function toggleClassMenu(event,id){
 document.addEventListener('click',()=>document.querySelectorAll('.class-card-menu-pop.show').forEach(menu=>menu.classList.remove('show')));
 
 let pendingLectureContentDeleteId='',contentDeleteTrigger=null;
-function deleteLectureContent(contentId){
-  const index=lectureContents.findIndex(item=>item.id===contentId);
-  if(index<0)return;
-  const content=lectureContents[index],linkedCount=linkedClassCount(contentId);
+function showLinkedLectureContentRestriction(contentId,action){
+  const content=lectureContents.find(item=>item.id===contentId),linkedCount=linkedClassCount(contentId);
+  if(!content||linkedCount<1)return false;
   const modal=document.getElementById('contentDeleteModal');
   const title=document.getElementById('contentDeleteTitle');
   const description=document.getElementById('contentDeleteDescription');
   const cancel=document.getElementById('contentDeleteCancel');
   const confirm=document.getElementById('contentDeleteConfirm');
   const actions=modal.querySelector('.unsaved-changes-actions');
+  const actionLabel=action==='edit'?'수정':'삭제';
   pendingLectureContentDeleteId='';
   contentDeleteTrigger=document.activeElement instanceof HTMLElement?document.activeElement:null;
-  if(linkedCount>0){
-    title.textContent='연결된 콘텐츠는 삭제할 수 없습니다';
-    description.textContent=`“${classShortTitle(content.title)}” 콘텐츠가 ${linkedCount}개의 클래스에서 사용 중입니다. 연결된 클래스를 먼저 삭제한 뒤, 연결 클래스가 없을 때 콘텐츠를 삭제할 수 있습니다.`;
-    cancel.textContent='확인';
-    confirm.hidden=true;
-    actions.classList.add('single-action');
-  }else{
-    pendingLectureContentDeleteId=contentId;
-    title.textContent='강의 콘텐츠를 삭제할까요?';
-    description.textContent=`“${classShortTitle(content.title)}” 콘텐츠를 삭제하면 복구할 수 없습니다.`;
-    cancel.textContent='취소';
-    confirm.hidden=false;
-    actions.classList.remove('single-action');
-  }
+  title.textContent=`연결된 콘텐츠는 ${actionLabel}할 수 없습니다`;
+  description.textContent=`“${classShortTitle(content.title)}” 콘텐츠가 ${linkedCount}개의 클래스에서 사용 중입니다. 연결된 클래스를 먼저 삭제한 뒤, 연결 클래스가 없을 때 콘텐츠를 ${actionLabel}할 수 있습니다.`;
+  cancel.textContent='확인';
+  confirm.hidden=true;
+  actions.classList.add('single-action');
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  requestAnimationFrame(()=>cancel.focus());
+  return true;
+}
+function requestLectureContentEdit(contentId){
+  if(showLinkedLectureContentRestriction(contentId,'edit'))return;
+  openClassEditor('edit',contentId);
+}
+function deleteLectureContent(contentId){
+  const index=lectureContents.findIndex(item=>item.id===contentId);
+  if(index<0)return;
+  if(showLinkedLectureContentRestriction(contentId,'delete'))return;
+  const content=lectureContents[index];
+  const modal=document.getElementById('contentDeleteModal');
+  const title=document.getElementById('contentDeleteTitle');
+  const description=document.getElementById('contentDeleteDescription');
+  const cancel=document.getElementById('contentDeleteCancel');
+  const confirm=document.getElementById('contentDeleteConfirm');
+  const actions=modal.querySelector('.unsaved-changes-actions');
+  pendingLectureContentDeleteId=contentId;
+  contentDeleteTrigger=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  title.textContent='강의 콘텐츠를 삭제할까요?';
+  description.textContent=`“${classShortTitle(content.title)}” 콘텐츠를 삭제하면 복구할 수 없습니다.`;
+  cancel.textContent='취소';
+  confirm.hidden=false;
+  actions.classList.remove('single-action');
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
   requestAnimationFrame(()=>cancel.focus());
@@ -390,6 +408,7 @@ function validateProductEditorForm(form){
 function saveClassForm(event,mode){
   event.preventDefault();
   const form=event.currentTarget,contentId=form.dataset.contentId;
+  if(mode==='edit'&&showLinkedLectureContentRestriction(contentId,'edit'))return;
   if(mode==='edit'){
     const content=lectureContents.find(item=>item.id===contentId);
     if(content){
@@ -406,7 +425,18 @@ function applyClassAssetLock(form){
   if(!form||form.dataset.assetsLocked!=='true')return;
   form.querySelectorAll('#editor-content input,#editor-content textarea,#editor-content select,#editor-content .add-row-btn,#editor-content .remove-row').forEach(control=>control.disabled=true);
 }
-function openClassEditor(mode,classId='',skipUnsavedCheck=false){runAdminNavigation(()=>{document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='classes'));document.getElementById('adminContent').innerHTML=renderClassEditor(mode,classId);const form=document.querySelector('.class-editor');applyClassAssetLock(form);window.scrollTo({top:0});location.hash=mode==='edit'?`#class-edit-${classId}`:'#class-new';beginEditorSession(form,'강의 콘텐츠');},skipUnsavedCheck);}
+function openClassEditor(mode,classId='',skipUnsavedCheck=false){
+  if(mode==='edit'&&linkedClassCount(classId)>0){
+    currentAdminView='classes';
+    document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='classes'));
+    document.getElementById('adminContent').innerHTML=renderClasses();
+    window.scrollTo({top:0});
+    history.replaceState(null,'',`${location.pathname}${location.search}#classes`);
+    showLinkedLectureContentRestriction(classId,'edit');
+    return false;
+  }
+  return runAdminNavigation(()=>{document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='classes'));document.getElementById('adminContent').innerHTML=renderClassEditor(mode,classId);const form=document.querySelector('.class-editor');applyClassAssetLock(form);window.scrollTo({top:0});location.hash=mode==='edit'?`#class-edit-${classId}`:'#class-new';beginEditorSession(form,'강의 콘텐츠');},skipUnsavedCheck);
+}
 
 function studentAccessClass(access){
   if(access.includes('스터디'))return 'master';
