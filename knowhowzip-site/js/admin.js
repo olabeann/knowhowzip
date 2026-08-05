@@ -118,7 +118,7 @@ function renderDashboard(){
 function renderClasses(){
   const rows=emptyPreviewRows(lectureContents);
   return `${pageHeader('Lecture content','강의 콘텐츠','수강생에게 제공되는 영상, 자료, 강의 순서와 설명을 관리합니다. 등록한 콘텐츠는 여러 클래스에서 재사용할 수 있습니다.','<button class="btn primary" onclick="openClassEditor(\'create\')">+ 새 강의 콘텐츠</button>')}
-  <div class="class-admin-grid${rows.length?'':' is-empty'}">${rows.length?rows.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="requestLectureContentEdit('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();requestLectureContentEdit('${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 관리"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="requestLectureContentEdit('${c.id}')">수정</button><button type="button" class="danger" onclick="deleteLectureContent('${c.id}')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join(''):adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}</div>`;
+  <div class="class-admin-grid${rows.length?'':' is-empty'}">${rows.length?rows.map(c=>`<article class="admin-class-card lecture-content-card" role="button" tabindex="0" onclick="requestLectureContentEdit('${c.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();requestLectureContentEdit('${c.id}')}" aria-label="${classShortTitle(c.title)} 강의 콘텐츠 ${linkedClassCount(c.id)>0?'상세 보기':'수정'}"><div class="class-card-body"><div class="class-card-top"><h2>${classShortTitle(c.title)} 커리큘럼</h2><div class="class-card-menu"><button type="button" aria-label="강의 콘텐츠 메뉴" onclick="toggleClassMenu(event,'${c.id}')">&#8942;</button><div class="class-card-menu-pop" id="class-menu-${c.id}" onclick="event.stopPropagation()"><button type="button" onclick="requestLectureContentEdit('${c.id}')">${linkedClassCount(c.id)>0?'상세 보기':'수정'}</button><button type="button" class="danger" onclick="deleteLectureContent('${c.id}')">삭제</button></div></div></div><p>${c.intro||'영상과 자료로 구성된 학습 콘텐츠입니다.'}</p><div class="lecture-content-stats"><span><b>${c.content?.videos?.length||0}</b> 영상</span><span><b>${c.content?.files?.length||0}</b> 자료</span><span><b>${linkedClassCount(c.id)}</b> 연결 클래스</span></div></div></article>`).join(''):adminEmptyState('▶','등록된 강의 콘텐츠가 없습니다.','영상과 자료를 등록해 첫 강의 콘텐츠를 만들어 보세요.','강의 콘텐츠 등록',"openClassEditor('create')")}</div>`;
 }
 
 function openClassPreview(classId=''){
@@ -166,7 +166,6 @@ function showLinkedLectureContentRestriction(contentId,action){
   return true;
 }
 function requestLectureContentEdit(contentId){
-  if(showLinkedLectureContentRestriction(contentId,'edit'))return;
   openClassEditor('edit',contentId);
 }
 function deleteLectureContent(contentId){
@@ -214,19 +213,19 @@ function renderClassEditor(mode='create',classId=''){
   const contentName=editing?`${classShortTitle(course.title)} 커리큘럼`:'';
   const curriculum=editing&&course.content?.videos?.length?course.content.videos:[''];
   const materials=editing&&course.content?.files?.length?course.content.files:[];
-  return `<form class="class-editor" data-active-class-step="0" data-content-id="${classId}" data-assets-locked="${assetsLocked}" novalidate onsubmit="if(!validateClassEditorForm(this)){event.preventDefault();return false;}saveClassForm(event,'${mode}')">
-    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 강의 콘텐츠</button><div><span>${editing?'Lecture content editing':'New lecture content'}</span><h1>${editing?'강의 콘텐츠 수정':'새 강의 콘텐츠'}</h1><p>영상·자료와 강의 순서를 관리합니다. 이 콘텐츠를 연결한 모든 클래스에서 동일하게 사용됩니다.</p></div><div class="editor-actions"><button type="submit" class="btn primary">강의 콘텐츠 저장</button></div></div>
-    ${assetsLocked?`<div class="content-lock-notice"><b>영상·자료 수정 불가</b><span>이 콘텐츠는 ${linkedCount}개의 클래스에 연결되어 있습니다. 기본 정보는 수정할 수 있지만 영상·자료와 콘텐츠 구성은 변경하거나 삭제할 수 없습니다.</span></div>`:''}
+  return `<form class="class-editor${assetsLocked?' is-readonly':''}" data-active-class-step="0" data-content-id="${classId}" data-assets-locked="${assetsLocked}" novalidate onsubmit="if(!validateClassEditorForm(this)){event.preventDefault();return false;}saveClassForm(event,'${mode}')">
+    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 강의 콘텐츠</button><div><span>${assetsLocked?'Lecture content details':editing?'Lecture content editing':'New lecture content'}</span><h1>${assetsLocked?'강의 콘텐츠 상세':editing?'강의 콘텐츠 수정':'새 강의 콘텐츠'}</h1><p>영상·자료와 강의 순서를 확인합니다. 이 콘텐츠를 연결한 모든 클래스에서 동일하게 사용됩니다.</p></div><div class="editor-actions">${assetsLocked?'':`<button type="submit" class="btn primary">강의 콘텐츠 저장</button>`}</div></div>
+    ${assetsLocked?`<div class="content-lock-notice"><b>읽기 전용 · 수정 불가</b><span>이 콘텐츠는 ${linkedCount}개의 클래스에 연결되어 있어 기본 정보와 영상·자료를 모두 조회만 할 수 있습니다.</span></div>`:''}
     <div class="editor-layout">
       <nav class="editor-steps class-editor-steps" aria-label="강의 콘텐츠 등록 단계"><button type="button" class="active" data-class-step="0" data-step-title="기본 정보" aria-current="step" aria-controls="editor-content-info" onclick="showClassEditorStep(0)"><i>1</i><span>기본 정보<small>제목·설명</small></span></button><button type="button" data-class-step="1" data-step-title="영상·자료" aria-controls="editor-content" onclick="showClassEditorStep(1)"><i>2</i><span>영상·자료<small>순서·업로드</small></span></button></nav>
       <div class="editor-sections">
-        <section class="panel editor-section class-step-panel active" id="editor-content-info" data-class-step-panel="0"><div class="editor-section-head"><i>1</i><div><h2>강의 콘텐츠 정보</h2><p>관리자에서 콘텐츠를 구분할 제목과 설명을 입력합니다.</p></div><span>제목 필수</span></div><div class="editor-fields"><label class="wide">콘텐츠 제목 <em>*</em><input name="contentTitle" required maxlength="80" value="${contentName}" placeholder="예: 경매 기초 커리큘럼"><small>수강생 판매 화면에는 클래스명이 표시되며, 이 제목은 관리자용입니다. 클래스명은 클래스 관리에서 클래스를 선택하면 확인할 수 있습니다.</small></label><label class="wide">콘텐츠 설명 <em class="optional">선택</em><textarea name="contentDescription" placeholder="이 커리큘럼의 학습 목표와 구성 특징을 적어주세요.">${editing?(course.intro||''):''}</textarea></label></div></section>
+        <section class="panel editor-section class-step-panel active${assetsLocked?' content-assets-locked':''}" id="editor-content-info" data-class-step-panel="0"><div class="editor-section-head"><i>1</i><div><h2>강의 콘텐츠 정보</h2><p>${assetsLocked?'연결된 콘텐츠의 기본 정보를 조회합니다.':'관리자에서 콘텐츠를 구분할 제목과 설명을 입력합니다.'}</p></div><span>${assetsLocked?'읽기 전용':'제목 필수'}</span></div><div class="editor-fields"><label class="wide">콘텐츠 제목 <em>*</em><input name="contentTitle" required maxlength="80" value="${contentName}" placeholder="예: 경매 기초 커리큘럼"><small>수강생 판매 화면에는 클래스명이 표시되며, 이 제목은 관리자용입니다. 클래스명은 클래스 관리에서 클래스를 선택하면 확인할 수 있습니다.</small></label><label class="wide">콘텐츠 설명 <em class="optional">선택</em><textarea name="contentDescription" placeholder="이 커리큘럼의 학습 목표와 구성 특징을 적어주세요.">${editing?(course.intro||''):''}</textarea></label></div></section>
 
         <section class="panel editor-section class-step-panel${assetsLocked?' content-assets-locked':''}" id="editor-content" data-class-step-panel="1" hidden><div class="editor-section-head"><i>2</i><div><h2>영상·자료</h2><p>${assetsLocked?'연결된 클래스의 학습 콘텐츠 보호를 위해 조회만 가능합니다.':'수강생에게 제공할 영상 순서와 다운로드 자료를 구성합니다.'}</p></div><span>${assetsLocked?'수정 불가':'영상 필수 · 자료 선택'}</span></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>영상 커리큘럼</h3><p>1개 이상의 영상이 필요합니다. 제목과 설명을 입력하고 영상 파일을 업로드하세요.</p></div><span id="curriculumCount">${curriculum.length}강 · 필수</span></div><div class="repeat-list" id="curriculumRows">${curriculum.map((item,i)=>curriculumRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addCurriculumRow()">＋ 강의 추가</button></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>제공 자료</h3><p>선택 항목입니다. 필요한 경우 자료 제목과 설명을 입력하고 파일을 업로드하세요.</p></div><span id="materialCount">${materials.length}개 · 선택</span></div><div class="repeat-list" id="materialRows">${materials.map((item,i)=>materialRow(i+1,item)).join('')}</div><button type="button" class="add-row-btn" onclick="addMaterialRow()">＋ 자료 추가</button></div></section>
         <div class="editor-step-actions"><button type="button" class="btn ghost" id="classStepPrevious" onclick="goClassEditorStep(-1)" disabled>← 이전 단계</button><span id="classStepCurrent">1 / 2 · 기본 정보</span><button type="button" class="btn primary" id="classStepNext" onclick="goClassEditorStep(1)">다음 단계 →</button></div>
       </div>
     </div>
-    <div class="editor-bottom-bar"><span><b>${editing?contentName:'새 강의 콘텐츠'}</b><small>영상 순서와 자료를 확인한 뒤 저장해 주세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">취소</button><button type="submit" class="btn primary">강의 콘텐츠 저장</button></div></div>
+    <div class="editor-bottom-bar"><span><b>${editing?contentName:'새 강의 콘텐츠'}</b><small>${assetsLocked?'연결된 콘텐츠는 조회만 할 수 있습니다.':'영상 순서와 자료를 확인한 뒤 저장해 주세요.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">${assetsLocked?'목록으로':'취소'}</button>${assetsLocked?'':`<button type="submit" class="btn primary">강의 콘텐츠 저장</button>`}</div></div>
   </form>`;
 }
 
@@ -408,7 +407,7 @@ function validateProductEditorForm(form){
 function saveClassForm(event,mode){
   event.preventDefault();
   const form=event.currentTarget,contentId=form.dataset.contentId;
-  if(mode==='edit'&&showLinkedLectureContentRestriction(contentId,'edit'))return;
+  if(form.dataset.assetsLocked==='true'){adminToast('연결된 강의 콘텐츠는 수정할 수 없습니다');return;}
   if(mode==='edit'){
     const content=lectureContents.find(item=>item.id===contentId);
     if(content){
@@ -418,24 +417,15 @@ function saveClassForm(event,mode){
     }
   }
   clearEditorSession();
-  adminToast(form.dataset.assetsLocked==='true'?'기본 정보를 저장했습니다':'강의 콘텐츠를 저장했습니다');
+  adminToast('강의 콘텐츠를 저장했습니다');
   setTimeout(()=>showAdminView('classes',true),700);
 }
 function applyClassAssetLock(form){
   if(!form||form.dataset.assetsLocked!=='true')return;
-  form.querySelectorAll('#editor-content input,#editor-content textarea,#editor-content select,#editor-content .add-row-btn,#editor-content .remove-row').forEach(control=>control.disabled=true);
+  form.querySelectorAll('input,textarea,select,.add-row-btn,.remove-row').forEach(control=>control.disabled=true);
 }
 function openClassEditor(mode,classId='',skipUnsavedCheck=false){
-  if(mode==='edit'&&linkedClassCount(classId)>0){
-    currentAdminView='classes';
-    document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='classes'));
-    document.getElementById('adminContent').innerHTML=renderClasses();
-    window.scrollTo({top:0});
-    history.replaceState(null,'',`${location.pathname}${location.search}#classes`);
-    showLinkedLectureContentRestriction(classId,'edit');
-    return false;
-  }
-  return runAdminNavigation(()=>{document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='classes'));document.getElementById('adminContent').innerHTML=renderClassEditor(mode,classId);const form=document.querySelector('.class-editor');applyClassAssetLock(form);window.scrollTo({top:0});location.hash=mode==='edit'?`#class-edit-${classId}`:'#class-new';beginEditorSession(form,'강의 콘텐츠');},skipUnsavedCheck);
+  return runAdminNavigation(()=>{document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='classes'));document.getElementById('adminContent').innerHTML=renderClassEditor(mode,classId);const form=document.querySelector('.class-editor');applyClassAssetLock(form);window.scrollTo({top:0});location.hash=mode==='edit'?`#class-edit-${classId}`:'#class-new';if(form?.dataset.assetsLocked!=='true')beginEditorSession(form,'강의 콘텐츠');},skipUnsavedCheck);
 }
 
 function studentAccessClass(access){
