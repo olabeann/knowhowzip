@@ -38,6 +38,8 @@ function hasWaitingAccess(productId){return !!waitingEntitlement(productId);}
 function hasPurchaseHistory(productId){return state.purchased.has(productId)||productEntitlements(productId).length>0;}
 function hasEndedAccess(productId){return !hasValidAccess(productId)&&!hasWaitingAccess(productId)&&!!latestEntitlement(productId);}
 function entitlementPeriod(item){return item?`${item.startAt.replaceAll('-','.')} ~ ${item.endAt.replaceAll('-','.')}`:'';}
+function entitlementOrder(item){return item?state.orders.find(order=>order.id===item.orderId)||null:null;}
+function isRepurchaseEntitlement(item){return entitlementOrder(item)?.isRepurchase===true;}
 function classPurchaseState(product){
   if(hasValidAccess(product.id))return {type:'active',label:'내 학습에서 보기'};
   if(hasWaitingAccess(product.id))return {type:'waiting',label:'수강 대기 · 내 학습에서 확인'};
@@ -493,9 +495,10 @@ const demoPayments=[
   {id:'P20260628014',date:'2026.06.28',productId:'mmoh-right',title:'권리분석 실전반 · 위험물건 거르기',amount:390000,payment:'결제 완료'}
 ];
 function renderPaymentHistory(){
-  const repurchasePayments=state.orders.map(order=>{const product=productMap[order.productId];return {id:order.id,date:order.purchasedAt,productId:order.productId,title:product?.title||order.productId,amount:product?.price||0,payment:order.status==='paid'?'결제 완료':'결제 취소'};});
-  const payments=publicEmptyPreviewMode?[]:[...repurchasePayments,...demoPayments];
-  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>결제한 클래스 내역을 확인하고 환불을 요청할 수 있습니다.</p></div></div>${payments.length?`<div class="payment-list">${payments.map(payment=>`<article class="payment-item"><div class="payment-date"><b>${payment.date}</b></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div>`:`<div class="my-empty payment-empty">${emptyLogo()}<h3>결제 내역이 없습니다</h3><p>클래스를 결제하면 클래스와 결제 금액이 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`}</section>`;
+  const repurchasePayments=state.orders.map(order=>{const product=productMap[order.productId];return {id:order.id,date:order.purchasedAt,productId:order.productId,title:order.title||product?.title||order.productId,amount:order.amount??product?.price??0,payment:order.status==='paid'?'결제 완료':'결제 취소'};});
+  const rawPayments=publicEmptyPreviewMode?[]:[...repurchasePayments,...demoPayments];
+  const payments=[...rawPayments].sort((a,b)=>b.date.localeCompare(a.date));
+  return `<section class="payment-history"><div class="payment-history-head"><div><h2>결제 내역</h2><p>모든 결제를 주문별로 확인하고 환불을 요청할 수 있습니다.</p></div></div>${payments.length?`<div class="payment-list">${payments.map(payment=>`<article class="payment-item"><div class="payment-date"><span>결제일</span><b>${payment.date}</b></div><div class="payment-product"><span>클래스</span><b>${payment.title}</b></div><div class="payment-amount"><span>결제 금액</span><b>${won(payment.amount)}</b></div><div class="payment-status"><span class="pay-state">${payment.payment}</span></div><button type="button" class="refund-request-button" onclick="openRefundRequest('${payment.id}')">환불 요청</button></article>`).join('')}</div>`:`<div class="my-empty payment-empty">${emptyLogo()}<h3>결제 내역이 없습니다</h3><p>클래스를 결제하면 클래스와 결제 금액이 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`}</section>`;
 }
 function renderUserProfile(){
   const user=state.user||(publicEmptyPreviewMode?{name:'김노하우',phone:'010-1234-5678',provider:'kakao'}:null);
@@ -525,25 +528,25 @@ function renderMy(){
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period;if(hasWaitingAccess(p.id))return `
+      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period,repurchased=isRepurchaseEntitlement(entitlement);if(hasWaitingAccess(p.id))return `
         <article class="learning-card waiting">
           <div class="learning-summary">
             <div class="learning-thumb waiting" style="background:${p.grad}"><span>수강 대기</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><div class="waiting-course-note">${entitlement.startAt.replaceAll('-','.')}부터 수강할 수 있습니다.</div><small>${displayPeriod}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3>${repurchased?'<div class="repurchase-course-note">재수강</div>':''}<div class="waiting-course-note">${entitlement.startAt.replaceAll('-','.')}부터 수강할 수 있습니다.</div><small>수강 기간 · ${displayPeriod}</small></div>
             <span class="waiting-course-badge">수강 대기</span>
           </div>
         </article>`;if(hasEndedAccess(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>${displayPeriod}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3><div class="ended-course-note">수강 기간이 종료되어 콘텐츠를 열람할 수 없습니다.</div><small>수강 기간 · ${displayPeriod}</small></div>
             <span class="ended-course-badge">수강 종료</span>
           </div>
         </article>`;return `
         <article class="learning-card">
           <div class="learning-summary">
             <div class="learning-thumb" style="background:${p.grad}"><span>수강 중</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
-            <div class="learning-title"><h3>${p.title}</h3><small>${contentSummary} · ${displayPeriod}</small></div>
+            <div class="learning-title"><h3>${p.title}</h3>${repurchased?'<div class="repurchase-course-note">재수강</div>':''}<small>${contentSummary} · 수강 기간 ${displayPeriod}</small></div>
             <button class="btn-primary learning-continue" onclick="continueLearning('${p.id}',0)">이어서 학습</button>
           </div>
           <div class="learning-details">
@@ -674,14 +677,19 @@ function switchAuth(m){state.authMode='kakao';}
 const DEMO_PURCHASES=['mmoh-basic','mmoh-right','mmoh-basic-right-package'];
 const DEMO_ENTITLEMENTS=[
   {id:'E-DEMO-1',productId:'mmoh-basic',orderId:'P-DEMO-1',startAt:'2026-07-05',endAt:'2026-08-02',status:'active'},
+  {id:'E-DEMO-REPURCHASE',productId:'mmoh-basic',orderId:'P-DEMO-REPURCHASE',startAt:'2026-08-05',endAt:'2026-09-04',status:'active'},
   {id:'E-DEMO-2',productId:'mmoh-right',orderId:'P-DEMO-2',startAt:'2026-07-12',endAt:'2026-08-09',status:'active'},
   {id:'E-DEMO-3',productId:'mmoh-basic-right-package',orderId:'P-DEMO-3',startAt:'2026-08-20',endAt:'2026-09-20',status:'active'}
+];
+const DEMO_ORDERS=[
+  {id:'P-DEMO-REPURCHASE',productId:'mmoh-basic',title:'경매 낙찰 기초반 · 4주 완성',amount:290000,isRepurchase:true,status:'paid',purchasedAt:'2026.08.05'}
 ];
 function submitAuth(){
   state.user={name:'김노하우',phone:'010-1234-5678',provider:'kakao'};
   state.myFilter='active';
   DEMO_PURCHASES.forEach(id=>state.purchased.add(id));
   if(!state.entitlements.length)state.entitlements=DEMO_ENTITLEMENTS.map(item=>({...item}));
+  if(!state.orders.length)state.orders=DEMO_ORDERS.map(item=>({...item}));
   document.getElementById('signupBtn').style.display='none';
   document.getElementById('userChip').style.display='flex';document.getElementById('userName').textContent=state.user.name;
   document.getElementById('mAuth').style.display='none';document.getElementById('mUser').style.display='flex';document.getElementById('mUserName').textContent=state.user.name;
@@ -743,11 +751,11 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
   document.getElementById('payModal').classList.add('show');}
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
 function confirmPay(id){
-  const now=new Date(),days=Number(productMap[id]?.periodDays||30),end=new Date(now);
+  const product=productMap[id],isRepurchase=hasPurchaseHistory(id),now=new Date(),days=Number(product?.periodDays||30),end=new Date(now);
   end.setDate(end.getDate()+days);
   const dateString=date=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   const orderId=`P${Date.now()}`,entitlementId=`E${Date.now()}`;
-  state.orders.push({id:orderId,productId:id,status:'paid',purchasedAt:dateString(now)});
+  state.orders.push({id:orderId,productId:id,title:product?.title||id,amount:product?.price||0,isRepurchase,status:'paid',purchasedAt:dateString(now)});
   state.entitlements.push({id:entitlementId,productId:id,orderId,startAt:dateString(now),endAt:dateString(end),status:'active'});
   state.purchased.add(id);
   state.pendingPurchase=id;
