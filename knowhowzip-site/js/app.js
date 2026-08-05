@@ -28,13 +28,19 @@ function validEntitlement(productId){
   const now=Date.now();
   return productEntitlements(productId).filter(item=>entitlementTime(item.startAt)<=now&&now<=entitlementTime(item.endAt,true)).sort((a,b)=>entitlementTime(b.endAt,true)-entitlementTime(a.endAt,true))[0]||null;
 }
+function waitingEntitlement(productId){
+  const now=Date.now();
+  return productEntitlements(productId).filter(item=>now<entitlementTime(item.startAt)).sort((a,b)=>entitlementTime(a.startAt)-entitlementTime(b.startAt))[0]||null;
+}
 function latestEntitlement(productId){return productEntitlements(productId).sort((a,b)=>entitlementTime(b.endAt,true)-entitlementTime(a.endAt,true))[0]||null;}
 function hasValidAccess(productId){return !!validEntitlement(productId);}
+function hasWaitingAccess(productId){return !!waitingEntitlement(productId);}
 function hasPurchaseHistory(productId){return state.purchased.has(productId)||productEntitlements(productId).length>0;}
-function hasEndedAccess(productId){return !hasValidAccess(productId)&&!!latestEntitlement(productId);}
+function hasEndedAccess(productId){return !hasValidAccess(productId)&&!hasWaitingAccess(productId)&&!!latestEntitlement(productId);}
 function entitlementPeriod(item){return item?`${item.startAt.replaceAll('-','.')} ~ ${item.endAt.replaceAll('-','.')}`:'';}
 function classPurchaseState(product){
   if(hasValidAccess(product.id))return {type:'active',label:'내 학습에서 보기'};
+  if(hasWaitingAccess(product.id))return {type:'waiting',label:'수강 대기 · 내 학습에서 확인'};
   const repurchase=hasPurchaseHistory(product.id);
   return {type:repurchase?'repurchase':'purchase',label:repurchase?'다시 수강하기':'수강신청'};
 }
@@ -225,7 +231,7 @@ function openDetail(pid){
   if(p.isPublic===false&&!hasValidAccess(pid))return showAccessDenied('product');
   if(!hasValidAccess(pid)&&!p.cohort?.recruitmentAlways&&p.cohort?.status!=='모집중')return showAccessDenied('product');
   activeDetail=pid;
-  const owned=hasValidAccess(pid),purchaseState=classPurchaseState(p),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
+  const owned=hasValidAccess(pid),waiting=hasWaitingAccess(pid),enrolled=owned||waiting,purchaseState=classPurchaseState(p),d=discRate(p),ch=p.cohort,req=purchaseRequirement(p);
   const hasRequirement=(p.requirement||{}).type&&p.requirement.type!=='none';
   const includedClasses=productClassNames(p),op=productOperation(p);
   const videos=productVideoTitles(p),files=productFileTitles(p);
@@ -255,11 +261,11 @@ function openDetail(pid){
             <p>${req.message}</p>
           </div>`:''}
           <div class="bc-price">${d?`<span class="disc">${d}%</span>`:''}<span class="final">${won(p.price)}</span>${d?`<span class="orig">정가 ${won(p.orig)}</span>`:''}</div>
-          <div class="bc-actions" data-actions="${pid}" style="${owned?'display:none':''}">
+          <div class="bc-actions" data-actions="${pid}" style="${enrolled?'display:none':''}">
             <button class="btn-red" onclick="startPurchase('${pid}')">${purchaseState.label}</button>
             <button class="bc-share" onclick="shareProduct('${pid}')">🔗 공유</button>
           </div>
-          <div class="bc-owned" data-owned="${pid}" style="display:${owned?'block':'none'}">✓ 수강 중 · 내 학습에서 확인</div>
+          <div class="bc-owned" data-owned="${pid}" style="display:${enrolled?'block':'none'}">${waiting?'수강 대기 · 내 학습에서 확인':'✓ 수강 중 · 내 학습에서 확인'}</div>
         </div>
       </div></aside>
 
@@ -289,7 +295,7 @@ function openDetail(pid){
     </div></div>
     <div class="buybar" id="buybar"></div>`;
   const bar=document.getElementById('buybar');
-  bar.innerHTML=owned?`<div class="bb-owned">✓ 수강 중 · 내 학습에서 확인</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">${purchaseState.label}</button>`;
+  bar.innerHTML=enrolled?`<div class="bb-owned">${waiting?'수강 대기 · 내 학습에서 확인':'✓ 수강 중 · 내 학습에서 확인'}</div>`:`<div class="bb-price">${d?`<span class="d">${d}%</span>`:''}<span class="f">${won(p.price)}</span></div><button class="btn-red" onclick="startPurchase('${pid}')">${purchaseState.label}</button>`;
   show('detail');window.scrollTo({top:0});setHash('#/p/'+pid);requestAnimationFrame(updateDetailBuycardPosition);
 }
 function goTab(btn,id){
@@ -479,7 +485,7 @@ function showAccessDenied(type,productId){
   location.href='./access-denied.html?type='+encodeURIComponent(type||'lesson')+(productId?'&product='+encodeURIComponent(productId):'');
 }
 function renderLearningTabs(owned){
-  const ended=owned.filter(x=>hasEndedAccess(x.p.id)).length,active=owned.filter(x=>hasValidAccess(x.p.id)).length;
+  const ended=owned.filter(x=>hasEndedAccess(x.p.id)).length,active=owned.filter(x=>hasValidAccess(x.p.id)||hasWaitingAccess(x.p.id)).length;
   document.getElementById('myLearningTabs').innerHTML=[['active',`수강 중 ${active}`],['ended',`수강 종료 ${ended}`]].map(([key,label])=>`<button class="${state.myFilter===key?'active':''}" onclick="setMyLearningFilter('${key}')">${label}</button>`).join('');
 }
 const demoPayments=[
@@ -512,14 +518,21 @@ function renderMy(){
   const allOwned=publicEmptyPreviewMode?[]:allProducts().filter(x=>hasPurchaseHistory(x.p.id));
   renderLearningTabs(allOwned);
   if(!allOwned.length){box.innerHTML=`<div class="my-empty learning-empty">${emptyLogo()}<h3>아직 수강할 클래스가 없습니다</h3><p>클래스를 결제하면 수강 기간과 학습 콘텐츠가 이곳에 표시됩니다.</p><button class="btn-red" onclick="show('creators')">클래스 둘러보기</button></div>`;return;}
-  const owned=allOwned.filter(x=>state.myFilter==='ended'?hasEndedAccess(x.p.id):hasValidAccess(x.p.id));
+  const owned=allOwned.filter(x=>state.myFilter==='ended'?hasEndedAccess(x.p.id):(hasValidAccess(x.p.id)||hasWaitingAccess(x.p.id)));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
   box.innerHTML=Object.values(byCreator).map(g=>`
     <section class="learning-group">
       <div class="learning-group-head"><span class="logo">${creatorLogo(g.c,38)}</span><h2>${g.c.name}</h2><span>클래스 ${g.items.length}</span><button onclick="openCreator('${g.c.id}')">크리에이터 페이지 →</button></div>
       ${renderCreatorLearningFaq(g.c,g.items)}
-      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period;if(hasEndedAccess(p.id))return `
+      ${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),contentCount=productContentSources(p).length,contentSummary=contentCount>1?`연결 콘텐츠 ${contentCount}개 · 전체 ${videos.length}강`:`전체 ${videos.length}강`,lessonStates=productLessonStates(p.id,videos.length),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),displayPeriod=entitlementPeriod(entitlement)||p.cohort.period;if(hasWaitingAccess(p.id))return `
+        <article class="learning-card waiting">
+          <div class="learning-summary">
+            <div class="learning-thumb waiting" style="background:${p.grad}"><span>수강 대기</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
+            <div class="learning-title"><h3>${p.title}</h3><div class="waiting-course-note">${entitlement.startAt.replaceAll('-','.')}부터 수강할 수 있습니다.</div><small>${displayPeriod}</small></div>
+            <span class="waiting-course-badge">수강 대기</span>
+          </div>
+        </article>`;if(hasEndedAccess(p.id))return `
         <article class="learning-card ended">
           <div class="learning-summary">
             <div class="learning-thumb ended" style="background:${p.grad}"><span>수강 종료</span>${g.c.logoType==='house'?houseSVG(44,{ink:p.deep,text:false}):creatorLogo(g.c,44)}</div>
@@ -662,7 +675,7 @@ const DEMO_PURCHASES=['mmoh-basic','mmoh-right','mmoh-basic-right-package'];
 const DEMO_ENTITLEMENTS=[
   {id:'E-DEMO-1',productId:'mmoh-basic',orderId:'P-DEMO-1',startAt:'2026-07-05',endAt:'2026-08-02',status:'active'},
   {id:'E-DEMO-2',productId:'mmoh-right',orderId:'P-DEMO-2',startAt:'2026-07-12',endAt:'2026-08-09',status:'active'},
-  {id:'E-DEMO-3',productId:'mmoh-basic-right-package',orderId:'P-DEMO-3',startAt:'2026-07-05',endAt:'2026-08-09',status:'active'}
+  {id:'E-DEMO-3',productId:'mmoh-basic-right-package',orderId:'P-DEMO-3',startAt:'2026-08-20',endAt:'2026-09-20',status:'active'}
 ];
 function submitAuth(){
   state.user={name:'김노하우',phone:'010-1234-5678',provider:'kakao'};
@@ -708,6 +721,7 @@ function startPurchase(id){
   if(!state.user){state.pending=id;openAuth('login');toast('결제를 위해 먼저 로그인해 주세요');return;}
   if(productMap[id]?.isPublic===false){toast('비공개 클래스는 새로 수강신청할 수 없습니다');return;}
   if(hasValidAccess(id)){toast('이미 수강 중인 클래스입니다');openMyLearningContent(id);return;}
+  if(hasWaitingAccess(id)){toast('수강 시작을 기다리고 있는 클래스입니다');show('mypage');return;}
   if(!productMap[id]?.cohort?.recruitmentAlways&&productMap[id]?.cohort?.status!=='모집중'){toast('현재 모집 중인 클래스가 아닙니다');return;}
   const req=purchaseRequirement(productMap[id]);
   if(!req.ok){toast(req.message);return;}

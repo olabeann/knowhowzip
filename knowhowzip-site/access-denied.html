@@ -1,45 +1,260 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>접근할 수 없는 페이지 · 노하우집</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-<link rel="stylesheet" href="./css/style.css">
-<link rel="stylesheet" href="./css/policy-guide.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>접근할 수 없는 페이지 · 노하우집</title>
+  <style>
+    :root {
+      --brand: #4f66f5;
+      --brand-dark: #3a4fd6;
+      --brand-soft: #eef1ff;
+      --ink: #101828;
+      --ink-soft: #475467;
+      --line: #eaecf0;
+      --page: #f5f6f8;
+      --nav-height: 68px;
+      --font: Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: var(--font);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, a { font: inherit; }
+    button { color: inherit; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    .wrap {
+      width: 100%;
+      max-width: 1248px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, .86);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-in {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      height: var(--nav-height);
+    }
+
+    .brand { display: flex; align-items: center; flex-shrink: 0; }
+    .brand-logo { display: block; width: 150px; height: auto; }
+
+    .gnb-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: flex;
+      gap: 6px;
+      transform: translate(-50%, -50%);
+    }
+
+    .gnb-menu button {
+      padding: 9px 16px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      background: transparent;
+      border: 0;
+      border-radius: 9px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: color .15s, background .15s;
+    }
+
+    .gnb-menu button:hover,
+    .gnb-menu button:focus-visible {
+      color: var(--ink);
+      background: var(--brand-soft);
+      outline: 0;
+    }
+
+    .nav-right { display: flex; margin-left: auto; }
+
+    .nav-cta,
+    .btn-primary,
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 12px 22px;
+      border-radius: 11px;
+      font-size: 15px;
+      font-weight: 800;
+      transition: transform .16s, box-shadow .16s, background .16s;
+    }
+
+    .nav-cta {
+      min-height: 42px;
+      padding: 10px 20px;
+      color: #fff;
+      background: var(--brand);
+      border: 0;
+      border-radius: 10px;
+      font-size: 14.5px;
+    }
+
+    .nav-cta:hover { background: var(--brand-dark); }
+
+    .access-denied-page {
+      display: flex;
+      align-items: center;
+      min-height: calc(100vh - var(--nav-height));
+      min-height: calc(100dvh - var(--nav-height));
+      padding: 64px 0;
+      background:
+        radial-gradient(circle at 50% 0, rgba(78, 100, 255, .10), transparent 34%),
+        var(--page);
+    }
+
+    .access-denied-card {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .access-denied-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 18px;
+      background: var(--brand-soft);
+      border-radius: 22px;
+    }
+
+    .access-denied-icon img { display: block; width: 42px; height: 42px; object-fit: contain; }
+
+    .access-denied-card h1 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1.25;
+      letter-spacing: -.5px;
+    }
+
+    .access-denied-card p {
+      max-width: 520px;
+      margin: 0 auto;
+      color: var(--ink-soft);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .access-denied-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .access-denied-actions a { min-width: 150px; }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, #5d77ff, var(--brand));
+      box-shadow: 0 2px 6px rgba(16, 24, 40, .10);
+    }
+
+    .btn-secondary { background: #fff; border: 1px solid var(--line); }
+
+    .btn-primary:hover,
+    .btn-secondary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(16, 24, 40, .10); }
+
+    .btn-primary:focus-visible,
+    .btn-secondary:focus-visible,
+    .nav-cta:focus-visible,
+    .brand:focus-visible { outline: 3px solid rgba(79, 102, 245, .32); outline-offset: 3px; }
+
+    @media (max-width: 760px) {
+      :root { --nav-height: 60px; }
+      .wrap { padding: 0 18px; }
+      .brand-logo { width: 132px; }
+      .gnb-menu, .nav-right { display: none; }
+      .access-denied-page { align-items: flex-start; padding: 48px 0 54px; }
+      .access-denied-card { padding: 24px 4px; }
+      .access-denied-card h1 { font-size: 23px; }
+      .access-denied-card p { font-size: 14px; }
+      .access-denied-actions { display: grid; grid-template-columns: 1fr; width: 100%; }
+      .access-denied-actions a { width: 100%; min-width: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
 </head>
 <body>
-<header class="nav">
-  <div class="wrap nav-in">
-    <a class="brand" href="./index.html" aria-label="노하우집 홈"><img class="brand-logo" src="./assets/images/knowhowzip-logo.png" alt="노하우집"></a>
-    <nav class="gnb-menu">
-      <button type="button" onclick="location.href='./index.html'">홈</button>
-      <button type="button" onclick="location.href='./index.html#/creators'">크리에이터</button>
-      <button type="button" onclick="location.href='./index.html#/mypage'">내 학습</button>
-      <button type="button" onclick="location.href='./index.html#/faq'">고객센터</button>
-    </nav>
-    <div class="nav-right">
-      <button class="nav-cta" type="button" onclick="location.href='./index.html#/mypage'">바로 시작하기</button>
-    </div>
-  </div>
-</header>
-
-<main class="access-denied-page">
-  <div class="wrap">
-    <section class="access-denied-card access-denied-plain">
-      <div class="access-denied-icon"><img class="my-empty-logo" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="노하우집"></div>
-      <h1 id="accessTitle">접근 할 수 없습니다.</h1>
-      <p id="accessMessage">주소가 잘못되었거나 권한이 없는 페이지입니다.<br>홈으로 이동하거나 관리자에게 문의해주세요.</p>
-      <div class="access-denied-actions">
-        <a class="btn-red" id="accessPrimary" href="./index.html">홈으로 이동</a>
-        <a class="btn-soft" id="accessSecondary" href="http://pf.kakao.com/_xksSwX/chat">관리자 문의</a>
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="./index.html" aria-label="노하우집 홈">
+        <img class="brand-logo" src="./assets/images/knowhowzip-logo.png" alt="노하우집">
+      </a>
+      <nav class="gnb-menu" aria-label="주요 메뉴">
+        <button type="button" data-route="">홈</button>
+        <button type="button" data-route="/creators">크리에이터</button>
+        <button type="button" data-route="/mypage">내 학습</button>
+        <button type="button" data-route="/faq">고객센터</button>
+      </nav>
+      <div class="nav-right">
+        <button class="nav-cta" type="button" data-route="/mypage">바로 시작하기</button>
       </div>
-    </section>
-  </div>
-</main>
-<script src="./js/policy-guide.js"></script>
+    </div>
+  </header>
+
+  <main class="access-denied-page" id="main">
+    <div class="wrap">
+      <section class="access-denied-card" aria-labelledby="accessTitle" aria-describedby="accessMessage">
+        <div class="access-denied-icon" aria-hidden="true">
+          <img src="./assets/images/Knowhowzip_logo_icon.png.png" alt="">
+        </div>
+        <h1 id="accessTitle">접근할 수 없습니다.</h1>
+        <p id="accessMessage">주소가 잘못되었거나 권한이 없는 페이지입니다.<br>홈으로 이동하거나 관리자에게 문의해 주세요.</p>
+        <div class="access-denied-actions">
+          <a class="btn-primary" href="./index.html">홈으로 이동</a>
+          <a class="btn-secondary" href="http://pf.kakao.com/_xksSwX/chat" target="_blank" rel="noopener noreferrer">관리자 문의</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      document.querySelectorAll("[data-route]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const route = button.dataset.route;
+          window.location.href = route ? `./index.html#${route}` : "./index.html";
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
