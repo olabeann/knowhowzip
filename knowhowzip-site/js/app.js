@@ -47,11 +47,20 @@ function classPurchaseState(product){
 
 /* ---------- product card (with creator) ---------- */
 function discRate(p){return p.orig>p.price?Math.round((1-p.price/p.orig)*100):0;}
+function classImageUrl(product){
+  if(!product)return '';
+  try{return localStorage.getItem(`nhz-class-image-${product.id}`)||product.image||'';}catch(error){return product.image||'';}
+}
+function classCoverMarkup(product,creator,logoSize=72){
+  const image=classImageUrl(product);
+  if(image)return `<img class="class-cover-image" src="${image}" alt="${product.title} 대표 이미지">`;
+  return `<span class="class-cover-bg" style="background:${product.grad}"></span><span class="class-cover-logo">${creator.logoType==='house'?houseSVG(logoSize,{ink:product.deep,text:false}):''}</span>`;
+}
 function prodCard(p,c){
   const d=discRate(p);
   return `<article class="pcard" onclick="openDetail('${p.id}')">
     <div class="thumb"><span class="own" data-own="${p.id}">수강 중</span>
-      <div style="position:absolute;inset:0;background:${p.grad}"></div><div style="position:relative">${c.logoType==='house'?houseSVG(72,{ink:p.deep,text:false}):''}</div></div>
+      ${classCoverMarkup(p,c)}</div>
     <div class="c-body">
       <div class="c-creator"><span class="mini">${creatorLogo(c,18)}</span>${c.name}</div>
       <span class="c-level">${p.level||'입문'}</span>
@@ -243,7 +252,7 @@ function openDetail(pid){
         <div class="d-tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
         <h1>${p.title}</h1>
         <p class="d-lead">${p.lead}</p>
-        <div class="d-visual" style="background:${p.grad}">${c.logoType==='house'?houseSVG(110,{ink:p.deep,text:false}):''}</div>
+        <div class="d-visual">${classCoverMarkup(p,c,110)}</div>
       </div>
       <aside><div class="buycard">
         <div class="bc-body">
@@ -537,7 +546,7 @@ function renderMy(){
   const owned=allOwned.filter(x=>state.myFilter==='ended'?hasEndedAccess(x.p.id):(hasValidAccess(x.p.id)||hasWaitingAccess(x.p.id)));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
-  box.innerHTML=Object.values(byCreator).map(g=>`<section class="learning-list-group"><div class="learning-list-group-head"><span>${creatorLogo(g.c,30)}</span><b>${g.c.name}</b><button type="button" onclick="openCreator('${g.c.id}')">페이지 보기 →</button></div>${creatorLearningFaqSearch(g.c,g.items)}${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),period=entitlementPeriod(entitlement)||p.cohort.period,status=learningStatus(p.id),hasOperation=!!productOperation(p).guide.trim(),operationLocked=status.className==='waiting',unreadOperation=hasOperation&&status.className==='active'&&!hasViewedLearningOperation(p);return `<article class="learning-course-row ${status.className}${unreadOperation?' operation-unread':''}"><div class="learning-course-main"><span class="learning-list-thumb" style="background:${p.grad}">${g.c.logoType==='house'?houseSVG(38,{ink:p.deep,text:false}):creatorLogo(g.c,38)}</span><div class="learning-list-copy"><span><em class="learning-status ${status.className}">${status.label}</em></span><b>${p.title}</b><small>영상 ${videos.length}강 · 자료 ${files.length}개</small><small>수강 기간 · ${period}</small></div></div><div class="learning-course-operation${operationLocked?' locked':''}"><span>${unreadOperation?'! 운영 안내를 확인해 주세요':'운영 안내'}</span><b>${operationLocked?'수강 시작 후 확인할 수 있습니다.':hasOperation?(unreadOperation?'일정과 참여 방법을 먼저 확인해 주세요.':'일정과 참여 방법을 확인할 수 있습니다.'):'등록된 안내가 없습니다.'}</b>${hasOperation&&!operationLocked?`<button type="button" onclick="openLearningOperationModal('${p.id}')">운영 안내 보기 →</button>`:''}</div><div class="learning-course-action">${status.className==='active'?`<button type="button" onclick="continueLearning('${p.id}',0)">학습하기</button>`:`<button type="button" disabled>${status.label}</button>`}</div></article>`;}).join('')}</section>`).join('');
+  box.innerHTML=Object.values(byCreator).map(g=>`<section class="learning-list-group"><div class="learning-list-group-head"><span>${creatorLogo(g.c,30)}</span><b>${g.c.name}</b><button type="button" onclick="openCreator('${g.c.id}')">페이지 보기 →</button></div>${creatorLearningFaqSearch(g.c,g.items)}${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),period=entitlementPeriod(entitlement)||p.cohort.period,status=learningStatus(p.id),hasOperation=!!productOperation(p).guide.trim(),operationLocked=status.className==='waiting',unreadOperation=hasOperation&&status.className==='active'&&!hasViewedLearningOperation(p);return `<article class="learning-course-row ${status.className}${unreadOperation?' operation-unread':''}"><div class="learning-course-main"><span class="learning-list-thumb">${classCoverMarkup(p,g.c,38)}</span><div class="learning-list-copy"><span><em class="learning-status ${status.className}">${status.label}</em></span><b>${p.title}</b><small>영상 ${videos.length}강 · 자료 ${files.length}개</small><small>수강 기간 · ${period}</small></div></div><div class="learning-course-operation${operationLocked?' locked':''}"><span>${unreadOperation?'! 운영 안내를 확인해 주세요':'운영 안내'}</span><b>${operationLocked?'수강 시작 후 확인할 수 있습니다.':hasOperation?(unreadOperation?'일정과 참여 방법을 먼저 확인해 주세요.':'일정과 참여 방법을 확인할 수 있습니다.'):'등록된 안내가 없습니다.'}</b>${hasOperation&&!operationLocked?`<button type="button" onclick="openLearningOperationModal('${p.id}')">운영 안내 보기 →</button>`:''}</div><div class="learning-course-action">${status.className==='active'?`<button type="button" onclick="continueLearning('${p.id}',0)">학습하기</button>`:`<button type="button" disabled>${status.label}</button>`}</div></article>`;}).join('')}</section>`).join('');
 }
 function setAccountFilter(filter){state.accountFilter=filter;renderAccount();}
 function renderAccountTabs(){
