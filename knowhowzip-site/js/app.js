@@ -425,6 +425,10 @@ function moveLesson(delta){
   const product=productMap[state.activeLesson.productId],videos=productVideoTitles(product),next=Math.min(Math.max(state.activeLesson.index+delta,0),videos.length-1);
   openLessonPlayer(state.activeLesson.productId,next);
 }
+function renderPlayerCurriculum(product,activeType='lesson',activeKey=0){
+  const videos=productVideoTitles(product),states=productLessonStates(product.id,videos.length),qaItems=productQaContents(product.id);
+  return `<aside class="lesson-curriculum-panel"><header><span>목차</span><b>${product.title}</b><small>영상 ${videos.length}강${qaItems.length?` · 추가 콘텐츠 ${qaItems.length}개`:''}</small></header><section><div class="lesson-curriculum-section-head"><b>영상 커리큘럼</b><span>${videos.length}강</span></div>${videos.map((title,index)=>{const meta=lessonStateMeta(states[index]),active=activeType==='lesson'&&Number(activeKey)===index;return `<button type="button" class="lesson-curriculum-item${active?' active':''}" onclick="openLessonPlayer('${product.id}',${index})"><i class="${meta.className}">${active?'▶':meta.icon}</i><span><b>${title}</b><small>${lessonDurations[index%lessonDurations.length]} · ${meta.label}</small></span></button>`;}).join('')}</section>${qaItems.length?`<section class="lesson-curriculum-extra"><div class="lesson-curriculum-section-head"><b>추가 콘텐츠</b><span>${qaItems.length}개</span></div>${qaItems.map(item=>{const open=qaIsOpen(item),active=activeType==='qa'&&activeKey===item.id;return `<button type="button" class="lesson-curriculum-item extra${active?' active':''}${open?'':' scheduled'}" ${open?`onclick="openQaContent('${product.id}','${item.id}')"`:'disabled'}><i>${open?'▶':'◷'}</i><span><b>${item.title}</b><small>${open?`${item.duration||'-'}분 · 공개 중`:`${qaOpenLabel(item.openAt)} 공개 예정`}</small></span><em>${open?'추가':'예정'}</em></button>`;}).join('')}</section>`:''}</aside>`;
+}
 function renderLessonPlayer(product,creator,index){
   const videos=productVideoTitles(product),files=productFileTitles(product),current=videos[index];
   const watched=Math.min(index+1,videos.length);
@@ -434,28 +438,23 @@ function renderLessonPlayer(product,creator,index){
         <button class="lesson-back" onclick="show('mypage')" aria-label="내 학습으로 돌아가기">←</button>
         <div class="lesson-player-titlebar"><h1>${current}</h1><span>${product.title}</span></div>
       </header>
-      <section class="lesson-stage">
-        <div class="lesson-video-shell">
-          <div class="lesson-video-aside"></div>
-          <div class="lesson-slide">
-            <div class="lesson-slide-brand">${creator.name}</div>
-            <h2>${current}</h2>
-            <p>${product.lead}</p>
-            <div class="lesson-slide-grid">
-              <article><b>${index+1}강 핵심</b><span>${files[0]||'강의 노트'}</span></article>
-              <article><b>오늘의 목표</b><span>${product.tags.slice(0,2).join(' · ')}</span></article>
+      <div class="lesson-player-workspace"><main class="lesson-player-main"><section class="lesson-stage">
+          <div class="lesson-video-shell">
+            <div class="lesson-video-aside"></div>
+            <div class="lesson-slide">
+              <div class="lesson-slide-brand">${creator.name}</div>
+              <h2>${current}</h2>
+              <p>${product.lead}</p>
+              <div class="lesson-slide-grid">
+                <article><b>${index+1}강 핵심</b><span>${files[0]||'강의 노트'}</span></article>
+                <article><b>오늘의 목표</b><span>${product.tags.slice(0,2).join(' · ')}</span></article>
+              </div>
+              <div class="lesson-instructor">${creator.logoType==='house'?houseSVG(54,{ink:product.deep,text:false}):creatorLogo(creator,54)}</div>
             </div>
-            <div class="lesson-instructor">${creator.logoType==='house'?houseSVG(54,{ink:product.deep,text:false}):creatorLogo(creator,54)}</div>
+            <div class="lesson-video-aside"></div>
           </div>
-          <div class="lesson-video-aside"></div>
-        </div>
-        <div class="lesson-video-controls">
-          <button onclick="moveLesson(-1)" ${index===0?'disabled':''}>이전 강의</button>
-          <span><i style="width:${(watched/videos.length)*100}%"></i></span>
-          <button onclick="moveLesson(1)" ${index===videos.length-1?'disabled':''}>다음 강의</button>
-          <button class="lesson-wide" onclick="toast('전체 화면 모드는 추후 제공됩니다')">전체 화면</button>
-        </div>
-      </section>
+          <div class="lesson-video-controls"><button onclick="moveLesson(-1)" ${index===0?'disabled':''}>이전 강의</button><span><i style="width:${(watched/videos.length)*100}%"></i></span><button onclick="moveLesson(1)" ${index===videos.length-1?'disabled':''}>다음 강의</button><button class="lesson-wide" onclick="toast('전체 화면 모드는 추후 제공됩니다')">전체 화면</button></div>
+        </section><section class="lesson-player-caption"><span>영상 커리큘럼</span><h2>${current}</h2><p>${product.lead}</p></section></main>${renderPlayerCurriculum(product,'lesson',index)}</div>
     </div>`;
 }
 
@@ -494,6 +493,29 @@ function learningStatus(productId){
   if(hasWaitingAccess(productId))return {label:'수강 대기',className:'waiting'};
   if(hasEndedAccess(productId))return {label:'수강 종료',className:'ended'};
   return {label:'수강 중',className:'active'};
+}
+function creatorQaContents(creator){
+  try{
+    const stored=JSON.parse(localStorage.getItem('nhz-mmoh-qa-contents')||'null');
+    if(creator?.id==='mmoh'&&Array.isArray(stored))return stored;
+  }catch(error){}
+  return creator?.qaContents||[];
+}
+function productQaContents(productId){return creatorQaContents(creatorOf[productId]).filter(item=>item.classId===productId&&item.status!=='draft'&&item.status!=='ended').sort((a,b)=>new Date(a.openAt)-new Date(b.openAt));}
+function qaIsOpen(item){return Date.now()>=new Date(item.openAt).getTime();}
+function qaOpenLabel(value){
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime()))return '오픈 일시 미정';
+  return new Intl.DateTimeFormat('ko-KR',{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true}).format(date);
+}
+function openQaContent(productId,itemId){
+  const product=productMap[productId],creator=creatorOf[productId],item=productQaContents(productId).find(row=>row.id===itemId);
+  if(!product||!creator||!item)return showAccessDenied('lesson',productId);
+  if(!state.user)return showAccessDenied('login',productId);
+  if(!hasValidAccess(productId))return showAccessDenied('purchase',productId);
+  if(!qaIsOpen(item)){toast(`${qaOpenLabel(item.openAt)}부터 볼 수 있습니다.`);return;}
+  document.getElementById('view-player').innerHTML=`<div class="lesson-player-page qa-player-page"><header class="lesson-player-top"><button class="lesson-back" onclick="show('mypage')" aria-label="내 학습으로 돌아가기">←</button><div class="lesson-player-titlebar"><h1>${item.title}</h1><span>${product.title} · 추가 콘텐츠</span></div></header><div class="lesson-player-workspace"><main class="lesson-player-main"><section class="lesson-stage"><div class="lesson-video-shell"><div class="lesson-video-aside"></div><div class="lesson-slide"><div class="lesson-slide-brand">${creator.name} · 추가 콘텐츠</div><h2>${item.title}</h2><p>${item.description}</p><div class="lesson-slide-grid"><article><b>추가 답변 영상</b><span>${item.videoName||'Q&A 다시보기'}</span></article><article><b>재생 시간</b><span>${item.duration||'-'}분</span></article></div><div class="lesson-instructor">${creator.logoType==='house'?houseSVG(54,{ink:product.deep,text:false}):creatorLogo(creator,54)}</div></div><div class="lesson-video-aside"></div></div><div class="lesson-video-controls qa-video-controls"><button disabled>추가 콘텐츠</button><span><i style="width:0%"></i></span><button onclick="toast('추가 영상 재생을 시작합니다')">재생</button><button class="lesson-wide" onclick="toast('전체 화면 모드는 추후 제공됩니다')">전체 화면</button></div></section><section class="lesson-player-caption"><span>추가 콘텐츠</span><h2>${item.title}</h2><p>${item.description}</p></section></main>${renderPlayerCurriculum(product,'qa',item.id)}</div></div>`;
+  show('player');setHash(`#/qa/${productId}/${itemId}`);
 }
 function learningOperationViewKey(productId){
   const userKey=state.user?.phone||state.user?.name||'guest';
@@ -771,6 +793,10 @@ function route(){
   const h=location.hash;
   if(h.startsWith('#/c/'))return openCreator(h.slice(4));
   if(h.startsWith('#/p/'))return openDetail(h.slice(4));
+  if(h.startsWith('#/qa/')){
+    const parts=h.split('/');
+    return openQaContent(parts[2],parts[3]);
+  }
   if(h.startsWith('#/learn/')){
     const parts=h.split('/');
     return openLessonPlayer(parts[2],Number(parts[3]||1)-1);

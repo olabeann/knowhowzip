@@ -79,6 +79,48 @@ creators.forEach(creator=>{
     const sourceIds=item.includedProductIds?.length?item.includedProductIds:[item.id];
     item.contentIds=sourceIds.map(sourceId=>`content-${sourceId}`);
   });
+  /* 추가 콘텐츠는 판매 조건을 가진 클래스나 재사용 강의 콘텐츠를 수정하지 않고,
+     결제한 클래스에 추가 제공되는 예약형 운영 콘텐츠로 별도 관리합니다. */
+  creator.qaContents=creator.id==='mmoh'?[{
+    id:'qa-mmoh-basic-01',
+    classId:'mmoh-basic',
+    title:'1차 라이브 Q&A 다시보기',
+    description:'입찰표 작성과 시세 분석에 관한 수강생 질문을 정리한 다시보기입니다.',
+    videoName:'live-qa-01.mp4',
+    duration:64,
+    openAt:'2026-08-20T20:00',
+    createdAt:'2026-08-18T14:20:00+09:00'
+  },{
+    id:'qa-mmoh-package-01',
+    classId:'mmoh-basic-right-package',
+    title:'권리분석 사례 Q&A 다시보기',
+    description:'실전 사례에서 자주 헷갈린 인수·소멸 권리를 다시 설명합니다.',
+    videoName:'rights-qa-01.mp4',
+    duration:52,
+    openAt:'2026-08-29T20:00',
+    createdAt:'2026-08-25T11:10:00+09:00'
+  },{
+    id:'qa-mmoh-field-draft',
+    classId:'mmoh-field',
+    title:'현장 임장 체크포인트 추가 해설',
+    description:'현장에서 놓치기 쉬운 확인 항목을 보충 설명하는 영상입니다.',
+    videoName:'field-extra-guide.mp4',
+    duration:38,
+    openAt:'',
+    status:'draft',
+    createdAt:'2026-08-26T09:30:00+09:00'
+  },{
+    id:'qa-mmoh-right-ended',
+    classId:'mmoh-right',
+    title:'권리분석 사전 질문 답변',
+    description:'수강 전 접수된 권리분석 질문을 사례별로 정리한 영상입니다.',
+    videoName:'rights-pre-qa.mp4',
+    duration:47,
+    openAt:'2026-07-15T20:00',
+    endedAt:'2026-08-09T23:59',
+    status:'ended',
+    createdAt:'2026-07-14T16:00:00+09:00'
+  }]:[];
 });
 
 /* indexes */

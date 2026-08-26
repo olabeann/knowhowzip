@@ -11,6 +11,7 @@
       "dashboard",
       "classes",
       "products",
+      "qa",
       "students",
       "sales",
       "settings",
@@ -24,6 +25,8 @@
       adminHashes.has(hashValue) ||
       hashValue.startsWith("class-edit-") ||
       hashValue.startsWith("product-edit-") ||
+      hashValue.startsWith("qa-edit-") ||
+      hashValue === "qa-new" ||
       hashValue.startsWith("sales-class-");
     const target = isAdminRoute
       ? "./knowhowzip-site/creator-admin.html"

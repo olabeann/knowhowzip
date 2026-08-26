@@ -771,6 +771,79 @@ function managedClassSalesState(product){
   return {label:'판매 중',className:'selling'};
 }
 function managedRecruitmentPeriod(product){return product.recruitmentAlways?'상시 모집':`${product.recruitmentStart||'-'} ~ ${product.recruitmentEnd||'-'}`;}
+
+const qaContents=(()=>{
+  const defaults=(publicCreator?.qaContents||[]).map(item=>({...item}));
+  try{
+    const stored=JSON.parse(localStorage.getItem('nhz-mmoh-qa-contents')||'null');
+    if(Array.isArray(stored)){
+      const storedIds=new Set(stored.map(item=>item.id));
+      return [...stored,...defaults.filter(item=>!storedIds.has(item.id))];
+    }
+  }catch(error){}
+  return defaults;
+})();
+function persistQaContents(){try{localStorage.setItem('nhz-mmoh-qa-contents',JSON.stringify(qaContents));}catch(error){}}
+function qaTargetClass(item){return saleProducts.find(product=>product.id===item.classId);}
+function qaContentState(item){
+  if(item.status==='draft')return {label:'임시 저장',className:'draft',published:false};
+  if(item.status==='ended')return {label:'공개 종료',className:'ended',published:true};
+  return Date.now()>=new Date(item.openAt).getTime()?{label:'공개 중',className:'open',published:true}:{label:'공개 예정',className:'scheduled',published:false};
+}
+function formatQaOpenAt(value){
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime()))return '-';
+  return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
+}
+function renderQaContents(){
+  const stateOrder={draft:0,scheduled:1,open:2,ended:3};
+  const rows=emptyPreviewRows([...qaContents].sort((a,b)=>stateOrder[qaContentState(a).className]-stateOrder[qaContentState(b).className]||(new Date(b.openAt||b.createdAt)-new Date(a.openAt||a.createdAt))));
+  return `${pageHeader('Additional content','추가 콘텐츠','클래스에 등록하지 못한 콘텐츠를 추가로 업로드 할 수 있습니다. 정해진 시간에 예약할 수 있어요.','<button class="btn primary" onclick="openQaEditor(\'create\')">+ 추가 콘텐츠 등록</button>')}
+    <div class="qa-admin-list${rows.length?'':' is-empty'}">${rows.length?rows.map(item=>{const target=qaTargetClass(item),state=qaContentState(item),dateText=state.className==='draft'?'공개 일정 미정':state.className==='ended'?`${formatQaOpenAt(item.endedAt||item.openAt)} 공개 종료`:`${formatQaOpenAt(item.openAt)} ${state.published?'공개 시작':'공개 예정'}`;return `<article class="qa-admin-card" role="button" tabindex="0" aria-label="${item.title} ${state.published?'상세 보기':'예약 수정'}" onclick="openQaEditor('edit','${item.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openQaEditor('edit','${item.id}')}"><div class="qa-card-state"><em class="${state.className}">${state.label}</em><span>${dateText}</span></div><div class="qa-card-copy"><small>제공 클래스</small><b>${target?.name||'삭제된 클래스'}</b><h2>${item.title}</h2><p>${item.description||'등록된 설명이 없습니다.'}</p></div><div class="qa-card-meta"><span>▶ ${item.videoName||'영상 등록 완료'}</span><span>${item.duration?`${item.duration}분`:'재생시간 확인 전'}</span></div>${state.published?'':`<button type="button" class="qa-delete-button" onclick="event.stopPropagation();deleteQaContent('${item.id}')" onkeydown="event.stopPropagation()">삭제</button>`}</article>`;}).join(''):adminEmptyState('＋','등록된 추가 콘텐츠가 없습니다.','운영 중인 클래스를 선택하고 첫 추가 영상을 예약해 보세요.','추가 콘텐츠 등록',"openQaEditor('create')")}</div>`;
+}
+function renderQaEditor(mode,itemId=''){
+  const editing=mode==='edit',item=qaContents.find(row=>row.id===itemId)||{},published=editing&&qaContentState(item).published;
+  const selectedClass=item.classId||saleProducts[0]?.id||'';
+  return `<form class="qa-editor" onsubmit="saveQaContent(event,'${mode}')" data-item-id="${item.id||''}" data-published="${published}">
+    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('qa')">← 추가 콘텐츠</button><div><span>${published?'Published content':editing?'Scheduled content editing':'New scheduled content'}</span><h1>${published?'추가 콘텐츠 상세':editing?'추가 콘텐츠 예약 수정':'추가 콘텐츠 예약 등록'}</h1><p>${published?'이미 수강생에게 오픈되어 조회만 할 수 있습니다.':'클래스를 수정하지 않고 결제 수강생에게 제공할 영상을 예약합니다.'}</p></div><div class="editor-actions">${published?'':`<button type="submit" class="btn primary">${editing?'예약 저장':'예약 등록'}</button>`}</div></div>
+    ${published?`<div class="content-lock-notice"><b>오픈 완료 · 수정 불가</b><span>수강생에게 제공된 영상의 일관성을 위해 대상 클래스, 영상과 오픈 일시는 변경할 수 없습니다. 새 추가 콘텐츠를 등록해 주세요.</span></div>`:`<section class="qa-editor-principle"><b>기존 클래스 정책은 바뀌지 않습니다.</b><span>가격·수강 기간·연결 강의 콘텐츠는 수정하지 않으며, 선택 클래스의 유효한 수강생에게만 예약 시점부터 노출합니다.</span></section>`}
+    <div class="qa-editor-layout"><section class="panel qa-editor-panel"><div class="editor-section-head"><i>Q</i><div><h2>제공 정보</h2><p>대상 클래스, 영상과 오픈 일시를 설정합니다.</p></div><span>전체 필수</span></div><div class="editor-fields">
+      <label class="wide">제공 클래스 <em>*</em><select name="classId" required ${published?'disabled':''}>${saleProducts.map(product=>`<option value="${product.id}" ${product.id===selectedClass?'selected':''}>${product.name} · 결제 ${product.paymentCount}건</option>`).join('')}</select><small>선택한 클래스 자체는 수정되지 않습니다. 해당 클래스의 유효한 수강 권한을 가진 수강생에게만 제공됩니다.</small></label>
+      <label class="wide">추가 콘텐츠 제목 <em>*</em><input name="title" required maxlength="80" value="${item.title||''}" placeholder="예: 1차 라이브 Q&A 다시보기" ${published?'readonly':''}></label>
+      <label class="wide">콘텐츠 설명 <em>*</em><textarea name="description" required placeholder="수강생이 영상에서 확인할 내용을 적어주세요." ${published?'readonly':''}>${item.description||''}</textarea></label>
+      <label>오픈 날짜와 시간 <em>*</em><input name="openAt" type="datetime-local" required value="${item.openAt||'2026-08-29T20:00'}" ${published?'readonly':''}><small>예약 전에는 오픈 예정으로 표시되고, 이 시각부터 재생할 수 있습니다.</small></label>
+      <label>영상 재생시간 <em>*</em><div class="input-suffix"><input name="duration" type="number" min="1" required value="${item.duration||''}" placeholder="예: 60" ${published?'readonly':''}><span>분</span></div></label>
+      <label class="wide qa-video-field">영상 파일 ${editing?'<em class="optional">교체 시 선택</em>':'<em>*</em>'}<input name="video" type="file" accept="video/mp4,video/quicktime,video/webm" ${editing||published?'': 'required'} ${published?'disabled':''} onchange="handleQaVideo(this)"><small class="qa-video-status">${item.videoName?`현재 영상 · ${item.videoName}`:'MP4, MOV, WebM · 최대 2GB'}</small></label>
+    </div></section><aside class="panel qa-access-summary"><span>제공 기준</span><h3>결제 수강생 전용</h3><ol><li>선택 클래스의 수강 권한 확인</li><li>예약 오픈 시각 확인</li><li>두 조건을 모두 충족하면 재생</li></ol><p>클래스가 비공개로 전환되어도 기존 수강 권한이 유효하면 추가 콘텐츠를 볼 수 있습니다.</p></aside></div>
+    <div class="editor-bottom-bar"><span><b>${item.title||'새 추가 콘텐츠'}</b><small>${published?'오픈된 콘텐츠는 조회만 가능합니다.':'클래스 변경 없이 추가 제공됩니다.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('qa')">${published?'목록으로':'취소'}</button>${published?'':`<button type="submit" class="btn primary">${editing?'예약 저장':'예약 등록'}</button>`}</div></div>
+  </form>`;
+}
+function handleQaVideo(input){
+  const file=input.files?.[0],status=input.closest('.qa-video-field')?.querySelector('.qa-video-status');
+  if(!file||!status)return;
+  if(file.size>2*1024*1024*1024){input.value='';status.textContent='용량 초과 · 최대 2GB';adminToast('영상은 최대 2GB까지 업로드할 수 있습니다');return;}
+  status.textContent=`선택한 영상 · ${file.name}`;
+}
+function saveQaContent(event,mode){
+  event.preventDefault();
+  const form=event.currentTarget;
+  if(form.dataset.published==='true'){adminToast('오픈된 추가 콘텐츠는 수정할 수 없습니다');return;}
+  if(!form.reportValidity())return;
+  const editing=mode==='edit',existing=qaContents.find(item=>item.id===form.dataset.itemId),file=form.elements.video.files?.[0];
+  const payload={id:existing?.id||`qa-${Date.now()}`,classId:form.elements.classId.value,title:form.elements.title.value.trim(),description:form.elements.description.value.trim(),videoName:file?.name||existing?.videoName||'qa-video.mp4',duration:Number(form.elements.duration.value),openAt:form.elements.openAt.value,status:'scheduled',endedAt:'',createdAt:existing?.createdAt||new Date().toISOString()};
+  if(existing)Object.assign(existing,payload);else qaContents.push(payload);
+  persistQaContents();clearEditorSession();adminToast(editing?'추가 콘텐츠 예약을 수정했습니다':'추가 콘텐츠를 예약했습니다');
+  setTimeout(()=>showAdminView('qa',true),500);
+}
+function deleteQaContent(itemId){
+  const index=qaContents.findIndex(item=>item.id===itemId);
+  if(index<0)return;
+  if(qaContentState(qaContents[index]).published){adminToast('오픈된 추가 콘텐츠는 삭제할 수 없습니다');return;}
+  qaContents.splice(index,1);persistQaContents();showAdminView('qa',true);adminToast('예약된 추가 콘텐츠를 삭제했습니다');
+}
+function openQaEditor(mode,itemId='',skipUnsavedCheck=false){
+  return runAdminNavigation(()=>{document.querySelectorAll('.admin-nav button').forEach(button=>button.classList.toggle('active',button.dataset.view==='qa'));document.getElementById('adminContent').innerHTML=renderQaEditor(mode,itemId);const form=document.querySelector('.qa-editor');window.scrollTo({top:0});location.hash=mode==='edit'?`#qa-edit-${itemId}`:'#qa-new';if(form?.dataset.published!=='true')beginEditorSession(form,'추가 콘텐츠');},skipUnsavedCheck);
+}
 function renderProducts(){
   const rows=emptyPreviewRows(saleProducts);
   return `${pageHeader('Class management','클래스 관리','수강생에게 노출되고 판매되는 클래스의 소개, 기간, 가격, 운영 안내, FAQ와 공개 상태를 관리합니다.','<button class="btn primary" onclick="openProductEditor(\'create\')">+ 새 클래스 등록</button>')}
@@ -1160,7 +1233,7 @@ function renderSettings(activePanel='profile'){
   <section id="settingsPanel">${settingsPanelMarkup(activePanel)}</section>`;
 }
 
-const viewRenderers={dashboard:renderDashboard,classes:renderClasses,products:renderProducts,students:renderStudents,sales:renderSales,settings:renderSettings};
+const viewRenderers={dashboard:renderDashboard,classes:renderClasses,products:renderProducts,qa:renderQaContents,students:renderStudents,sales:renderSales,settings:renderSettings};
 function updateEmptyPreviewIndicator(){
   let indicator=document.getElementById('emptyPreviewIndicator');
   if(!emptyPreviewMode){
@@ -1177,11 +1250,11 @@ function updateEmptyPreviewIndicator(){
   indicator.innerHTML='<b>빈 화면 미리보기</b><span>⌘ ⇧ E를 다시 누르면 원래 데이터로 돌아갑니다.</span>';
 }
 function toggleEmptyPreviewMode(){
-  if(document.querySelector('.class-editor,.product-editor')){
+  if(document.querySelector('.class-editor,.product-editor,.qa-editor')){
     adminToast('목록 화면에서 빈 화면 미리보기를 사용할 수 있습니다');
     return;
   }
-  const supported=['dashboard','classes','products','students','sales'];
+  const supported=['dashboard','classes','products','qa','students','sales'];
   const activeView=supported.includes(currentAdminView)?currentAdminView:document.querySelector('.admin-nav button.active')?.dataset.view;
   if(!supported.includes(activeView)){
     adminToast('이 화면에는 미리 볼 데이터 목록이 없습니다');
@@ -1207,6 +1280,8 @@ function openAdminHash(hash,skipUnsavedCheck=true){
   else if(view.startsWith('class-edit-'))openClassEditor('edit',view.replace('class-edit-',''),skipUnsavedCheck);
   else if(view==='product-new')openProductEditor('create','',skipUnsavedCheck);
   else if(view.startsWith('product-edit-'))openProductEditor('edit',view.replace('product-edit-',''),skipUnsavedCheck);
+  else if(view==='qa-new')openQaEditor('create','',skipUnsavedCheck);
+  else if(view.startsWith('qa-edit-'))openQaEditor('edit',view.replace('qa-edit-',''),skipUnsavedCheck);
   else if(view.startsWith('sales-class-'))openSalesClassStudents(view.replace('sales-class-',''));
   else if(view==='settings-payout')openSettingsPanel('payout');
   else showAdminView(viewRenderers[view]?view:'dashboard',skipUnsavedCheck);
@@ -1221,6 +1296,8 @@ if(initialView==='class-new')openClassEditor('create');
 else if(initialView.startsWith('class-edit-'))openClassEditor('edit',initialView.replace('class-edit-',''));
 else if(initialView==='product-new')openProductEditor('create');
 else if(initialView.startsWith('product-edit-'))openProductEditor('edit',initialView.replace('product-edit-',''));
+else if(initialView==='qa-new')openQaEditor('create');
+else if(initialView.startsWith('qa-edit-'))openQaEditor('edit',initialView.replace('qa-edit-',''));
 else if(initialView.startsWith('sales-class-'))openSalesClassStudents(initialView.replace('sales-class-',''));
 else if(initialView==='settings-payout')openSettingsPanel('payout');
 else showAdminView(viewRenderers[initialView]?initialView:'dashboard');
