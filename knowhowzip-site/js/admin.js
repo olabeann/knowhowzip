@@ -796,8 +796,8 @@ function formatQaOpenAt(value){
   return new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
 }
 function renderQaContents(){
-  const stateOrder={draft:0,scheduled:1,open:2,ended:3};
-  const rows=emptyPreviewRows([...qaContents].sort((a,b)=>stateOrder[qaContentState(a).className]-stateOrder[qaContentState(b).className]||(new Date(b.openAt||b.createdAt)-new Date(a.openAt||a.createdAt))));
+  const stateOrder={scheduled:0,open:1,ended:2};
+  const rows=emptyPreviewRows([...qaContents].filter(item=>item.status!=='draft').sort((a,b)=>stateOrder[qaContentState(a).className]-stateOrder[qaContentState(b).className]||(new Date(b.openAt||b.createdAt)-new Date(a.openAt||a.createdAt))));
   return `${pageHeader('Additional content','추가 콘텐츠','클래스에 등록하지 못한 콘텐츠를 추가로 업로드 할 수 있습니다. 정해진 시간에 예약할 수 있어요.','<button class="btn primary" onclick="openQaEditor(\'create\')">+ 추가 콘텐츠 등록</button>')}
     <div class="qa-admin-list${rows.length?'':' is-empty'}">${rows.length?rows.map(item=>{const target=qaTargetClass(item),state=qaContentState(item),dateText=state.className==='draft'?'공개 일정 미정':state.className==='ended'?`${formatQaOpenAt(item.endedAt||item.openAt)} 공개 종료`:`${formatQaOpenAt(item.openAt)} ${state.published?'공개 시작':'공개 예정'}`;return `<article class="qa-admin-card" role="button" tabindex="0" aria-label="${item.title} ${state.published?'상세 보기':'예약 수정'}" onclick="openQaEditor('edit','${item.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openQaEditor('edit','${item.id}')}"><div class="qa-card-state"><em class="${state.className}">${state.label}</em><span>${dateText}</span></div><div class="qa-card-copy"><small>제공 클래스</small><b>${target?.name||'삭제된 클래스'}</b><h2>${item.title}</h2><p>${item.description||'등록된 설명이 없습니다.'}</p></div><div class="qa-card-meta"><span>▶ ${item.videoName||'영상 등록 완료'}</span><span>${item.duration?`${item.duration}분`:'재생시간 확인 전'}</span></div>${state.published?'':`<button type="button" class="qa-delete-button" onclick="event.stopPropagation();deleteQaContent('${item.id}')" onkeydown="event.stopPropagation()">삭제</button>`}</article>`;}).join(''):adminEmptyState('＋','등록된 추가 콘텐츠가 없습니다.','운영 중인 클래스를 선택하고 첫 추가 영상을 예약해 보세요.','추가 콘텐츠 등록',"openQaEditor('create')")}</div>`;
 }
@@ -805,15 +805,14 @@ function renderQaEditor(mode,itemId=''){
   const editing=mode==='edit',item=qaContents.find(row=>row.id===itemId)||{},published=editing&&qaContentState(item).published;
   const selectedClass=item.classId||saleProducts[0]?.id||'';
   return `<form class="qa-editor" onsubmit="saveQaContent(event,'${mode}')" data-item-id="${item.id||''}" data-published="${published}">
-    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('qa')">← 추가 콘텐츠</button><div><span>${published?'Published content':editing?'Scheduled content editing':'New scheduled content'}</span><h1>${published?'추가 콘텐츠 상세':editing?'추가 콘텐츠 예약 수정':'추가 콘텐츠 예약 등록'}</h1><p>${published?'이미 수강생에게 오픈되어 조회만 할 수 있습니다.':'클래스를 수정하지 않고 결제 수강생에게 제공할 영상을 예약합니다.'}</p></div><div class="editor-actions">${published?'':`<button type="submit" class="btn primary">${editing?'예약 저장':'예약 등록'}</button>`}</div></div>
+    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('qa')">← 추가 콘텐츠</button><div><span>${published?'Published content':editing?'Scheduled content editing':'New scheduled content'}</span><h1>${published?'추가 콘텐츠 상세':editing?'추가 콘텐츠 예약 수정':'추가 콘텐츠 예약 등록'}</h1><p>${published?'이미 수강생에게 오픈되어 조회만 할 수 있습니다.':'클래스를 수정하지 않고 결제 수강생에게 제공할 영상을 예약합니다.'}</p></div></div>
     ${published?`<div class="content-lock-notice"><b>오픈 완료 · 수정 불가</b><span>수강생에게 제공된 영상의 일관성을 위해 대상 클래스, 영상과 오픈 일시는 변경할 수 없습니다. 새 추가 콘텐츠를 등록해 주세요.</span></div>`:`<section class="qa-editor-principle"><b>기존 클래스 정책은 바뀌지 않습니다.</b><span>가격·수강 기간·연결 강의 콘텐츠는 수정하지 않으며, 선택 클래스의 유효한 수강생에게만 예약 시점부터 노출합니다.</span></section>`}
     <div class="qa-editor-layout"><section class="panel qa-editor-panel"><div class="editor-section-head"><i>Q</i><div><h2>제공 정보</h2><p>대상 클래스, 영상과 오픈 일시를 설정합니다.</p></div><span>전체 필수</span></div><div class="editor-fields">
-      <label class="wide">제공 클래스 <em>*</em><select name="classId" required ${published?'disabled':''}>${saleProducts.map(product=>`<option value="${product.id}" ${product.id===selectedClass?'selected':''}>${product.name} · 결제 ${product.paymentCount}건</option>`).join('')}</select><small>선택한 클래스 자체는 수정되지 않습니다. 해당 클래스의 유효한 수강 권한을 가진 수강생에게만 제공됩니다.</small></label>
+      <label class="wide">클래스 선택 <em>*</em><select name="classId" required ${published?'disabled':''}>${saleProducts.map(product=>`<option value="${product.id}" ${product.id===selectedClass?'selected':''}>${product.name} · 결제 ${product.paymentCount}건</option>`).join('')}</select><small>선택한 클래스 자체는 수정되지 않습니다. 해당 클래스의 유효한 수강 권한을 가진 수강생에게만 제공됩니다.</small></label>
       <label class="wide">추가 콘텐츠 제목 <em>*</em><input name="title" required maxlength="80" value="${item.title||''}" placeholder="예: 1차 라이브 Q&A 다시보기" ${published?'readonly':''}></label>
       <label class="wide">콘텐츠 설명 <em>*</em><textarea name="description" required placeholder="수강생이 영상에서 확인할 내용을 적어주세요." ${published?'readonly':''}>${item.description||''}</textarea></label>
       <label>오픈 날짜와 시간 <em>*</em><input name="openAt" type="datetime-local" required value="${item.openAt||'2026-08-29T20:00'}" ${published?'readonly':''}><small>예약 전에는 오픈 예정으로 표시되고, 이 시각부터 재생할 수 있습니다.</small></label>
-      <label>영상 재생시간 <em>*</em><div class="input-suffix"><input name="duration" type="number" min="1" required value="${item.duration||''}" placeholder="예: 60" ${published?'readonly':''}><span>분</span></div></label>
-      <label class="wide qa-video-field">영상 파일 ${editing?'<em class="optional">교체 시 선택</em>':'<em>*</em>'}<input name="video" type="file" accept="video/mp4,video/quicktime,video/webm" ${editing||published?'': 'required'} ${published?'disabled':''} onchange="handleQaVideo(this)"><small class="qa-video-status">${item.videoName?`현재 영상 · ${item.videoName}`:'MP4, MOV, WebM · 최대 2GB'}</small></label>
+      <label class="wide qa-video-field">영상 파일 ${editing?'<em class="optional">교체 시 선택</em>':'<em>*</em>'}<input name="video" type="file" accept="video/mp4,video/quicktime,video/webm" ${editing||published?'': 'required'} ${published?'disabled':''} onchange="handleQaVideo(this)"><input name="duration" type="hidden" value="${item.duration||''}"><small class="qa-video-status">${item.videoName?`현재 영상 · ${item.videoName} · ${item.duration||'-'}분`:'MP4, MOV, WebM · 최대 2GB · 업로드 시 재생시간 자동 표시'}</small></label>
     </div></section><aside class="panel qa-access-summary"><span>제공 기준</span><h3>결제 수강생 전용</h3><ol><li>선택 클래스의 수강 권한 확인</li><li>예약 오픈 시각 확인</li><li>두 조건을 모두 충족하면 재생</li></ol><p>클래스가 비공개로 전환되어도 기존 수강 권한이 유효하면 추가 콘텐츠를 볼 수 있습니다.</p></aside></div>
     <div class="editor-bottom-bar"><span><b>${item.title||'새 추가 콘텐츠'}</b><small>${published?'오픈된 콘텐츠는 조회만 가능합니다.':'클래스 변경 없이 추가 제공됩니다.'}</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('qa')">${published?'목록으로':'취소'}</button>${published?'':`<button type="submit" class="btn primary">${editing?'예약 저장':'예약 등록'}</button>`}</div></div>
   </form>`;
@@ -822,7 +821,23 @@ function handleQaVideo(input){
   const file=input.files?.[0],status=input.closest('.qa-video-field')?.querySelector('.qa-video-status');
   if(!file||!status)return;
   if(file.size>2*1024*1024*1024){input.value='';status.textContent='용량 초과 · 최대 2GB';adminToast('영상은 최대 2GB까지 업로드할 수 있습니다');return;}
-  status.textContent=`선택한 영상 · ${file.name}`;
+  const durationInput=input.form?.elements.duration,video=document.createElement('video'),url=URL.createObjectURL(file);
+  status.textContent=`선택한 영상 · ${file.name} · 재생시간 확인 중`;
+  video.preload='metadata';
+  video.onloadedmetadata=()=>{
+    const minutes=Number.isFinite(video.duration)?Math.max(1,Math.ceil(video.duration/60)):0;
+    if(!minutes){video.onerror();return;}
+    if(durationInput)durationInput.value=minutes;
+    status.textContent=`선택한 영상 · ${file.name} · ${minutes}분`;
+    URL.revokeObjectURL(url);
+  };
+  video.onerror=()=>{
+    if(durationInput)durationInput.value='';
+    status.textContent=`선택한 영상 · ${file.name} · 재생시간 확인 실패`;
+    URL.revokeObjectURL(url);
+    adminToast('영상 재생시간을 확인할 수 없습니다');
+  };
+  video.src=url;
 }
 function saveQaContent(event,mode){
   event.preventDefault();
@@ -830,6 +845,7 @@ function saveQaContent(event,mode){
   if(form.dataset.published==='true'){adminToast('오픈된 추가 콘텐츠는 수정할 수 없습니다');return;}
   if(!form.reportValidity())return;
   const editing=mode==='edit',existing=qaContents.find(item=>item.id===form.dataset.itemId),file=form.elements.video.files?.[0];
+  if(!Number(form.elements.duration.value)){adminToast('영상 재생시간 확인이 끝난 뒤 등록해 주세요');return;}
   const payload={id:existing?.id||`qa-${Date.now()}`,classId:form.elements.classId.value,title:form.elements.title.value.trim(),description:form.elements.description.value.trim(),videoName:file?.name||existing?.videoName||'qa-video.mp4',duration:Number(form.elements.duration.value),openAt:form.elements.openAt.value,status:'scheduled',endedAt:'',createdAt:existing?.createdAt||new Date().toISOString()};
   if(existing)Object.assign(existing,payload);else qaContents.push(payload);
   persistQaContents();clearEditorSession();adminToast(editing?'추가 콘텐츠 예약을 수정했습니다':'추가 콘텐츠를 예약했습니다');
