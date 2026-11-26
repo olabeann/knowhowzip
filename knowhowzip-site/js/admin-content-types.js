@@ -51,7 +51,7 @@ function showTypeChooser(kind,skip=false){
 const typeBaseClassEditor=openClassEditor,typeBaseProductEditor=openProductEditor,typeBaseRouter=openAdminHash;
 function chooseContentType(kind,type){if(type==='ebook')kind==='content'?openEbookEditor():openEbookSaleEditor();else kind==='content'?openVideoContent('create'):openVideoSale('create');}
 function videoBanner(form){form?.insertAdjacentHTML('afterbegin',`<div class="type-editor-banner">${typeBadge('video')}<span>영상 강의 · 커리큘럼과 첨부 자료</span></div>`);}
-function openVideoContent(mode,id='',skip=false){typeBaseClassEditor(mode,id,skip);const form=document.querySelector('.class-editor');if(form&&!form.querySelector('.type-editor-banner')){videoBanner(form);beginEditorSession(form,'영상 콘텐츠');}}
+function openVideoContent(mode,id='',skip=false){typeBaseClassEditor(mode,id,skip);}
 function openVideoSale(mode,id='',skip=false){typeBaseProductEditor(mode,id,skip);const form=document.querySelector('.product-editor');if(form&&!form.querySelector('.type-editor-banner')){videoBanner(form);beginEditorSession(form,'영상 판매');}}
 openClassEditor=function(mode,id='',skip=false){if(mode==='create')return showTypeChooser('content',skip);if(typeOf(lectureContents.find(c=>c.id===id))==='ebook')return openEbookEditor(id,skip);return openVideoContent(mode,id,skip);};
 openProductEditor=function(mode='create',id='',skip=false){
@@ -106,7 +106,7 @@ saveProductForm=function(event,mode){
 for(const name of ['confirmLectureContentDelete','confirmManagedClassDelete','duplicateManagedClass']){const original=window[name];window[name]=function(...args){original(...args);persistTypeData();};}
 function ebookHeading(title,back){return `<div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('${back}')">목록으로</button><div><span>E-BOOK</span><h1>${title}</h1><p>영상 없이, 한 권의 책으로 노하우를 전하세요.</p></div></div>`;}
 function renderEbookOutlineRow(title='',page='',locked=false,index=0,total=1){
-  return `<div class="ebook-outline-row"><span class="ebook-outline-number">${index+1}</span><label>목차 제목<input data-outline-title name="outlineTitle[]" value="${typeEscape(title)}" placeholder="예: 들어가며" ${locked?'readonly':''}></label><label>시작 페이지<input data-outline-page name="outlinePage[]" type="number" min="1" step="1" inputmode="numeric" value="${typeEscape(page)}" placeholder="1" ${locked?'readonly':''}></label>${locked?'':`<div class="ebook-outline-actions"><button type="button" data-outline-up aria-label="${index+1}번 목차 위로 이동" onclick="changeEbookOutline(this,'up')" ${index===0?'disabled':''}>↑</button><button type="button" data-outline-down aria-label="${index+1}번 목차 아래로 이동" onclick="changeEbookOutline(this,'down')" ${index===total-1?'disabled':''}>↓</button><button type="button" data-outline-remove aria-label="${index+1}번 목차 삭제" onclick="changeEbookOutline(this,'remove')">삭제</button></div>`}</div>`;
+  return `<div class="ebook-outline-row"><span class="ebook-outline-number">${index+1}</span><label>목차 제목<input data-outline-title name="outlineTitle[]" value="${typeEscape(title)}" placeholder="예: 들어가며" ${locked?'readonly':''}></label><label>시작 페이지<input data-outline-page name="outlinePage[]" type="number" min="1" step="1" inputmode="numeric" value="${typeEscape(page)}" ${locked?'readonly':''}></label>${locked?'':`<div class="ebook-outline-actions"><button type="button" data-outline-up aria-label="${index+1}번 목차 위로 이동" onclick="changeEbookOutline(this,'up')" ${index===0?'disabled':''}>↑</button><button type="button" data-outline-down aria-label="${index+1}번 목차 아래로 이동" onclick="changeEbookOutline(this,'down')" ${index===total-1?'disabled':''}>↓</button><button type="button" data-outline-remove aria-label="${index+1}번 목차 삭제" onclick="changeEbookOutline(this,'remove')">삭제</button></div>`}</div>`;
 }
 function renderEbookOutline(value,locked){
   const rows=value.split('\n').filter(line=>line.trim()).map(line=>{const split=line.lastIndexOf('|');return split<0?[line,'']:[line.slice(0,split).trim(),line.slice(split+1).trim()];});
@@ -148,15 +148,26 @@ function readEbookOutline(form,pages){
     const titleInput=row.querySelector('[data-outline-title]'),pageInput=row.querySelector('[data-outline-page]');
     const title=titleInput.value.trim(),rawPage=pageInput.value.trim(),page=Number(rawPage);
     if(!title&&!rawPage)continue;
-    if(!title||title.includes('|')){titleInput.focus();throw new Error(`${index+1}번 목차의 제목을 입력해 주세요. 제목에는 | 기호를 사용할 수 없습니다.`);}
-    if(!Number.isInteger(page)||page<1||page>pages){pageInput.focus();throw new Error(`${index+1}번 목차의 시작 페이지를 1~${pages} 사이의 정수로 입력해 주세요.`);}
+    if(!title||title.includes('|')){showClassEditorStep(1,true);titleInput.focus();throw new Error(`${index+1}번 목차의 제목을 입력해 주세요. 제목에는 | 기호를 사용할 수 없습니다.`);}
+    if(!Number.isInteger(page)||page<1||page>pages){showClassEditorStep(1,true);pageInput.focus();throw new Error(`${index+1}번 목차의 시작 페이지를 1~${pages} 사이의 정수로 입력해 주세요.`);}
     toc.push({title,page});
   }
   return toc;
 }
 function openEbookEditor(id='',skip=false){
   const item=lectureContents.find(c=>c.id===id)||{},locked=id&&linkedClassCount(id)>0;
-  setTypeScreen(`<form class="type-form ebook-content-editor" data-id="${typeEscape(id)}" onsubmit="saveEbookContent(event)">${ebookHeading(id?'전자책 콘텐츠 관리':'새 전자책 콘텐츠','classes')}<div class="type-editor-banner">${typeBadge('ebook')}<span>PDF · 온라인 열람</span></div>${locked?'<div class="type-note">판매에 연결된 원본은 조회만 가능합니다. 개정판은 새 콘텐츠로 등록해 주세요.</div>':''}<div class="form-grid"><div><section class="panel"><h2>콘텐츠 정보</h2><p>판매 화면의 제목과 별도로 관리할 콘텐츠 정보를 입력하세요.</p><div class="type-fields"><label>콘텐츠 제목 *<input name="title" maxlength="80" required value="${typeEscape(item.title||'')}" ${locked?'readonly':''} placeholder="예: 경매 입문 가이드"></label><label>콘텐츠 설명<textarea name="description" ${locked?'readonly':''} placeholder="책의 구성과 학습 목표를 적어주세요.">${typeEscape(item.intro||'')}</textarea></label></div></section><section class="panel"><h2>전자책 파일</h2><p>PDF 1개를 등록하세요. 페이지 수는 자동으로 확인합니다.</p><div class="type-fields">${locked?'':`<label class="pdf-upload">PDF 선택 *<input name="pdfFile" type="file" accept="application/pdf,.pdf" onchange="inspectEbookFile(this)"><small>PDF · 최대 50MB (미리보기 기준)</small></label>`}<div class="type-file-info" id="ebookFileInfo">${item.fileName?`${typeEscape(item.fileName)} · ${item.pageCount}페이지`:'선택한 파일이 없습니다.'}</div>${renderEbookOutline(item.outline||'',locked)}</div></section></div><aside>${typeBadge('ebook')}<h3>등록 후 판매에 연결</h3><p>전자책 파일을 저장한 뒤 클래스 관리에서 가격과 이용 기간을 설정하세요.</p><p>파일 저장 방지를 보장하는 기능은 아닙니다.</p>${id?`<a class="type-link" href="ebook-reader.html?book=${encodeURIComponent(id)}" target="_blank" rel="noopener">저장된 전자책 보기</a>`:''}</aside></div><p class="type-error" id="ebookError" role="alert"></p><div class="form-actions"><button type="button" class="btn ghost" onclick="showAdminView('classes')">목록으로</button>${locked?'':'<button type="submit" class="btn primary" id="ebookSave">콘텐츠 저장</button>'}</div></form>`,id?`#ebook-edit-${id}`:'#ebook-new','classes',skip);
+  const saveButton=locked?'':'<button type="submit" class="btn primary" data-ebook-save>콘텐츠 저장</button>';
+  setTypeScreen(`<form class="type-form class-editor ebook-content-editor" data-id="${typeEscape(id)}" data-active-class-step="0" novalidate onsubmit="saveEbookContent(event)">
+    <div class="editor-head"><button type="button" class="editor-back" onclick="showAdminView('classes')">← 강의 콘텐츠</button><div><span>Lecture content editing</span><h1>${id?'전자책 콘텐츠 관리':'새 전자책 콘텐츠'}</h1><p>PDF와 목차를 관리합니다. 저장한 콘텐츠는 클래스 관리에서 판매에 연결할 수 있습니다.</p></div><div class="editor-actions">${saveButton}</div></div>
+    ${locked?'<div class="type-note">판매에 연결된 원본은 조회만 가능합니다. 개정판은 새 콘텐츠로 등록해 주세요.</div>':''}
+    <div class="editor-layout"><nav class="editor-steps class-editor-steps" aria-label="전자책 콘텐츠 등록 단계"><button type="button" class="active" data-class-step="0" data-step-title="기본 정보" aria-current="step" aria-controls="ebook-info" onclick="showClassEditorStep(0)"><i>1</i><span>기본 정보<small>제목·설명</small></span></button><button type="button" data-class-step="1" data-step-title="PDF·목차" aria-controls="ebook-file" onclick="showClassEditorStep(1)"><i>2</i><span>PDF·목차<small>파일·페이지 설정</small></span></button></nav>
+    <div class="editor-sections">
+      <section class="panel editor-section class-step-panel active" id="ebook-info"><div class="editor-section-head"><i>1</i><div><h2>전자책 콘텐츠 정보</h2><p>관리자에서 콘텐츠를 구분할 제목과 설명을 입력합니다.</p></div><span>${locked?'읽기 전용':'제목 필수'}</span></div><div class="editor-fields"><label class="wide">콘텐츠 제목 <em>*</em><input name="title" maxlength="80" required value="${typeEscape(item.title||'')}" ${locked?'readonly':''} placeholder="예: 경매 입문 가이드"><small>수강생 판매 화면에는 클래스명이 표시되며, 이 제목은 관리자용입니다.</small></label><label class="wide">콘텐츠 설명<textarea name="description" ${locked?'readonly':''} placeholder="책의 구성과 학습 목표를 적어주세요.">${typeEscape(item.intro||'')}</textarea></label></div></section>
+      <section class="panel editor-section class-step-panel" id="ebook-file" hidden><div class="editor-section-head"><i>2</i><div><h2>PDF·목차</h2><p>전자책 파일을 등록하고 목차의 시작 페이지를 설정합니다.</p></div><span>${locked?'읽기 전용':'PDF 필수 · 목차 선택'}</span></div><div class="content-editor-block"><div class="content-editor-title"><div><h3>전자책 파일</h3><p>PDF 1개를 등록하세요. 페이지 수는 자동으로 확인합니다.</p></div>${id?`<a class="type-link" href="ebook-reader.html?book=${encodeURIComponent(id)}" target="_blank" rel="noopener">저장된 전자책 보기</a>`:''}</div><div class="type-fields">${locked?'':`<label class="pdf-upload">PDF 선택 *<input name="pdfFile" type="file" accept="application/pdf,.pdf" onchange="inspectEbookFile(this)"><small>PDF · 최대 50MB (미리보기 기준)</small></label>`}<div class="type-file-info" id="ebookFileInfo">${item.fileName?`${typeEscape(item.fileName)} · ${item.pageCount}페이지`:'선택한 파일이 없습니다.'}</div></div></div><div class="content-editor-block type-fields">${renderEbookOutline(item.outline||'',locked)}</div></section>
+      <div class="editor-step-actions"><button type="button" class="btn ghost" id="classStepPrevious" onclick="goClassEditorStep(-1)" disabled>← 이전 단계</button><span id="classStepCurrent">1 / 2 · 기본 정보</span><button type="button" class="btn primary" id="classStepNext" onclick="goClassEditorStep(1)">다음 단계 →</button></div>
+    </div></div><p class="type-error" id="ebookError" role="alert"></p>
+    <div class="editor-bottom-bar"><span><b>전자책 콘텐츠</b><small>PDF와 목차를 확인한 뒤 저장해 주세요.</small></span><div><button type="button" class="btn ghost" onclick="showAdminView('classes')">${locked?'목록으로':'취소'}</button>${saveButton}</div></div>
+  </form>`,id?`#ebook-edit-${id}`:'#ebook-new','classes',skip);
 }
 async function inspectEbookFile(input){
   const form=input.form,file=input.files[0];form._pdf=null;form._pdfFile=null;form._reading=!!file;const token=Symbol();form._fileToken=token;$('ebookError').textContent='';
@@ -173,18 +184,19 @@ async function inspectEbookFile(input){
 }
 function $(id){return document.getElementById(id);}
 async function saveEbookContent(event){
-  event.preventDefault();const form=event.currentTarget,old=lectureContents.find(c=>c.id===form.dataset.id);if(old&&linkedClassCount(old.id)>0)return;
-  const error=$('ebookError');error.textContent='';const title=form.elements.title.value.trim();if(!title){error.textContent='콘텐츠 제목을 입력해 주세요.';return;}
-  if(form._reading){error.textContent='PDF 확인이 끝난 뒤 저장해 주세요.';return;}
-  const fileInfo=form._pdf||old;if(!fileInfo?.pageCount){error.textContent='전자책 PDF를 선택해 주세요.';return;}
+  event.preventDefault();const form=event.currentTarget,old=lectureContents.find(c=>c.id===form.dataset.id);if(form._saving||(old&&linkedClassCount(old.id)>0))return;
+  const invalid=form.querySelector(':invalid');if(invalid){showClassEditorStep(invalid.closest('#ebook-file')?1:0,true);invalid.focus();invalid.reportValidity();return;}
+  const error=$('ebookError');error.textContent='';const title=form.elements.title.value.trim();if(!title){showClassEditorStep(0,true);form.elements.title.focus();error.textContent='콘텐츠 제목을 입력해 주세요.';return;}
+  if(form._reading){showClassEditorStep(1,true);error.textContent='PDF 확인이 끝난 뒤 저장해 주세요.';return;}
+  const fileInfo=form._pdf||old;if(!fileInfo?.pageCount){showClassEditorStep(1,true);error.textContent='전자책 PDF를 선택해 주세요.';return;}
   try{
     const toc=readEbookOutline(form,fileInfo.pageCount);
     const item={...old,...fileInfo,id:old?.id||`ebook-${crypto.randomUUID()}`,type:'ebook',title,intro:form.elements.description.value.trim(),outline:toc.map(entry=>`${entry.title} | ${entry.page}`).join('\n'),content:{videos:[],files:[]},sample:form._pdfFile?false:!!old?.sample};
-    $('ebookSave').disabled=true;
+    form._saving=true;form.querySelectorAll('[data-ebook-save]').forEach(button=>button.disabled=true);
     if(!item.sample){const storage=await import('./ebook-storage.mjs');const existing=form._pdfFile?null:await storage.loadBook(item.id);const file=form._pdfFile||existing?.file;if(!file)throw new Error('저장된 파일을 찾을 수 없습니다. PDF를 다시 선택해 주세요.');await storage.saveBook({id:item.id,title:item.title,file,toc});}
     if(old)Object.assign(old,item);else lectureContents.unshift(item);
     const persisted=persistTypeData();clearEditorSession();contentTypeFilter='ebook';showAdminView('classes',true);if(persisted)adminToast('전자책 콘텐츠를 이 브라우저에 저장했습니다.');
-  }catch(err){error.textContent=err.message||'파일 저장에 실패했습니다. 저장 공간을 확인해 주세요.';if($('ebookSave'))$('ebookSave').disabled=false;}
+  }catch(err){error.textContent=err.message||'파일 저장에 실패했습니다. 저장 공간을 확인해 주세요.';showClassEditorStep(1,true);form._saving=false;form.querySelectorAll('[data-ebook-save]').forEach(button=>button.disabled=false);}
 }
 function openEbookSaleEditor(id='',skip=false){
   const item=saleProducts.find(p=>p.id===id)||{},books=lectureContents.filter(c=>typeOf(c)==='ebook'),locked=!!item.paymentCount;

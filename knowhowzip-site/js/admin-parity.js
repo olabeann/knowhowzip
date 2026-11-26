@@ -26,6 +26,7 @@ function renumberCurriculum(){
   const rows=[...document.querySelectorAll('#curriculumRows .curriculum-row')];
   rows.forEach((row,i)=>{
     row.querySelector('.curriculum-row-head em').textContent=`${i+1}강`;
+    row.querySelector('.remove-row').innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 10v7M14 10v7"/></svg>';
     const buttons=row.querySelectorAll('.curriculum-order button');
     buttons[0].disabled=i===0;buttons[2].disabled=i===rows.length-1;
     ['위로 이동','순서 드래그','아래로 이동'].forEach((label,n)=>buttons[n].setAttribute('aria-label',`${i+1}강 ${label}`));

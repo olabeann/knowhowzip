@@ -6,3 +6,13 @@
 
 .product-class-choice[data-content-type="ebook"] .class-order-control{display:none}
 .ebook-outline{min-width:0}.ebook-outline-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.ebook-outline-heading h3{margin:0;font-size:15px}.ebook-outline-heading h3 span{margin-left:6px;font-size:12px;font-weight:500;color:#667085}.ebook-outline-heading .btn{padding:9px 12px;font-size:13px}.ebook-outline-help{margin:10px 0 16px;font-size:12px;line-height:1.8;color:#667085}.ebook-outline-list{display:grid;gap:10px}.ebook-outline-row{display:grid;grid-template-columns:24px minmax(0,1fr) 100px auto;align-items:end;gap:10px;padding:14px;border:1px solid #e2e7ef;border-radius:10px;background:#fafbfc}.ebook-outline-number{align-self:center;color:#667085;font-size:13px;text-align:center}.type-fields .ebook-outline-row label{min-width:0;font-size:12px;gap:7px}.type-fields .ebook-outline-row input{min-width:0;padding:10px}.ebook-outline-actions{display:flex;gap:4px;padding-bottom:2px}.ebook-outline-actions button{min-width:32px;min-height:36px;padding:6px;border:1px solid #d8dfe9;border-radius:6px;background:#fff;font:inherit;font-size:12px;color:#475467;cursor:pointer}.ebook-outline-actions button:disabled{opacity:.35;cursor:default}.ebook-outline-actions button:not(:disabled):hover{background:#eef1ff;border-color:#aebcf5}.ebook-outline button:focus-visible,.ebook-outline input:focus-visible{outline:2px solid #4f66f5;outline-offset:2px}.ebook-outline-empty{padding:24px;text-align:center;border:1px dashed #d8dfe9;border-radius:10px;color:#667085;font-size:13px}.ebook-outline-empty[hidden]{display:none}@media(max-width:600px){.ebook-outline-row{grid-template-columns:20px minmax(0,1fr) 90px;gap:8px;padding:12px}.ebook-outline-actions{grid-column:2/-1;justify-content:flex-end}.ebook-outline-heading{flex-wrap:wrap}}
+
+/* Shared class-editor layout for both video and ebook content. */
+.type-form.ebook-content-editor{max-width:1100px}
+.ebook-content-editor .editor-section.panel{padding:24px;margin-bottom:0}
+.ebook-content-editor h2{font-size:16px;margin:0 0 3px}
+.ebook-content-editor .editor-section-head p{font-size:13px}
+.ebook-content-editor .editor-fields input,.ebook-content-editor .editor-fields textarea{font-weight:400}
+.ebook-content-editor .content-editor-title{flex-wrap:wrap;gap:12px}
+.ebook-content-editor .pdf-upload{padding:20px}
+@media(max-width:640px){.ebook-content-editor .editor-section.panel{padding:18px}}

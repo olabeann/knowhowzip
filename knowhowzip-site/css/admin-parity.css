@@ -120,3 +120,72 @@ body.description-expanded{overflow:hidden}
  .class-image-gallery{min-width:0}
 }
 @media(prefers-reduced-motion:reduce){.admin-sidebar,.admin-workspace{transition:none}}
+
+/* Content detail: match the two-step editor and persistent actions. */
+.class-editor{max-width:1100px;padding-bottom:80px}
+.class-editor .editor-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px 18px;margin-bottom:24px}
+.class-editor .editor-back{grid-column:1/-1;color:var(--brand);padding:0;margin:0 0 4px}
+.class-editor .editor-head h1{font-size:27px;margin:4px 0}
+.class-editor .editor-actions{margin:0}
+.class-editor .btn{font-size:14px;min-height:40px;padding:10px 20px;border-radius:10px}
+.class-editor .btn.primary{background:linear-gradient(135deg,#707bff,#4f5dff)}
+.class-editor .class-editor-steps{position:static;grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:18px;padding:8px}
+.class-editor .class-editor-steps button{padding:12px 11px;min-height:62px}
+.class-editor .class-editor-steps button span{font-size:15px}
+.class-editor .class-editor-steps button small{display:block;font-size:12px;margin-top:3px;font-weight:400}
+.class-editor .editor-section{padding:24px;border-radius:17px}
+.class-editor .editor-section-head{padding-bottom:18px;margin-bottom:22px}
+.class-editor .editor-section-head>span{font-size:9px}
+.class-editor .editor-fields label{font-size:13px}
+.class-editor .editor-fields input{min-height:40px;font-weight:400}
+.class-editor .editor-fields textarea{min-height:115px;font-weight:400}
+.class-editor .editor-fields small{font-size:12px;font-weight:400}
+.class-editor .editor-step-actions{grid-template-columns:140px 1fr 140px;padding:14px 0 8px}
+.class-editor .editor-step-actions .btn.ghost{border-color:transparent;background:transparent;justify-self:start}
+.class-editor .editor-bottom-bar{position:fixed;left:var(--sidebar-width);right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;padding:10px 35px;background:#fff;border-top:1px solid var(--line);z-index:45;box-shadow:0 -5px 18px rgba(16,24,40,.03)}
+.class-editor .editor-bottom-bar>span{display:block}
+.class-editor .editor-bottom-bar>span b{font-size:13px}
+.class-editor .editor-bottom-bar>span small{font-size:11px}
+@media(max-width:640px){
+ .class-editor .editor-head{grid-template-columns:minmax(0,1fr)}
+ .class-editor .editor-actions{justify-self:end}
+ .class-editor .editor-section{padding:18px}
+ .class-editor .class-editor-steps button{min-width:0;padding:10px 6px;gap:7px}
+ .class-editor .class-editor-steps button span{font-size:13px}
+ .class-editor .class-editor-steps button small{font-size:10px}
+ .class-editor .editor-step-actions{grid-template-columns:1fr auto 1fr;gap:6px}
+ .class-editor .editor-step-actions .btn{font-size:12px;padding:8px}
+ .class-editor .editor-bottom-bar{padding:10px 12px}
+ .class-editor .editor-bottom-bar>span{display:none}
+ .class-editor .editor-bottom-bar>div{margin-left:auto}
+}
+
+/* Video/material step: aligned upload cards and a compact reorder rail. */
+.class-editor .content-editor-title h3{font-size:14px}
+.class-editor .content-editor-title p{font-size:12px;line-height:1.6}
+.class-editor .repeat-row.curriculum-row{padding:13px 13px 13px 54px!important;background:#f8f9fb}
+.class-editor .curriculum-order{left:12px;top:14px;gap:4px}
+.class-editor .curriculum-order button{width:28px;height:28px;border:0;background:transparent;color:#98a2b3}
+.class-editor .curriculum-row-head{grid-template-columns:42px minmax(0,1fr) 82px 30px;gap:10px}
+.class-editor .curriculum-row-head>em{height:40px;display:grid;place-items:center;border-radius:9px;background:var(--brand-soft);font-size:12px}
+.class-editor .curriculum-row-head>.curriculum-title{font-size:14px;height:40px;font-weight:400}
+.class-editor .curriculum-row-head .duration input{height:40px;font-size:14px}
+.class-editor .curriculum-row-head .remove-row{display:grid;place-items:center;border:0;background:transparent;color:#98a2b3}
+.class-editor .curriculum-description{width:100%;margin:34px 0 10px;min-height:115px;font-size:14px}
+.class-editor .video-upload{width:100%;margin-left:0;flex-direction:row;align-items:center;border-color:#b9c5ff;min-height:64px}
+.class-editor .video-upload>span>b{font-size:12px}
+.class-editor .video-upload>span>small{font-size:12px}
+.class-editor .video-file-status{font-size:10px}
+.class-editor .video-preview-link{width:100%;margin:16px 0 0;border:1px solid var(--line);background:#fbfcfe;flex-wrap:wrap}
+.class-editor .video-preview-name{min-width:0;overflow-wrap:anywhere;font-size:10px}
+.class-editor .video-preview-link>a{margin-left:auto;text-decoration:none;font-size:10px}
+.class-editor .add-row-btn{margin-top:8px;border-color:#b9c5ff;font-size:11px;min-height:40px}
+@media(max-width:640px){
+ .class-editor .curriculum-row-head{grid-template-columns:34px minmax(0,1fr) 26px;gap:6px}
+ .class-editor .curriculum-row-head .duration{grid-column:2;grid-row:2;width:82px}
+ .class-editor .curriculum-row-head .remove-row{grid-column:3;grid-row:1}
+ .class-editor .curriculum-description{margin-top:16px}
+ .class-editor .video-upload{flex-direction:column;align-items:flex-start}
+ .class-editor .video-file-status{margin-left:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+}
+.class-editor .class-editor-steps{scroll-margin-top:80px}
