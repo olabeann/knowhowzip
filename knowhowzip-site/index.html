@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>노하우집 · 크리에이터 클래스 마켓</title>
+<title>노하우집 | 크리에이터의 노하우를 배우는 클래스 플랫폼</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-  <link rel="stylesheet" href="./css/style.css?v=20260826-1">
+  <link rel="stylesheet" href="./css/style.css?v=20261106-1">
 <link rel="stylesheet" href="./css/refund-policy.css">
 <link rel="stylesheet" href="./css/policy-guide.css?v=20260727-2">
 </head>
@@ -24,12 +24,11 @@
       <button data-nav="mypage" onclick="show('mypage')">내 학습</button>
       <button data-nav="account" onclick="show('account')">마이</button>
       <button data-nav="faq" onclick="show('faq')">고객센터</button>
-      <a class="gnb-admin-link" href="./creator-admin.html">관리자 페이지</a>
     </nav>
     <div class="nav-right">
       <button class="nav-cta" id="signupBtn" onclick="openAuth('login')">바로 시작하기</button>
       <div class="user-chip" id="userChip"><span id="userName"></span> 님<button class="out" onclick="logout()">로그아웃</button></div>
-      <button class="hamburger" id="hamburger" onclick="toggleMnav()">☰</button>
+      <button class="hamburger" id="hamburger" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mnav" onclick="toggleMnav()">☰</button>
     </div>
   </div>
 </header>
@@ -41,15 +40,14 @@
   </div>
 </div>
 
-<div class="mnav" id="mnav">
-  <button class="mlink" onclick="show('home');toggleMnav()">홈</button>
-  <button class="mlink" onclick="show('creators');toggleMnav()">크리에이터</button>
-  <button class="mlink" onclick="show('mypage');toggleMnav()">내 학습</button>
-  <button class="mlink" onclick="show('account');toggleMnav()">마이</button>
-  <button class="mlink" onclick="show('faq');toggleMnav()">고객센터</button>
-  <a class="mlink admin-mobile-link" href="./creator-admin.html">관리자 페이지</a>
+<div class="mnav" id="mnav" inert>
+  <button class="mlink" onclick="show('home')">홈</button>
+  <button class="mlink" onclick="show('creators')">크리에이터</button>
+  <button class="mlink" onclick="show('mypage')">내 학습</button>
+  <button class="mlink" onclick="show('account')">마이</button>
+  <button class="mlink" onclick="show('faq')">고객센터</button>
   <div class="mauth" id="mAuth"><button class="s" onclick="toggleMnav();openAuth('login')">바로 시작하기</button></div>
-  <div class="muser" id="mUser" style="display:none"><span id="mUserName"></span> 님<button class="out" onclick="logout();toggleMnav()">로그아웃</button></div>
+  <div class="muser" id="mUser" style="display:none"><span id="mUserName"></span> 님<button class="out" onclick="logout()">로그아웃</button></div>
 </div>
 
 <main>
@@ -186,7 +184,7 @@
       <div class="creator-filter-row">
         <div>
           <h2>전체 크리에이터</h2>
-          <p><b id="creatorResultCount">0</b>명의 크리에이터가 등록되어 있어요.</p>
+          <p><b id="creatorResultCount">0</b>명의 크리에이터를 찾았어요.</p>
         </div>
       </div>
       <div class="creator-directory-grid" id="creatorPageGrid"></div>
@@ -238,14 +236,15 @@
 <footer>
   <div class="wrap">
     <div class="foot-in">
-      <div class="foot-brand"><img class="foot-logo-icon" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="" aria-hidden="true"><span>노하우집<small>크리에이터 클래스 마켓</small></span></div>
+      <a class="foot-brand" href="#" onclick="show('home');return false;" aria-label="노하우집 홈"><img class="foot-logo-icon" src="./assets/images/Knowhowzip_logo_icon.png.png" alt="" aria-hidden="true"><span>노하우집<small>크리에이터 클래스 마켓</small></span></a>
       <div class="foot-cols">
         <div class="foot-col"><h5>탐색</h5><a href="#" onclick="show('creators');return false;">크리에이터</a></div>
-        <div class="foot-col"><h5>내 정보</h5><a href="#" onclick="show('mypage');return false;">내 학습</a><a href="#" onclick="show('account');return false;">마이</a><a href="#" onclick="openAuth('login');return false;">카카오 로그인</a></div>
-        <div class="foot-col"><h5>지원</h5><a href="#" onclick="show('faq');return false;">고객센터</a><a href="#" onclick="openKakaoChannel();return false;">크리에이터 입점</a></div>
+        <div class="foot-col"><h5>내 정보</h5><a href="#" onclick="show('mypage');return false;">내 학습</a><a href="#/account" onclick="show('account');return false;">마이페이지</a></div>
+        <div class="foot-col"><h5>지원</h5><a href="#" onclick="show('faq');return false;">고객센터</a><a href="./creator-admin.html">크리에이터 입점</a></div>
+        <div class="foot-col"><h5>약관</h5><a href="https://radical-basket-e85.notion.site/39c1f6888e578018bd01c60799db7ec2?pvs=74" target="_blank" rel="noopener noreferrer">서비스 이용약관</a><a href="https://radical-basket-e85.notion.site/39c1f6888e57802fa2dad79ea1a9a4c7?pvs=74" target="_blank" rel="noopener noreferrer">개인정보처리방침</a></div>
       </div>
     </div>
-    <div class="foot-bottom">노하우집 · 크리에이터 클래스 마켓 · 본 페이지는 외주/검수용 시안입니다.</div>
+    <div class="foot-bottom" aria-label="사업자 정보"><p><strong>주식회사 위이</strong><span>대표자: 범지민</span><span>사업자등록번호: 236-81-02950</span><span>Email: <a href="mailto:wiiee@wiiee.co.kr">wiiee@wiiee.co.kr</a></span></p><p><span>과천 오피스: 경기 과천시 과천대로7길 65 과천상상자이타워 B동 205호</span><span>인천 오피스: 인천 연수구 갯벌로12, 송도본원 7층 7-10호 (송도동, 인천창조경제혁신센터)</span></p></div>
   </div>
 </footer>
 
@@ -285,10 +284,12 @@
   </div>
 </div></div>
 
-<div class="toast" id="toast"></div>
-<script src="./js/data.js?v=20260826-1"></script>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="./js/data.js?v=20261106-1"></script>
+<script src="./js/public-catalog.js?v=20261106"></script>
+<script src="./js/local-class-catalog.js"></script>
 <script src="./js/refund-policy.js"></script>
-<script src="./js/app.js?v=20260826-1"></script>
+<script src="./js/app.js?v=20261106-1"></script>
 <script src="./js/policy-guide.js?v=20260826-2"></script>
 
 </body>
