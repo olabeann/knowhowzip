@@ -1,6 +1,6 @@
 import { getDocument, GlobalWorkerOptions, TextLayer } from '../vendor/pdfjs/pdf.mjs';
 import { renderInternalLinks } from './ebook-links.mjs';
-import { installPageSwipe, pageKeyDirection } from './ebook-navigation.mjs';
+import { installPageSwipe, pageKeyDirection } from './ebook-navigation.mjs?v=20261126-touch-fix';
 GlobalWorkerOptions.workerSrc = new URL('../vendor/pdfjs/pdf.worker.mjs', import.meta.url).href;
 const $ = id => document.getElementById(id);
 let chapters = ['표지 · 처음 시작하는 경매','이 책을 읽는 방법','나만의 학습 지도 만들기','기록을 남기는 세 가지 질문','배운 내용을 내 것으로','다음 학습을 준비하며'];

@@ -43,7 +43,14 @@ export function installPageSwipe(stage, { enabled, navigate }) {
     if (turn) navigate(dx < 0 ? 1 : -1);
   });
   stage.addEventListener('pointercancel', event => { pointers.delete(event.pointerId); reset(); });
-  stage.addEventListener('lostpointercapture', () => { gesture = null; stage.classList.remove('page-dragging'); });
+  stage.addEventListener('lostpointercapture', event => {
+    // Touch implicitly captures on the PDF text/canvas/link under the finger.
+    // Its capture-loss event bubbles here when we transfer capture to stage.
+    // Only losing stage's own capture cancels the active gesture.
+    if (event.target !== stage || event.pointerId !== gesture?.id) return;
+    gesture = null;
+    stage.classList.remove('page-dragging');
+  });
   // Release a mouse gesture even when its pointer leaves the page before capture.
   stage.addEventListener('pointerleave', event => {
     if (!stage.hasPointerCapture?.(event.pointerId)) { pointers.delete(event.pointerId); reset(); }

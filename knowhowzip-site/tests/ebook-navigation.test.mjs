@@ -21,13 +21,33 @@ function reader() {
     emit('pointermove', { pointerType, clientX: 200 + dx, clientY: 100 + dy });
     emit('pointerup', { pointerType, clientX: 200 + dx, clientY: 100 + dy });
   };
-  return { emit, swipe, turns, setEnabled: value => { enabled = value; } };
+  return { emit, swipe, turns, stage, setEnabled: value => { enabled = value; } };
 }
+
+test('touch implicit capture transfer from PDF text to stage does not cancel the swipe', () => {
+  const r = reader();
+  r.emit('pointerdown', { pointerType: 'touch' });
+  r.emit('pointermove', { pointerType: 'touch', clientX: 180 });
+  // Touch starts with implicit capture on a canvas/text/link child. Its loss
+  // bubbles when the stage takes capture on the first horizontal movement.
+  r.emit('lostpointercapture', { target: { tagName: 'SPAN' } });
+  r.emit('pointermove', { pointerType: 'touch', clientX: 80 });
+  r.emit('pointerup', { pointerType: 'touch', clientX: 80 });
+  assert.deepEqual(r.turns, [1]);
+});
 
 test('mouse and touch horizontal swipes turn exactly one page per gesture', () => {
   const r = reader();
   r.swipe(-100, 0, 'mouse'); r.swipe(100); r.swipe(-300);
   assert.deepEqual(r.turns, [1, -1, 1]);
+});
+test('losing stage capture still cancels its own gesture', () => {
+  const r = reader();
+  r.emit('pointerdown');
+  r.emit('pointermove', { clientX: 180 });
+  r.emit('lostpointercapture', { target: r.stage });
+  r.emit('pointerup', { clientX: 80 });
+  assert.deepEqual(r.turns, []);
 });
 test('taps keep PDF links clickable, swipes suppress accidental link clicks', () => {
   const r = reader();
