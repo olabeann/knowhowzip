@@ -189,3 +189,60 @@ body.description-expanded{overflow:hidden}
  .class-editor .video-file-status{margin-left:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 }
 .class-editor .class-editor-steps{scroll-margin-top:80px}
+
+/* Class management detail: full-width steps, summary and persistent actions. */
+.product-editor{max-width:1440px;padding-bottom:86px}
+.product-editor .product-editor-head{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin-bottom:22px}
+.product-editor-head>.editor-back,.product-editor-head>div:nth-child(2)>span{display:none}
+.product-editor .product-editor-head h1{font-size:28px;margin:0 0 8px}
+.product-editor .product-editor-actions{margin:0;align-items:end;flex-wrap:wrap}
+.product-editor .btn{min-height:40px;padding:10px 20px;border-radius:10px;font-size:14px}
+.product-editor .btn.primary{background:linear-gradient(135deg,#707bff,#4f5dff)}
+.product-editor .product-setup-hero{margin-bottom:22px;padding:0;background:#fff}
+.product-editor .product-setup-hero h2{font-size:19px;margin:6px 0 0}
+.product-editor .product-editor-steps{position:sticky;top:76px;scroll-margin-top:80px;grid-template-columns:repeat(7,minmax(0,1fr));margin-bottom:22px}
+.product-editor .product-editor-steps button{padding:12px 9px;min-height:64px;gap:9px}
+.product-editor .product-editor-steps button span{font-size:14px;white-space:nowrap}
+.product-editor .product-editor-steps button small{display:block;font-size:12px;margin-top:4px;font-weight:400}
+.product-editor .product-editor-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+.product-editor .product-editor-main{min-width:0}
+.product-editor .product-editor-side{display:flex;position:sticky;top:176px;gap:16px;min-width:0}
+.product-editor .product-summary{padding:20px}
+.product-editor .product-summary>span{font-size:13px}
+.product-editor .product-summary h3{font-size:24px;margin:12px 0 8px;overflow-wrap:anywhere}
+.product-editor .product-summary p{font-size:12px}
+.product-editor .product-summary strong{font-size:34px;margin:24px 0}
+.product-editor .product-summary div b{font-size:13px}
+.product-editor .product-summary div em{font-size:12px;padding:12px 10px}
+.product-editor .product-summary small{font-size:11px}
+.product-editor .product-section{border-radius:17px}
+.product-editor .product-section-head em{border:0;border-radius:5px;background:#feeceb;color:var(--red);font-size:9px;padding:5px 7px}
+.product-editor .product-class-choice{padding:16px;gap:14px}
+.product-editor .product-class-choice>span{min-width:0}
+.product-editor .product-class-choice>span b{font-size:14px;overflow-wrap:anywhere}
+.product-editor .product-class-choice>span small{font-size:12px}
+.product-editor .class-order-control small{font-size:12px}
+.product-editor .class-order-control select{font-size:12px;min-height:34px}
+.product-editor .editor-bottom-bar{position:fixed;left:var(--sidebar-width);right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 35px;margin:0;background:#fff;border-top:1px solid var(--line);z-index:45;box-shadow:0 -5px 18px rgba(16,24,40,.03)}
+.product-editor .editor-bottom-bar>span{display:block;min-width:0}
+.product-editor .editor-bottom-bar>span b{font-size:13px}
+.product-editor .editor-bottom-bar>span small{font-size:11px}
+@media(max-width:1200px){
+ .product-editor .product-editor-steps{grid-template-columns:repeat(7,minmax(140px,1fr));overflow-x:auto}
+ .product-editor .product-editor-grid{grid-template-columns:minmax(0,1fr) 260px}
+}
+@media(max-width:1000px){
+ .product-editor .product-editor-grid{grid-template-columns:minmax(0,1fr)}
+ .product-editor .product-editor-side{position:static;display:flex}
+ .product-editor .product-editor-head{grid-template-columns:minmax(0,1fr)}
+ .product-editor .product-editor-actions{justify-content:flex-start}
+}
+@media(max-width:640px){
+ .product-editor .product-class-choice{flex-wrap:wrap}
+ .product-editor .class-order-control{margin-left:auto}
+ .product-editor .product-section{padding:18px}
+ .product-editor .editor-bottom-bar{padding:10px 12px}
+ .product-editor .editor-bottom-bar>span{display:none}
+ .product-editor .editor-bottom-bar>div{margin-left:auto}
+ .product-editor .product-setup-hero h2{font-size:16px}
+}

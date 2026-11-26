@@ -229,7 +229,7 @@ function openOperationLink(url,title){if(url)window.open(url,'_blank','noopener,
 function openMyLearningContent(productId,section='video'){
   if(!state.user)return openAuth('login');
   if(!hasValidAccess(productId))return toast(hasEndedAccess(productId)?'수강 기간이 종료되었습니다':'클래스를 수강 신청한 뒤 이용할 수 있습니다');
-  if(productMap[productId]?.type==='ebook')return openLessonPlayer(productId,0);
+  if(productMap[productId]?.type==='ebook')return openEbookLearning(productId);
   state.myFilter='active';
   show('mypage');
   requestAnimationFrame(()=>{
@@ -238,11 +238,20 @@ function openMyLearningContent(productId,section='video'){
     (target?.closest('.learning-card')||target)?.scrollIntoView({behavior:'smooth',block:'start'});
   });
 }
+function ebookBooks(product){return productContentSources(product).filter(item=>item.type==='ebook');}
+function ebookSummary(product){const books=ebookBooks(product);return `전자책 ${books.length}권 · 총 ${books.reduce((sum,book)=>sum+(Number(book.pageCount)||0),0)}페이지`;}
+function openEbookLearning(productId){
+  if(!state.user||!hasValidAccess(productId))return openLessonPlayer(productId,0);
+  if(ebookBooks(productMap[productId]).length<=1)return openLessonPlayer(productId,0);
+  openDetail(productId);
+  requestAnimationFrame(()=>document.getElementById('ebookBookList')?.scrollIntoView({behavior:'smooth',block:'start'}));
+}
 function ebookDetailContent(product,owned){
-  const book=productContentSources(product)[0];
   const escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  const chapters=(book?.outline||'').split('\n').filter(line=>line.trim());
-  return `<div class="d-section"><h3><span class="dot"></span>전자책 <span class="sub">PDF · ${book?.pageCount||0}페이지</span></h3><div class="detail-content-state ${owned?'is-owned':'is-locked'}"><div><b>${escape(book?.title||product.title)}</b><p>온라인 뷰어에서 목차와 이어서 읽기를 이용해 읽을 수 있습니다.</p></div>${owned?`<button type="button" onclick="openMyLearningContent('${product.id}')">학습하기 →</button>`:''}</div>${product.sampleBookId?`<a class="btn-red ebook-sample-link" href="./ebook-reader.html?book=${encodeURIComponent(product.sampleBookId)}">샘플 전자책 읽어보기 ↗</a>`:''}<div class="sub-h">목차</div><ul class="curr">${chapters.map(line=>{const parts=line.split('|');return `<li><span>${escape(parts[0].trim())}</span><span class="content-lock">${escape((parts[1]||'').trim())}페이지</span></li>`;}).join('')}</ul></div>`;
+  return `<div class="d-section" id="ebookBookList"><h3><span class="dot"></span>전자책 <span class="sub">${ebookSummary(product)}</span></h3>${ebookBooks(product).map((book,index)=>{
+    const chapters=(book.outline||'').split('\n').filter(line=>line.trim());
+    return `<section class="ebook-book-item"><div class="detail-content-state ${owned?'is-owned':'is-locked'}"><div><b>${escape(book.title)}</b><p>PDF · ${Number(book.pageCount)||0}페이지</p></div>${owned?`<button type="button" onclick="openLessonPlayer(${escape(JSON.stringify(product.id))},${index})">학습하기 →</button>`:''}</div>${chapters.length?`<div class="sub-h">목차</div><ul class="curr">${chapters.map(line=>{const parts=line.split('|');return `<li><span>${escape(parts[0].trim())}</span><span class="content-lock">${escape((parts[1]||'').trim())}페이지</span></li>`;}).join('')}</ul>`:''}</section>`;
+  }).join('')}${product.sampleBookId?`<a class="btn-red ebook-sample-link" href="./ebook-reader.html?book=${encodeURIComponent(product.sampleBookId)}">샘플 전자책 읽어보기 ↗</a>`:''}</div>`;
 }
 function openDetail(pid){
   const p=productMap[pid],c=creatorOf[pid];
@@ -407,7 +416,7 @@ function updateLessonPlaybackProgress(productId,index,currentTime,duration){
   if(currentTime>=duration-1)setLessonLearningState(productId,index,'completed');
 }
 function continueLearning(productId,index){
-  if(productMap[productId]?.type==='ebook')return openLessonPlayer(productId,0);
+  if(productMap[productId]?.type==='ebook')return openEbookLearning(productId);
   const videos=productVideoTitles(productMap[productId]);
   const states=productLessonStates(productId,videos.length);
   const inProgress=states.indexOf('in-progress'),before=states.indexOf('before');
@@ -419,16 +428,16 @@ function openLessonPlayer(productId,index=0){
   if(!product||!creator)return showAccessDenied('lesson');
   const videos=productVideoTitles(product),requested=Number.isFinite(Number(index))?Number(index):0,next=Math.min(Math.max(requested,0),videos.length-1);
   if(!state.user){
-    state.pendingLesson={productId,index:next};
+    state.pendingLesson={productId,index:product.type==='ebook'?requested:next};
     return showAccessDenied('login',productId);
   }
   if(!hasValidAccess(productId)){
     return showAccessDenied('purchase',productId);
   }
   if(product.type==='ebook'){
-    const book=productContentSources(product).find(item=>item.type==='ebook');
+    const book=Number.isInteger(requested)?ebookBooks(product)[requested]:null;
     if(!book)return toast('연결된 전자책을 찾을 수 없습니다.');
-    location.href='./ebook-reader.html?book='+encodeURIComponent(product.bookId||book.id);
+    location.href='./ebook-reader.html?book='+encodeURIComponent(book.id);
     return;
   }
   const currentStatus=productLessonStates(productId,videos.length)[next];
@@ -586,7 +595,7 @@ function renderMy(){
   const owned=allOwned.filter(x=>state.myFilter==='ended'?hasEndedAccess(x.p.id):(hasValidAccess(x.p.id)||hasWaitingAccess(x.p.id)));
   if(!owned.length){box.innerHTML=`<div class="my-empty"><div class="my-empty-icon">✓</div><h3>${state.myFilter==='ended'?'수강 종료된 클래스가 없습니다':'현재 수강 중인 클래스가 없습니다'}</h3><p>${state.myFilter==='ended'?'수강 기간이 종료된 클래스가 이곳에 표시됩니다.':'새로운 클래스를 둘러보세요.'}</p></div>`;return;}
   const byCreator={};owned.forEach(x=>{(byCreator[x.c.id]=byCreator[x.c.id]||{c:x.c,items:[]}).items.push(x.p);});
-  box.innerHTML=Object.values(byCreator).map(g=>`<section class="learning-list-group"><div class="learning-list-group-head"><span>${creatorLogo(g.c,30)}</span><b>${g.c.name}</b><button type="button" onclick="openCreator('${g.c.id}')">페이지 보기 →</button></div>${creatorLearningFaqSearch(g.c,g.items)}${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),period=entitlementPeriod(entitlement)||p.cohort.period,status=learningStatus(p.id),hasOperation=!!productOperation(p).guide.trim(),operationLocked=status.className==='waiting',unreadOperation=hasOperation&&status.className==='active'&&!hasViewedLearningOperation(p);return `<article class="learning-course-row ${status.className}${unreadOperation?' operation-unread':''}"><div class="learning-course-main"><span class="learning-list-thumb">${classCoverMarkup(p,g.c,38)}</span><div class="learning-list-copy"><span><em class="learning-status ${status.className}">${status.label}</em></span><b>${p.title}</b><small>${p.type==='ebook'?'전자책 · '+(productContentSources(p)[0]?.pageCount||0)+'페이지':`영상 ${videos.length}강 · 자료 ${files.length}개`}</small><small>수강 기간 · ${period}</small></div></div><div class="learning-course-operation${operationLocked?' locked':''}"><span>${unreadOperation?'! 운영 안내를 확인해 주세요':'운영 안내'}</span><b>${operationLocked?'수강 시작 후 확인할 수 있습니다.':hasOperation?(unreadOperation?'일정과 참여 방법을 먼저 확인해 주세요.':'일정과 참여 방법을 확인할 수 있습니다.'):'등록된 안내가 없습니다.'}</b>${hasOperation&&!operationLocked?`<button type="button" onclick="openLearningOperationModal('${p.id}')">운영 안내 보기 →</button>`:''}</div><div class="learning-course-action">${status.className==='active'?`<button type="button" onclick="continueLearning('${p.id}',0)">학습하기</button>`:`<button type="button" disabled>${status.label}</button>`}</div></article>`;}).join('')}</section>`).join('');
+  box.innerHTML=Object.values(byCreator).map(g=>`<section class="learning-list-group"><div class="learning-list-group-head"><span>${creatorLogo(g.c,30)}</span><b>${g.c.name}</b><button type="button" onclick="openCreator('${g.c.id}')">페이지 보기 →</button></div>${creatorLearningFaqSearch(g.c,g.items)}${g.items.map(p=>{const videos=productVideoTitles(p),files=productFileTitles(p),entitlement=validEntitlement(p.id)||waitingEntitlement(p.id)||latestEntitlement(p.id),period=entitlementPeriod(entitlement)||p.cohort.period,status=learningStatus(p.id),hasOperation=!!productOperation(p).guide.trim(),operationLocked=status.className==='waiting',unreadOperation=hasOperation&&status.className==='active'&&!hasViewedLearningOperation(p);return `<article class="learning-course-row ${status.className}${unreadOperation?' operation-unread':''}"><div class="learning-course-main"><span class="learning-list-thumb">${classCoverMarkup(p,g.c,38)}</span><div class="learning-list-copy"><span><em class="learning-status ${status.className}">${status.label}</em></span><b>${p.title}</b><small>${p.type==='ebook'?ebookSummary(p):`영상 ${videos.length}강 · 자료 ${files.length}개`}</small><small>수강 기간 · ${period}</small></div></div><div class="learning-course-operation${operationLocked?' locked':''}"><span>${unreadOperation?'! 운영 안내를 확인해 주세요':'운영 안내'}</span><b>${operationLocked?'수강 시작 후 확인할 수 있습니다.':hasOperation?(unreadOperation?'일정과 참여 방법을 먼저 확인해 주세요.':'일정과 참여 방법을 확인할 수 있습니다.'):'등록된 안내가 없습니다.'}</b>${hasOperation&&!operationLocked?`<button type="button" onclick="openLearningOperationModal('${p.id}')">운영 안내 보기 →</button>`:''}</div><div class="learning-course-action">${status.className==='active'?`<button type="button" onclick="continueLearning('${p.id}',0)">학습하기</button>`:`<button type="button" disabled>${status.label}</button>`}</div></article>`;}).join('')}</section>`).join('');
 }
 function setAccountFilter(filter){state.accountFilter=filter;renderAccount();}
 function renderAccountTabs(){

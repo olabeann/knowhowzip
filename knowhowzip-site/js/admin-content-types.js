@@ -75,7 +75,6 @@ function selectedClassType(ids){
   if(!items.length||items.some(item=>!item))throw new Error('연결할 콘텐츠를 선택해 주세요.');
   const type=typeOf(items[0]);
   if(items.some(item=>typeOf(item)!==type))throw new Error('영상과 전자책은 함께 연결할 수 없습니다. 기존 선택을 해제한 뒤 선택해 주세요.');
-  if(type==='ebook'&&items.length!==1)throw new Error('전자책은 한 클래스에 한 권만 연결할 수 있습니다.');
   return type;
 }
 function updateSelectedViewer(form){
@@ -99,7 +98,7 @@ saveProductForm=function(event,mode){
   typeBaseSaveProduct(event,mode);
   if(!activeEditorSession){
     const product=saleProducts.find(item=>item.id===form.dataset.productId)||(mode==='create'?saleProducts[0]:null);
-    if(product){product.type=type;product.viewerType=type;product.bookId=type==='ebook'?product.contentIds[0]:null;}
+    if(product){product.type=type;product.viewerType=type;product.bookId=type==='ebook'?product.contentIds[0]:null;product.bookIds=type==='ebook'?[...product.contentIds]:[];}
     persistTypeData();
   }
 };
@@ -198,19 +197,7 @@ async function saveEbookContent(event){
     const persisted=persistTypeData();clearEditorSession();contentTypeFilter='ebook';showAdminView('classes',true);if(persisted)adminToast('전자책 콘텐츠를 이 브라우저에 저장했습니다.');
   }catch(err){error.textContent=err.message||'파일 저장에 실패했습니다. 저장 공간을 확인해 주세요.';showClassEditorStep(1,true);form._saving=false;form.querySelectorAll('[data-ebook-save]').forEach(button=>button.disabled=false);}
 }
-function openEbookSaleEditor(id='',skip=false){
-  const item=saleProducts.find(p=>p.id===id)||{},books=lectureContents.filter(c=>typeOf(c)==='ebook'),locked=!!item.paymentCount;
-  setTypeScreen(`<form class="type-form ebook-sale-editor" data-id="${typeEscape(id)}" onsubmit="saveEbookSale(event)">${ebookHeading(id?'전자책 판매 관리':'새 전자책 판매 등록','products')}<div class="type-editor-banner">${typeBadge('ebook')}<span>결제 후 온라인으로 읽기</span></div><div class="form-grid"><div><section class="panel"><h2>판매 정보</h2><p>구매자에게 표시되는 제목과 소개를 입력하세요.</p><div class="type-fields"><label>판매 제목 *<input name="title" required maxlength="100" value="${typeEscape(item.name||'')}" placeholder="예: 처음 시작하는 경매, 한 권으로"></label><label>책 소개 *<textarea name="description" required>${typeEscape(item.desc||'')}</textarea></label><label>연결할 전자책 *<select name="contentId" required ${locked?'disabled':''}><option value="">전자책을 선택하세요</option>${books.map(book=>`<option value="${typeEscape(book.id)}" ${item.contentIds?.includes(book.id)?'selected':''}>${typeEscape(book.title)} · ${book.pageCount}페이지</option>`).join('')}</select><small>전자책 콘텐츠만 연결할 수 있습니다. 1차 범위는 판매당 1권입니다.</small></label>${books.length?'':'<p class="type-error">등록된 전자책이 없습니다. 먼저 강의 콘텐츠에서 전자책을 등록해 주세요.</p>'}</div></section><section class="panel"><h2>공통 판매 설정</h2><p>가격·이용 기간·공개 상태를 설정합니다.</p>${locked?'<div class="type-note">구매 이력이 있어 연결 콘텐츠·가격·이용 기간은 변경할 수 없습니다.</div>':''}<div class="type-fields"><label>판매 가격 (원) *<input name="price" type="number" min="0" max="100000000" step="1" required value="${item.price??''}" ${locked?'readonly':''} placeholder="19000"></label><label>이용 기간 *<select name="periodMode" onchange="toggleEbookDays(this.form)" ${locked?'disabled':''}><option value="days" ${!item.accessUnlimited?'selected':''}>결제일부터 기간 지정</option><option value="unlimited" ${item.accessUnlimited?'selected':''}>기간 제한 없음</option></select></label><label id="ebookDaysLabel" ${item.accessUnlimited?'hidden':''}>이용 일수 *<input name="days" type="number" min="1" max="36500" step="1" value="${item.periodDays||365}" ${item.accessUnlimited?'disabled':'required'} ${locked?'readonly':''}></label><label>공개 상태<select name="status"><option ${item.status!=='공개'?'selected':''}>비공개</option><option ${item.status==='공개'?'selected':''}>공개</option></select><small>공개 여부와 기존 구매자의 이용 권한은 별도로 관리합니다.</small></label><div class="type-file-info">판매 방식: 상시 판매 · 결제 즉시 열람<br>제공 방식: 온라인 뷰어 · 다운로드 버튼 없음</div></div></section></div><aside>${typeBadge('ebook')}<h3>구매자의 이용 흐름</h3><p>전자책 상세 → 결제 → 내 학습 → 읽기</p><p>주문·구매 권한·정산은 영상과 공통으로 관리합니다.</p><p>전자책 열람의 환불 처리 기준은 별도 확정이 필요합니다.</p></aside></div><p id="ebookSaleError" class="type-error" role="alert"></p><div class="form-actions"><button type="button" class="btn ghost" onclick="showAdminView('products')">취소</button><button class="btn primary" type="submit" ${books.length?'':'disabled'}>판매 정보 저장</button></div></form>`,id?`#ebook-sale-edit-${id}`:'#ebook-sale-new','products',skip);
-}
-function toggleEbookDays(form){const unlimited=form.elements.periodMode.value==='unlimited';$('ebookDaysLabel').hidden=unlimited;form.elements.days.disabled=unlimited;form.elements.days.required=!unlimited;}
-function saveEbookSale(event){
-  event.preventDefault();const form=event.currentTarget,old=saleProducts.find(p=>p.id===form.dataset.id),locked=!!old?.paymentCount;
-  const book=lectureContents.find(c=>c.id===(locked?old.contentIds[0]:form.elements.contentId.value));
-  const title=form.elements.title.value.trim(),desc=form.elements.description.value.trim(),price=locked?old.price:Number(form.elements.price.value),unlimited=locked?old.accessUnlimited:form.elements.periodMode.value==='unlimited',days=locked?Number(old.periodDays):Number(form.elements.days.value);
-  if(!title||!desc||!book||typeOf(book)!=='ebook'||!Number.isInteger(price)||price<0||(!unlimited&&(!Number.isInteger(days)||days<1))){$('ebookSaleError').textContent='제목·소개·전자책·가격·이용 기간을 확인해 주세요.';return;}
-  const item={...old,id:old?.id||`sale-ebook-${crypto.randomUUID()}`,type:'ebook',name:title,desc,contentIds:[book.id],price,originalPrice:price,status:form.elements.status.value,period:unlimited?'이용 기간 제한 없음':`결제일로부터 ${days}일`,periodDays:unlimited?'':days,accessUnlimited:unlimited,accessMode:'immediate',recruitmentAlways:true,requirement:'조건 없음',paymentCount:old?.paymentCount||0,tags:['전자책'],courses:[],operation:{},faq:[]};
-  if(old)Object.assign(old,item);else saleProducts.unshift(item);const persisted=persistTypeData();clearEditorSession();saleTypeFilter='ebook';showAdminView('products',true);if(persisted)adminToast('전자책 판매 정보를 이 브라우저에 저장했습니다.');
-}
+function openEbookSaleEditor(id='',skip=false){return openProductEditor(id?'edit':'create',id,skip);}
 openAdminHash=function(hash,skip=true){
   if(hash==='#content-type')return showTypeChooser('content',skip);
   if(hash==='#sale-type')return showTypeChooser('sale',skip);

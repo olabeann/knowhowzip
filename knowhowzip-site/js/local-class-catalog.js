@@ -11,8 +11,8 @@ try {
       const sources=(sale.contentIds||[]).map(id=>byId.get(id));
       if(!sources.length||sources.some(item=>!item))return;
       const type=sources[0].type==='ebook'?'ebook':'video';
-      if(sources.some(item=>(item.type==='ebook'?'ebook':'video')!==type)||(type==='ebook'&&sources.length!==1))return;
-      const product=P({...sale,title:sale.name,lead:sale.desc,orig:sale.originalPrice||sale.price,type,viewerType:type,bookId:type==='ebook'?sources[0].id:null,isPublic:sale.status==='공개',requirement:{label:sale.requirement||'조건 없음'},content:{videos:[],files:[]},cohort:{period:sale.period,accessMode:sale.accessMode,periodDays:sale.periodDays,accessUnlimited:sale.accessUnlimited,recruitmentAlways:sale.recruitmentAlways,recruitmentStart:sale.recruitmentStart,recruitmentEnd:sale.recruitmentEnd,deadline:sale.recruitmentEnd,status:sale.status==='공개'?'모집중':'비공개'}});
+      if(sources.some(item=>(item.type==='ebook'?'ebook':'video')!==type))return;
+      const product=P({...sale,title:sale.name,lead:sale.desc,orig:sale.originalPrice||sale.price,type,viewerType:type,bookId:type==='ebook'?sources[0].id:null,bookIds:type==='ebook'?sources.map(book=>book.id):[],isPublic:sale.status==='공개',requirement:{label:sale.requirement||'조건 없음'},content:{videos:[],files:[]},cohort:{period:sale.period,accessMode:sale.accessMode,periodDays:sale.periodDays,accessUnlimited:sale.accessUnlimited,recruitmentAlways:sale.recruitmentAlways,recruitmentStart:sale.recruitmentStart,recruitmentEnd:sale.recruitmentEnd,deadline:sale.recruitmentEnd,status:sale.status==='공개'?'모집중':'비공개'}});
       const index=creator.products.findIndex(item=>item.id===sale.id);
       if(index<0)creator.products.push(product);else creator.products[index]=product;
       productMap[product.id]=product;creatorOf[product.id]=creator;
