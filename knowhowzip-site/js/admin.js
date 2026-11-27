@@ -549,7 +549,7 @@ function renderStudents(){
   return `${pageHeader('Student management','수강생 관리','수강생의 결제 상품과 현재 수강 상태를 확인합니다.')}
   <input type="hidden" id="studentStateFilter" value="전체 상태">
   <section id="studentStateSummary">${studentStateSummary()}</section>
-  <div class="student-table-toolbar"><div class="filter-bar"><div class="admin-search">⌕ <input id="studentSearchInput" type="search" placeholder="이름, 이메일, 상품 검색" onkeydown="if(event.key==='Enter')filterStudents()"></div><button class="btn primary" type="button" onclick="filterStudents()">검색</button><select id="studentProductFilter" onchange="filterStudents()"><option value="전체 최근 결제상품">전체 강의</option>${studentProductOptions().map(product=>`<option>${product}</option>`).join('')}</select></div></div>
+  <div class="student-table-toolbar"><div class="filter-bar"><div class="admin-search"><input id="studentSearchInput" type="search" aria-label="수강생 이름, 이메일, 상품 검색" placeholder="이름, 이메일, 상품 검색" onkeydown="if(event.key==='Enter')filterStudents()"><button class="student-search-button" type="button" aria-label="수강생 검색" onclick="filterStudents()"><span aria-hidden="true">🔍</span></button></div><select id="studentProductFilter" aria-label="클래스 필터" onchange="filterStudents()"><option value="전체 최근 결제상품">전체 클래스</option>${studentProductOptions().map(product=>`<option>${product}</option>`).join('')}</select></div></div>
   <article class="panel full-table" id="studentTable">${renderStudentTableSection()}</article>`;
 }
 
