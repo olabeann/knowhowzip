@@ -25,3 +25,27 @@
 .refund-policy-formula{margin-top:13px;padding:14px 16px;border-radius:10px;background:#f7f8fb;font-size:12px;font-weight:800;line-height:1.65;color:#34415a}
 .refund-policy-contact{margin-top:14px!important;font-weight:800;color:#4c5cff!important}
 @media(max-width:640px){.refund-policy-grid{grid-template-columns:1fr}.refund-policy-body{padding:14px}.refund-policy-lead{padding:16px}.refund-policy-section{padding:19px 0}}
+
+.refund-policy-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.8}
+.editor-fields textarea.refund-policy-input{min-height:360px;resize:vertical;line-height:1.8}
+.refund-policy-input[readonly]{background:#f7f8fb;color:#64708a}
+.pay-refund{margin:20px 0}
+.pay-refund h4{margin:0 0 8px;font-size:13px}
+
+#product-refund .refund-policy-templates{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;align-items:center}
+.refund-policy-templates>label{font-size:13px;font-weight:600;color:#4f5b70;margin-right:4px}
+.refund-policy-templates select{height:40px;min-width:150px;padding:0 36px 0 12px;border:1px solid #dfe3ed;border-radius:9px;appearance:none;-webkit-appearance:none;background-color:#fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m3 4.5 3 3 3-3' fill='none' stroke='%2334415a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;color:#34415a;font:inherit;font-size:13px}
+.refund-policy-templates small{flex-basis:100%;font-size:12px;color:#64708a;line-height:1.6}
+#product-refund textarea.refund-policy-input{background:#fff;color:#34415a;font-size:14px;font-weight:400;line-height:1.9;padding:18px;min-height:360px}
+.refund-required{color:#e34d59;font-size:14px}
+.refund-lock-badge{margin-left:auto;white-space:nowrap;border-radius:6px;padding:6px 9px;background:#f3f4f8;color:#64708a;font-size:12px;font-weight:600}
+.refund-policy-readonly{color:#34415a}
+.refund-policy-readonly>summary{list-style:none;cursor:pointer;border-radius:8px}
+.refund-policy-readonly>summary::-webkit-details-marker{display:none}
+.refund-policy-excerpt{display:block;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;font-weight:400;line-height:1.9;margin-bottom:20px}
+.refund-expand-label,.refund-collapse-label{font-size:13px;font-weight:600;color:#6254e8}
+.refund-collapse-label,.refund-policy-readonly[open] .refund-expand-label,.refund-policy-readonly[open] .refund-policy-excerpt{display:none}
+.refund-policy-readonly[open] .refund-collapse-label{display:block;margin-bottom:16px}
+.refund-policy-readonly .refund-policy-text{font-size:14px;line-height:1.9;font-weight:400}
+.refund-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:480px){.refund-policy-templates>label{flex-basis:100%}.refund-policy-templates select{flex:1;min-width:0}}

@@ -317,7 +317,7 @@ function openDetail(pid){
           <ul class="mat-list">${files.map(m=>`<li><span class="mi">📄</span><span>${m}</span>${owned?`<button type="button" class="content-learning-link" onclick="openMyLearningContent('${pid}','files')">내 학습에서 보기 →</button>`:'<span class="content-lock">🔒 수강 후 제공</span>'}</li>`).join('')}</ul>
         </div>`}</div>
         <div class="d-panel" id="sec-faq"><div class="d-section"><h3><span class="dot"></span>클래스 FAQ</h3>${faqAcc(p.faq,'pf'+pid)}</div></div>
-        <div class="d-panel" id="sec-refund"><div class="d-section"><h3><span class="dot"></span>환불 규정</h3>${refundPolicyMarkup()}</div></div>
+        <div class="d-panel" id="sec-refund"><div class="d-section"><h3><span class="dot"></span>환불 규정</h3>${refundPolicyMarkup(p,true)}</div></div>
       </div>
       </div>
     </div></div>
@@ -613,10 +613,10 @@ const commonFaqs=[
   {q:'결제 후 바로 수강할 수 있나요?',a:'네. 결제가 완료되면 내 학습에서 바로 콘텐츠와 운영 안내를 확인할 수 있습니다.'},
   {q:'여러 크리에이터의 클래스를 한 계정으로 들을 수 있나요?',a:'네. 하나의 노하우집 계정으로 모든 크리에이터의 클래스를 구매·수강할 수 있고, 내 학습에서 크리에이터별로 모아 볼 수 있습니다.'},
   {q:'자료·단톡방은 어떻게 이용하나요?',a:'구매한 클래스의 내 학습에서 자료 열람·다운로드와 단톡방·줌 링크가 활성화됩니다. 미구매 클래스는 제한됩니다.'},
-  {q:'환불 규정은 어떻게 되나요?',a:'지정 기간 수강 클래스는 결제일부터 수강 시작일까지 언제든지, 수강 시작 후에는 7일 이내 전액 환불할 수 있습니다. 결제 즉시 수강 클래스는 결제일부터 7일 이내 전액 환불할 수 있습니다. 이미 재생하거나 자료를 다운로드한 강의는 환불 대상에서 제외됩니다. 자세한 내용은 클래스 상세의 환불 규정을 확인해 주세요.'},
+  {q:'환불 규정은 어떻게 되나요?',a:'클래스별 환불 규정은 클래스 상세와 결제 화면에서 확인할 수 있습니다. 환불 신청은 마이 > 결제 내역 > 환불 요청을 이용해 주세요.'},
   {q:'크리에이터로 입점하려면요?',a:'상단 입점 문의 또는 고객센터의 카카오 채널을 통해 신청할 수 있습니다.'}
 ];
-function renderFaq(){if(window.publicCatalogActive)commonFaqs[3].a='첫 강의 시작 전까지 전액 환불, 이후에는 진행 회차를 제외한 잔여분에 대해 규정에 따라 처리됩니다.';document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
+function renderFaq(){document.getElementById('faqList').innerHTML=faqAcc(commonFaqs,'c');}
 function toggleFaq(key){const a=document.getElementById('fa-'+key);if(!a)return;const item=a.parentElement;const open=item.classList.toggle('open');a.style.maxHeight=open?a.scrollHeight+'px':'0';requestAnimationFrame(updateDetailBuycardPosition);}
 const KAKAO_CHANNEL_URL='https://pf.kakao.com/_xksSwX/chat';
 function openKakaoChannel(){window.open(KAKAO_CHANNEL_URL,'_blank','noopener,noreferrer');}
@@ -764,6 +764,7 @@ function openPay(id){const p=productMap[id],c=creatorOf[id],d=discRate(p);state.
     </div>
     <div style="font-weight:800;font-size:13px;margin-bottom:8px">결제 수단</div>
     <div class="pay-methods" id="payMethods"><button class="active" data-m="card" onclick="pickMethod('card')">신용카드</button><button data-m="bank" onclick="pickMethod('bank')">계좌이체</button></div>
+    <section class="pay-refund"><h4>환불 규정</h4>${refundPolicyMarkup(p)}</section>
     <button class="btn-red" onclick="confirmPay('${id}')">${won(p.price)} 결제하기</button>`;
   document.getElementById('payModal').classList.add('show');}
 function pickMethod(m){state.payMethod=m;document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));}
@@ -772,7 +773,10 @@ function confirmPay(id){
   end.setDate(end.getDate()+days);
   const dateString=date=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   const orderId=`P${Date.now()}`,entitlementId=`E${Date.now()}`;
-  state.orders.push({id:orderId,productId:id,title:product?.title||id,amount:product?.price||0,status:'paid',purchasedAt:dateString(now)});
+  const refundPolicy=refundPolicyText(product);
+  product.refundPolicy=refundPolicy;product.paymentCount=(Number(product.paymentCount)||0)+1;
+  try{localStorage.setItem(`nhz-purchased-refund-${id}`,JSON.stringify(refundPolicy));}catch{toast('결제 이력을 브라우저에 저장하지 못했습니다.');}
+  state.orders.push({refundPolicy,id:orderId,productId:id,title:product?.title||id,amount:product?.price||0,status:'paid',purchasedAt:dateString(now)});
   state.entitlements.push({id:entitlementId,productId:id,orderId,startAt:dateString(now),endAt:dateString(end),status:'active'});
   state.purchased.add(id);
   state.pendingPurchase=id;
